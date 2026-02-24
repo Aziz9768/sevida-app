@@ -9103,6 +9103,46 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="position:fixed;inset:0;background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="background:white;border-radius:20px;padding:48px 44px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,0.3);text-align:center;animation:loginFadeIn 0.5s ease both;">
+    <div style="width:52px;height:52px;background:linear-gradient(135deg,#353182,#6366f1);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 4px 16px rgba(53,49,130,0.3);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:#6366f1;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Leap Metrics</div>
+    <h1 style="font-size:22px;font-weight:700;color:#1e293b;margin:0 0 6px;">Sevida</h1>
+    <p style="font-size:13px;color:#94a3b8;margin:0 0 32px;">Care Management Platform — Demo</p>
+    <div style="text-align:left;margin-bottom:16px;">
+      <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Username</label>
+      <input id="loginUser" type="text" placeholder="Enter username" style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;transition:border 0.2s;" onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
+    </div>
+    <div style="text-align:left;margin-bottom:24px;">
+      <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Password</label>
+      <input id="loginPass" type="password" placeholder="Enter password" style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;transition:border 0.2s;" onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="loginError" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;font-size:12px;padding:10px 14px;border-radius:8px;margin-bottom:16px;">Incorrect username or password.</div>
+    <button onclick="doLogin()" style="width:100%;background:linear-gradient(135deg,#353182,#4f46e5);color:white;border:none;padding:13px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(53,49,130,0.3);">Sign In</button>
+    <p style="font-size:11px;color:#cbd5e1;margin-top:20px;">For review purposes only</p>
+  </div>
+</div>
+<style>
+@keyframes loginFadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+</style>
+<script>
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  if (u === 'sevida' && p === 'demo2026') {
+    document.getElementById('loginScreen').style.opacity = '0';
+    document.getElementById('loginScreen').style.transition = 'opacity 0.4s';
+    setTimeout(() => document.getElementById('loginScreen').style.display = 'none', 400);
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginPass').value = '';
+  }
+}
+</script>
 <!-- APP LOADER -->
 <div id="appLoader" style="display:flex;position:fixed;inset:0;z-index:99999;background:#f8fafc;flex-direction:column;align-items:center;justify-content:center;gap:0;transition:opacity 0.4s ease;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
 
@@ -31657,6 +31697,7 @@ const reportRunLog = [];
 function navigateToReports() {
     const pc = document.getElementById('pageContainer');
     if (!pc) return;
+    closeAICopilot();
     pc.innerHTML = buildReportsPageHTML();
     updateBreadcrumbs(['Home', 'Reports']);
     setTimeout(initReportsPage, 0);
