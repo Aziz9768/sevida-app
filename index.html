@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9178,10 +9177,12 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 
 
 
-#sevida-ai-wrapper .btn, .sai-modal .btn {background:var(--surf);border:1px solid var(--ln);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--ink2);cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:inherit;transition:background .12s;}
-#sevida-ai-wrapper .btn:hover, .sai-modal .btn:hover {background:var(--s3);}
-#sevida-ai-wrapper .btnp, .sai-modal .btnp {background:var(--p);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:inherit;transition:background .12s;}
-#sevida-ai-wrapper .btnp:hover, .sai-modal .btnp:hover {background:var(--pd);}
+#sevida-ai-wrapper .btn, .sai-modal .btn, .modal-bg .btn {background:var(--surf);border:1px solid var(--ln);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--ink2);cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:inherit;transition:background .12s;}
+#sevida-ai-wrapper .btn:hover, .sai-modal .btn:hover, .modal-bg .btn:hover {background:var(--s3);}
+#sevida-ai-wrapper .btnp, .sai-modal .btnp, .modal-bg .btnp {background:var(--p);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:inherit;transition:background .12s;}
+#sevida-ai-wrapper .btnp:hover, .sai-modal .btnp:hover, .modal-bg .btnp:hover {background:var(--pd);}
+#sevida-ai-wrapper .btn:disabled, .modal-bg .btn:disabled {opacity:.5;cursor:not-allowed;}
+#sevida-ai-wrapper .btnp:disabled, .modal-bg .btnp:disabled {opacity:.5;cursor:not-allowed;}
 
 /* ── PAGES ── */
 #sevida-ai-wrapper .pg{padding:20px 24px 40px;display:none;}
@@ -9243,6 +9244,23 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 /* ── DRAWER ── */
 .dr{position:fixed;top:65px;right:0;bottom:0;width:0;background:var(--surf);border-left:1px solid var(--ln);display:flex;flex-direction:column;transition:width .22s cubic-bezier(.4,0,.2,1);overflow:hidden;z-index:1500;box-shadow:-4px 0 16px rgba(26,25,51,.10);}
 .dr.on{width:460px;}
+
+/* ── FULL-PAGE DETAIL VIEW ── */
+.detail-page{display:none;flex-direction:column;min-height:calc(100vh - 65px);}
+.detail-page.on{display:flex;}
+.detail-page-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink3);cursor:pointer;padding:0 0 16px;border:none;background:none;font-family:inherit;}
+.detail-page-back:hover{color:var(--p);}
+.detail-page-back svg{flex-shrink:0;}
+.detail-page-card{background:var(--surf);border:1px solid var(--ln);border-radius:10px;flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.detail-page-head{padding:18px 22px;border-bottom:1px solid var(--ln);display:flex;align-items:flex-start;gap:12px;}
+.detail-page-title{font-size:16px;font-weight:600;flex:1;}
+.detail-page-sub{font-size:12.5px;color:var(--ink3);margin-top:3px;}
+.detail-page-body{flex:1;overflow-y:auto;padding:20px 22px;}
+.detail-page-body::-webkit-scrollbar{width:4px;}
+.detail-page-body::-webkit-scrollbar-thumb{background:var(--ln);}
+.detail-page-foot{padding:14px 22px;border-top:1px solid var(--ln);display:flex;gap:8px;background:var(--surf);}
+/* Hide list content when detail is active */
+.pg-list-hide{display:none!important;}
 .dr-h{padding:14px 18px;border-bottom:1px solid var(--ln);display:flex;align-items:flex-start;gap:10px;flex-shrink:0;}
 .dr-t{font-size:15px;font-weight:600;flex:1;word-break:break-all;}
 .dr-s{font-size:12px;color:var(--ink3);margin-top:2px;}
@@ -10951,6 +10969,10 @@ function doLogin() {
     <div class="modal-b" style="padding:0;">
       <div class="sm-tabs">
         <div class="sm-tab on" data-smtab="sm-edit-pane">Edit spec</div>
+        <div class="sm-tab" data-smtab="sm-ai-pane" style="display:flex;align-items:center;gap:5px;">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M5 8.5c.8 1 2 1.5 3 1.5s2.2-.5 3-1.5M5.5 6a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm5 0a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          Draft with AI
+        </div>
         <div class="sm-tab" data-smtab="sm-test-pane">&#9654; Test skill</div>
         <div class="sm-tab" data-smtab="sm-validate-pane">&#10003; Validate</div>
       </div>
@@ -10993,6 +11015,31 @@ function doLogin() {
         <strong style="color:var(--ink2);">Approval flow:</strong> Saving creates a Draft. Submit for approval to make it available to agents. Once approved it is immediately available to SkillFinderAgent &mdash; no restart needed.
       </div>
       </div><!-- /sm-edit-pane -->
+
+      <!-- AI DRAFT PANE -->
+      <div id="sm-ai-pane" style="display:none;height:480px;flex-direction:column;">
+
+        <!-- Chat messages -->
+        <div id="sm-ai-messages" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;min-height:0;"></div>
+
+        <!-- Generated output -->
+        <div id="sm-ai-output" style="display:none;border-top:1px solid var(--ln);padding:14px 20px;background:var(--s2);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:12px;font-weight:600;color:var(--ink2);">Generated skill spec</span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn" onclick="smAiCopyOutput()" style="font-size:11.5px;padding:4px 10px;">Copy</button>
+              <button class="btnp" onclick="smAiApplyToForm()" style="font-size:11.5px;padding:4px 10px;">Apply to form →</button>
+            </div>
+          </div>
+          <pre id="sm-ai-spec-output" style="font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--ink2);margin:0;max-height:160px;overflow-y:auto;background:#fff;border:1px solid var(--ln);border-radius:5px;padding:10px 12px;"></pre>
+        </div>
+
+        <!-- Input area -->
+        <div style="border-top:1px solid var(--ln);padding:12px 16px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0;">
+          <textarea id="sm-ai-input" placeholder="Describe the skill you want to create..." style="flex:1;min-height:40px;max-height:100px;resize:none;font-size:13px;padding:8px 10px;border:1px solid var(--ln);border-radius:6px;line-height:1.5;font-family:inherit;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();smAiSend();}"></textarea>
+          <button class="btnp" id="sm-ai-send-btn" onclick="smAiSend()" style="flex-shrink:0;padding:8px 14px;font-size:13px;">Send</button>
+        </div>
+      </div><!-- /sm-ai-pane -->
 
       <!-- TEST PANE -->
       <div id="sm-test-pane" style="padding:16px 20px;display:none;">
@@ -23017,22 +23064,53 @@ function getActiveMemberSubTab() {
 }
 
 function getMemberContextQuestions(member, subTab) {
+    // ── AGENT DEPENDENCY MAP ──
+    // Maps question id → agent id required. If that agent is inactive, question is hidden.
+    var QUESTION_AGENT_MAP = {
+        'mx_previsit':        'a1', // Pre-Visit Summarizer
+        'mx_adt_summary':     'a1',
+        'mx_risk_acuity':     'a1',
+        'mx_recent_notes':    'a1',
+        'mx_diagnoses':       'a1',
+        'mx_medications':     'a1',
+        'mx_labs':            'a1',
+        'mx_allergies_vitals':'a1',
+        'mx_care_gaps':       'a4', // Care Gap Finder
+        'mx_assess_due':      'a4',
+        'mx_assess_completed':'a4',
+        'mx_assess_missing':  'a4',
+        'mx_assess_timeline': 'a4',
+        'mx_priority_pop':    'a4',
+    };
+
+    // Build set of active agent IDs
+    var activeAgentIds = {};
+    if (window.AGENTS) {
+        window.AGENTS.forEach(function(a) {
+            activeAgentIds[a.id] = (a.status === 'active');
+        });
+    }
+
+    function isAllowed(q) {
+        var requiredAgent = QUESTION_AGENT_MAP[q.id];
+        if (!requiredAgent) return true; // no dependency — always show
+        return activeAgentIds[requiredAgent] !== false; // hide only if explicitly inactive
+    }
+
     // ── COMMON QUESTIONS (appear on ALL tabs) ──
+    // Only truly generic questions that have no agent equivalent
     const common = [
         { id: 'mx_next_focus', text: '✦ What should I focus on next contact?', handler: 'qNextContactFocus' },
         { id: 'mx_draft_note', text: '✦ Draft a service note', handler: 'qDraftServiceNote' },
-        { id: 'mx_previsit', text: 'Generate pre-visit summary', handler: 'qPreVisitSummary' },
         { id: 'mx_attention', text: 'What needs my attention?', handler: 'qMemberAttention' },
-        { id: 'mx_recent_updates', text: 'Show recent updates & changes', handler: 'qMemberRecentUpdates' },
         { id: 'mx_open_tasks', text: 'Show open tasks for this member', handler: 'qMemberOpenTasks' },
         { id: 'mx_create_appt', text: 'Schedule an appointment', handler: 'qCreateAppointment' },
-    ];
+    ].filter(isAllowed);
 
     // ── TAB-SPECIFIC QUESTIONS ──
     const tabSpecific = {
         'dashboard': [
             { id: 'mx_adt_summary', text: 'Summarize recent ADT events', handler: 'qMemberADTSummary' },
-            { id: 'mx_care_gaps', text: 'What are the care gaps for this member?', handler: 'qMemberCareGaps' },
             { id: 'mx_risk_acuity', text: 'Show risk factors & acuity history', handler: 'qMemberRiskAcuity' },
             { id: 'mx_recent_notes', text: 'Summarize last 5 service notes', handler: 'qMemberRecentNotes' },
         ],
@@ -23043,7 +23121,6 @@ function getMemberContextQuestions(member, subTab) {
         ],
         'timeline': [
             { id: 'mx_milestones', text: 'Summarize key journey milestones', handler: 'qMemberMilestones' },
-            { id: 'mx_since_last', text: 'What happened since last contact?', handler: 'qMemberSinceLastContact' },
             { id: 'mx_engagement_gaps', text: 'Show gaps in member engagement', handler: 'qMemberEngagementGaps' },
         ],
         'insurance': [
@@ -23052,9 +23129,7 @@ function getMemberContextQuestions(member, subTab) {
             { id: 'mx_term_date', text: 'When is coverage term date?', handler: 'qMemberTermDate' },
         ],
         'screenings': [
-            { id: 'mx_assess_due', text: 'What assessments are due or overdue?', handler: 'qMemberAssessDue' },
             { id: 'mx_assess_completed', text: 'Summarize completed assessments', handler: 'qMemberAssessCompleted' },
-            { id: 'mx_assess_missing', text: 'What screenings are missing?', handler: 'qMemberScreeningsMissing' },
             { id: 'mx_assess_timeline', text: 'Show assessment completion timeline', handler: 'qMemberAssessTimeline' },
         ],
         'bio-psycho': [
@@ -23063,8 +23138,6 @@ function getMemberContextQuestions(member, subTab) {
             { id: 'mx_housing', text: 'Show housing & support situation', handler: 'qMemberHousing' },
         ],
         'history': [
-            { id: 'mx_diagnoses', text: 'Summarize diagnoses & conditions', handler: 'qMemberDiagnoses' },
-            { id: 'mx_medications', text: 'Show current medications', handler: 'qMemberMedications' },
             { id: 'mx_labs', text: 'Show recent labs with flags', handler: 'qMemberLabs' },
             { id: 'mx_allergies_vitals', text: 'Allergies & vital signs summary', handler: 'qMemberAllergiesVitals' },
         ],
@@ -23091,7 +23164,7 @@ function getMemberContextQuestions(member, subTab) {
         ],
     };
 
-    return [...common, ...(tabSpecific[subTab] || tabSpecific['dashboard'])];
+    return [...common, ...(tabSpecific[subTab] || tabSpecific['dashboard']).filter(isAllowed)];
 }
 
 // Collect ALL member context question IDs for search (used by handleAIQuestion)
@@ -35175,7 +35248,7 @@ function doReassignCM() {
           h+='</div>';
           return h;
         })()
-        +'<div style="display:flex;gap:8px;margin-top:16px;"><button class="btnp" data-save-agent="'+esc(a.id)+'">Save changes</button><button class="btn" data-run-agent-now="1">Run now</button></div>'
+        +'<div style="margin-top:4px;"></div>'
       +'</div>'
       +'<div class="tab-pane" id="ta-runs"><div class="dl">Last '+a.recentRuns.length+' runs</div>'+runsH+'</div>';
 
@@ -35330,6 +35403,183 @@ function doReassignCM() {
 
   window.closedr=function(id){document.getElementById(id).classList.remove('on');};
 
+  // ── FULL-PAGE DETAIL SYSTEM ──
+  // Maps each drawer to the pg-* page it belongs to
+  var DR_PAGE_MAP = {
+    'dr-a':      'app-agents',
+    'dr-sa':     'sys-agents',
+    'dr-sk':     'skills',
+    'dr-r':      'runs',
+    'dr-t':      'tools',
+    'dr-flow':   'flows',
+    'dr-prompt': 'prompts',
+    'dr-resource':'resources',
+    'dr-review': 'review',
+    'dr-model':  'models',
+    'dr-sch':    'schedules'
+  };
+
+  // Back button arrow SVG
+  var BACK_SVG = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  // Ensure a detail-page container exists for a given page
+  function ensureDetailPage(pageId) {
+    var pg = document.getElementById('pg-' + pageId);
+    if (!pg) return null;
+    var dp = pg.querySelector('.detail-page');
+    if (!dp) {
+      dp = document.createElement('div');
+      dp.className = 'detail-page';
+      dp.id = 'dp-' + pageId;
+      pg.appendChild(dp);
+    }
+    return dp;
+  }
+
+  // Get all direct list/content children of a pg (everything except .detail-page)
+  function getPgListEls(pageId) {
+    var pg = document.getElementById('pg-' + pageId);
+    if (!pg) return [];
+    return Array.prototype.slice.call(pg.children).filter(function(c){
+      return !c.classList.contains('detail-page');
+    });
+  }
+
+  // Show the detail page for a drawer
+  window.openDetailPage = function(drId) {
+    var pageId = DR_PAGE_MAP[drId];
+    if (!pageId) return; // not a mapped drawer — do nothing
+
+    var dr = document.getElementById(drId);
+    if (!dr) return;
+
+    // Copy content from drawer into detail page
+    var dp = ensureDetailPage(pageId);
+    if (!dp) return;
+
+    // Build header from dr-h
+    var drH = dr.querySelector('.dr-h');
+    var drT = dr.querySelector('.dr-t');
+    var drS = dr.querySelector('.dr-s');
+    var drB = dr.querySelector('.dr-b');
+    var drF = dr.querySelector('.dr-f');
+
+    var headHTML = '<div class="detail-page-head">'
+      + '<div style="flex:1;">'
+      + '<div class="detail-page-title">' + (drT ? drT.innerHTML : '') + '</div>'
+      + (drS && drS.innerHTML ? '<div class="detail-page-sub">' + drS.innerHTML + '</div>' : '')
+      + '</div>'
+      + '</div>';
+
+    var bodyHTML = '<div class="detail-page-body" id="dp-body-' + drId + '">' + (drB ? drB.innerHTML : '') + '</div>';
+
+    var footHTML = drF ? '<div class="detail-page-foot">'
+      + drF.innerHTML.replace(/data-close-dr="[^"]*"/g, 'data-close-detail="1"')
+      + '</div>' : '';
+
+    dp.innerHTML =
+      '<button class="detail-page-back" data-close-detail="1">' + BACK_SVG + ' Back</button>'
+      + '<div class="detail-page-card">'
+      + headHTML
+      + bodyHTML
+      + footHTML
+      + '</div>';
+
+    // Rewrite all IDs inside the detail body to avoid duplicates with the hidden drawer
+    var dpBody = dp.querySelector('.detail-page-body');
+    if (dpBody) {
+      // Prefix all id= attributes
+      dpBody.querySelectorAll('[id]').forEach(function(el) {
+        el.id = 'dp--' + el.id;
+      });
+      // Update data-tab references to match new IDs
+      dpBody.querySelectorAll('[data-tab]').forEach(function(el) {
+        el.setAttribute('data-tab', 'dp--' + el.getAttribute('data-tab'));
+      });
+      // Update data-smtab references
+      dpBody.querySelectorAll('[data-smtab]').forEach(function(el) {
+        el.setAttribute('data-smtab', 'dp--' + el.getAttribute('data-smtab'));
+      });
+    }
+
+    // Hide list elements
+    getPgListEls(pageId).forEach(function(el){ el.classList.add('pg-list-hide'); });
+
+    // Show detail page
+    dp.classList.add('on');
+
+    // Wire tabs directly on the detail body (avoids ID lookup issues)
+    if (dpBody) {
+      dpBody.querySelectorAll('.tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          var tl = tab.parentElement;
+          var tid = tab.getAttribute('data-tab');
+          tl.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('on'); });
+          // Find tab-panes scoped to this detail body
+          dpBody.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('on'); });
+          tab.classList.add('on');
+          var tgt = dpBody.querySelector('#' + tid) || document.getElementById(tid);
+          if (tgt) tgt.classList.add('on');
+        });
+      });
+      // Wire switches
+      dpBody.querySelectorAll('.sw').forEach(function(sw) {
+        sw.addEventListener('click', function(){ sw.classList.toggle('on'); });
+      });
+    }
+
+    // Don't add .on to the actual drawer
+    dr.classList.remove('on');
+  };
+
+  // Close detail page and return to list
+  window.closeDetailPage = function(pageId) {
+    if (!pageId) {
+      // Close all open detail pages
+      document.querySelectorAll('.detail-page.on').forEach(function(dp){
+        dp.classList.remove('on');
+        dp.innerHTML = '';
+      });
+      document.querySelectorAll('.pg-list-hide').forEach(function(el){
+        el.classList.remove('pg-list-hide');
+      });
+      return;
+    }
+    var dp = document.getElementById('dp-' + pageId);
+    if (dp) { dp.classList.remove('on'); dp.innerHTML = ''; }
+    getPgListEls(pageId).forEach(function(el){ el.classList.remove('pg-list-hide'); });
+  };
+
+  // Intercept data-close-detail clicks
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-close-detail]');
+    if (btn) {
+      e.stopPropagation();
+      closeDetailPage();
+    }
+  });
+
+  // Patch classList.add('on') on all .dr elements to redirect to detail page
+  (function patchDrawers() {
+    document.querySelectorAll('.dr').forEach(function(dr) {
+      var drId = dr.id;
+      if (!drId || !DR_PAGE_MAP[drId]) return;
+      var orig = dr.classList;
+      // Use a MutationObserver to catch classList.add('on')
+      var obs = new MutationObserver(function(mutations) {
+        mutations.forEach(function(m) {
+          if (m.type === 'attributes' && m.attributeName === 'class') {
+            if (dr.classList.contains('on')) {
+              dr.classList.remove('on'); // prevent the drawer from opening
+              openDetailPage(drId);
+            }
+          }
+        });
+      });
+      obs.observe(dr, { attributes: true });
+    });
+  })();
+
   function setupTabs(cid){
     var c=document.getElementById(cid); if(!c) return;
     c.querySelectorAll('.tab').forEach(function(tab){
@@ -35359,6 +35609,7 @@ function doReassignCM() {
     // Close all open modals and drawers on page change
     document.querySelectorAll('.modal-bg.on').forEach(function(m){m.classList.remove('on');});
     document.querySelectorAll('.dr.on').forEach(function(d){d.classList.remove('on');});
+    closeDetailPage(); // also close any open detail pages
     var _c=document.getElementById('crumb');if(_c)_c.textContent=PAGE_MAP[id]||id;
     var _rb=document.getElementById('runBtn');if(_rb)_rb.style.display=(id==='app-agents'||id==='sys-agents'||id==='skills'||id==='runs')?'inline-flex':'none'; onPageChange(id); if(id==='settings'){rUsers();}
     closeAllDr();
@@ -35475,6 +35726,21 @@ function doReassignCM() {
       document.getElementById('sm-spec').value = '';
     }
     document.getElementById('skillComposerModal').classList.add('on');
+    // Reset AI pane conversation
+    smAiHistory = [];
+    smAiGeneratedSpec = null;
+    var msgs = document.getElementById('sm-ai-messages');
+    if (msgs) msgs.innerHTML = '';
+    var aiOut = document.getElementById('sm-ai-output');
+    if (aiOut) aiOut.style.display = 'none';
+    // Ensure Edit tab is active
+    document.querySelectorAll('.sm-tab').forEach(function(t){
+      t.classList.toggle('on', t.getAttribute('data-smtab') === 'sm-edit-pane');
+    });
+    ['sm-edit-pane','sm-ai-pane','sm-test-pane','sm-validate-pane'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.style.display = id === 'sm-edit-pane' ? 'block' : 'none';
+    });
   };
 
   window.closeSkillModal = function() {
@@ -35591,10 +35857,15 @@ function doReassignCM() {
       var target = smtab.getAttribute('data-smtab');
       smtab.parentElement.querySelectorAll('.sm-tab').forEach(function(t){t.classList.remove('on');});
       smtab.classList.add('on');
-      ['sm-edit-pane','sm-test-pane','sm-validate-pane'].forEach(function(id){
+      ['sm-edit-pane','sm-ai-pane','sm-test-pane','sm-validate-pane'].forEach(function(id){
         var el = document.getElementById(id);
-        if (el) el.style.display = id === target ? 'block' : 'none';
+        if (el) el.style.display = id === target ? (id === 'sm-ai-pane' ? 'flex' : 'block') : 'none';
       });
+      // When switching to AI pane, init if empty
+      if (target === 'sm-ai-pane') {
+        var msgs = document.getElementById('sm-ai-messages');
+        if (!msgs.hasChildNodes()) smAiInit();
+      }
     }
   });
 
@@ -35822,6 +36093,215 @@ function doReassignCM() {
   };
 
 
+  // ── AI DRAFT PANE ──
+  var smAiHistory = []; // conversation history
+  var smAiGeneratedSpec = null; // last generated full spec object
+
+  var SM_AI_TOOLS = ['fhir_get_patient','fhir_search_conditions','fhir_search_medications','fhir_search_observations','fhir_search_observations_by_code','fhir_search_encounters','fhir_search_medication_dispenses','population_search_conditions','fhir_batch_get_patients','portal_messaging_read','portal_messaging_write','rcm_query','sentiment_classifier'];
+
+  var SM_AI_SYSTEM = "You are SkillMaker, an AI assistant that helps Sevida platform admins create well-structured skill specifications for healthcare AI agents.\n\nYour job is to have a SHORT, focused conversation to understand what skill the user wants, then generate a complete skill spec.\n\nAvailable tools you can reference:\n" + SM_AI_TOOLS.join(', ') + "\n\nConversation rules:\n- Ask ONLY the most important clarifying question at a time if you need more information\n- Keep questions short and specific (e.g. 'Does this skill need to look up a specific patient, or across the whole population?')\n- Once you have enough context (usually 1-2 exchanges), generate the skill spec\n- If the user's first message is already detailed enough, generate immediately — don't ask unnecessary questions\n- Never ask more than 2 clarifying questions total before generating\n\nWhen you are ready to generate, respond with ONLY this JSON structure (no markdown, no explanation before or after):\n{\n  \"action\": \"generate\",\n  \"skill_id\": \"snake_case_id\",\n  \"description\": \"one line description for SkillFinder routing\",\n  \"tools\": [\"tool1\", \"tool2\"],\n  \"spec\": \"# Skill: skill_id\\n## Overview\\n...\\n## Available Tools\\n...\\n## Execution Guidance\\n...\"\n}\n\nIf you still need clarification, respond with ONLY this JSON:\n{\n  \"action\": \"clarify\",\n  \"message\": \"your question here\"\n}\n\nIMPORTANT: Always respond with valid JSON only. No prose, no markdown fences.";
+
+  window.smAiInit = function() {
+    smAiHistory = [];
+    smAiGeneratedSpec = null;
+    var msgs = document.getElementById('sm-ai-messages');
+    msgs.innerHTML = '';
+    document.getElementById('sm-ai-output').style.display = 'none';
+    var inp = document.getElementById('sm-ai-input');
+    if (inp) inp.value = '';
+    // Show welcome message
+    smAiAddBubble('ai', "Describe the skill you want to create — what should it do, and when should agents use it? The more detail you give, the better. I'll ask a follow-up question if I need anything else before generating.");
+  };
+
+  window.smAiAddBubble = function(role, text) {
+    var msgs = document.getElementById('sm-ai-messages');
+    var isAi = role === 'ai';
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;gap:8px;align-items:flex-start;' + (isAi ? '' : 'flex-direction:row-reverse;');
+    var avatar = document.createElement('div');
+    avatar.style.cssText = 'width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:2px;';
+    if (isAi) {
+      avatar.style.background = 'var(--p)';
+      avatar.style.color = '#fff';
+      avatar.textContent = 'AI';
+    } else {
+      avatar.style.background = 'var(--s3,#e5e3f5)';
+      avatar.style.color = 'var(--p)';
+      avatar.textContent = 'You';
+    }
+    var bubble = document.createElement('div');
+    bubble.style.cssText = 'max-width:78%;padding:9px 12px;border-radius:10px;font-size:13px;line-height:1.55;' + (isAi ? 'background:var(--s2);color:var(--ink);border-bottom-left-radius:3px;' : 'background:var(--p);color:#fff;border-bottom-right-radius:3px;');
+    bubble.textContent = text;
+    wrap.appendChild(avatar);
+    wrap.appendChild(bubble);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+  };
+
+  window.smAiAddTyping = function() {
+    var msgs = document.getElementById('sm-ai-messages');
+    var wrap = document.createElement('div');
+    wrap.id = 'sm-ai-typing';
+    wrap.style.cssText = 'display:flex;gap:8px;align-items:flex-start;';
+    var avatar = document.createElement('div');
+    avatar.style.cssText = 'width:28px;height:28px;border-radius:50%;flex-shrink:0;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:2px;';
+    avatar.textContent = 'AI';
+    var bubble = document.createElement('div');
+    bubble.style.cssText = 'padding:9px 14px;border-radius:10px;background:var(--s2);border-bottom-left-radius:3px;display:flex;gap:4px;align-items:center;';
+    bubble.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:var(--ink3);animation:aiDot .8s infinite;display:inline-block;"></span><span style="width:6px;height:6px;border-radius:50%;background:var(--ink3);animation:aiDot .8s .2s infinite;display:inline-block;"></span><span style="width:6px;height:6px;border-radius:50%;background:var(--ink3);animation:aiDot .8s .4s infinite;display:inline-block;"></span>';
+    wrap.appendChild(avatar);
+    wrap.appendChild(bubble);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+  };
+
+  // Inject typing dot keyframe once
+  (function(){
+    if (!document.getElementById('ai-dot-style')) {
+      var s = document.createElement('style');
+      s.id = 'ai-dot-style';
+      s.textContent = '@keyframes aiDot{0%,80%,100%{opacity:.2;transform:scale(.8);}40%{opacity:1;transform:scale(1);}}';
+      document.head.appendChild(s);
+    }
+  })();
+
+  window.smAiSend = function() {
+    var input = document.getElementById('sm-ai-input');
+    var text = input.value.trim();
+    if (!text) return;
+
+    var apiKey = getApiKey();
+    if (!apiKey) {
+      smAiAddBubble('ai', 'No API key found. Go to Settings → Integrations and save your Anthropic API key first.');
+      return;
+    }
+
+    // Add user bubble
+    smAiAddBubble('user', text);
+    input.value = '';
+    input.style.height = 'auto';
+
+    // Add to history
+    smAiHistory.push({ role: 'user', content: text });
+
+    // Disable input
+    document.getElementById('sm-ai-send-btn').disabled = true;
+    input.disabled = true;
+
+    // Show typing indicator
+    smAiAddTyping();
+
+    // Call API
+    fetch('/.netlify/functions/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
+        system: SM_AI_SYSTEM,
+        messages: smAiHistory
+      })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      // Remove typing
+      var typing = document.getElementById('sm-ai-typing');
+      if (typing) typing.remove();
+
+      // Re-enable input
+      document.getElementById('sm-ai-send-btn').disabled = false;
+      input.disabled = false;
+      input.focus();
+
+      if (data.error) {
+        smAiAddBubble('ai', 'Error: ' + (data.error.message || 'API call failed. Check your key.'));
+        return;
+      }
+
+      var raw = data.content && data.content[0] && data.content[0].text;
+      if (!raw) { smAiAddBubble('ai', 'No response from API. Try again.'); return; }
+
+      // Add assistant turn to history
+      smAiHistory.push({ role: 'assistant', content: raw });
+
+      // Parse JSON response
+      var parsed;
+      try {
+        var cleaned = raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+        parsed = JSON.parse(cleaned);
+      } catch(e) {
+        // Fallback: show as plain message
+        smAiAddBubble('ai', raw);
+        return;
+      }
+
+      if (parsed.action === 'clarify') {
+        smAiAddBubble('ai', parsed.message);
+      } else if (parsed.action === 'generate') {
+        smAiGeneratedSpec = parsed;
+        smAiAddBubble('ai', "Done — I've generated the skill spec below. Copy it or click 'Apply to form' to fill in the Edit tab automatically.");
+        // Show output panel
+        document.getElementById('sm-ai-spec-output').textContent = parsed.spec;
+        document.getElementById('sm-ai-output').style.display = 'block';
+        // Scroll messages to bottom
+        var msgs = document.getElementById('sm-ai-messages');
+        msgs.scrollTop = msgs.scrollHeight;
+      } else {
+        // Unexpected structure — show raw
+        smAiAddBubble('ai', raw);
+      }
+    })
+    .catch(function(err) {
+      var typing = document.getElementById('sm-ai-typing');
+      if (typing) typing.remove();
+      document.getElementById('sm-ai-send-btn').disabled = false;
+      input.disabled = false;
+      smAiAddBubble('ai', 'Request failed: ' + err.message);
+    });
+  };
+
+  window.smAiCopyOutput = function() {
+    if (!smAiGeneratedSpec) return;
+    var text = smAiGeneratedSpec.spec;
+    try {
+      navigator.clipboard.writeText(text).then(function() { toast('Skill spec copied to clipboard'); });
+    } catch(e) {
+      // Fallback
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      toast('Skill spec copied');
+    }
+  };
+
+  window.smAiApplyToForm = function() {
+    if (!smAiGeneratedSpec) return;
+    var s = smAiGeneratedSpec;
+    // Fill form fields
+    document.getElementById('sm-id').value = s.skill_id || '';
+    document.getElementById('sm-desc').value = s.description || '';
+    document.getElementById('sm-spec').value = s.spec || '';
+    // Reset tools — clear both DOM and the smSelectedTools array
+    document.getElementById('sm-tools-list').innerHTML = '';
+    smSelectedTools.length = 0; // reset in place so references stay valid
+    if (s.tools && s.tools.length) {
+      s.tools.forEach(function(t) { smAddTool(t); });
+    }
+    // Switch to Edit tab
+    document.querySelectorAll('.sm-tab').forEach(function(t){t.classList.remove('on');});
+    document.querySelectorAll('.sm-tab').forEach(function(t){
+      if (t.getAttribute('data-smtab') === 'sm-edit-pane') t.classList.add('on');
+    });
+    ['sm-edit-pane','sm-ai-pane','sm-test-pane','sm-validate-pane'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.style.display = id === 'sm-edit-pane' ? 'block' : 'none';
+    });
+    toast('Applied to form — review and submit when ready');
+  };
+
   // ── AGENT TOGGLE (active/inactive) ──
   document.addEventListener('click', function(e) {
     var tog = e.target.closest('[data-toggle-agent]');
@@ -35842,6 +36322,9 @@ function doReassignCM() {
         toast(agent.name + ' activated');
       }
       rA();
+      // Refresh chat UI so disabled agents disappear immediately
+      if(typeof window.renderAgentChips === 'function') window.renderAgentChips();
+      if(typeof window.renderWelcomeScreen === 'function' && window.aiCopilotState && window.aiCopilotState.isOpen && !window.aiCopilotState.isInConversation) window.renderWelcomeScreen();
       return;
     }
 
@@ -38142,7 +38625,7 @@ function doReassignCM() {
   if(_oR) window.openR=function(id){_oR(id);_showBd();};
   // Also patch closeAllDr to hide backdrop
   var _cAD=window.closeAllDr;
-  if(_cAD) window.closeAllDr=function(){_cAD();if(_drBd)_drBd.classList.remove('on');};
+  if(_cAD) window.closeAllDr=function(){_cAD();if(_drBd)_drBd.classList.remove('on');closeDetailPage&&closeDetailPage();};
 
   // Click outside any SAI modal overlay to close it
   document.querySelectorAll('.modal-bg').forEach(function(bg){
@@ -39369,6 +39852,7 @@ window.renderAgentChips = function() {
 
     // Filter agents by surface (no surfaces field = show everywhere)
     var agents = (window.AGENTS||[]).filter(function(a) {
+        if(a.status === 'inactive') return false; // respect the active toggle
         if(!a.surfaces || !a.surfaces.length) return true;
         return a.surfaces.indexOf(currentSurface) > -1 || a.surfaces.indexOf('all') > -1;
     });
