@@ -9210,9 +9210,10 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 .cb.p0{padding:0;}
 
 /* ── TABLE ── */
-.tbl{width:100%;border-collapse:collapse;}
-.tbl th{font-size:11px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:.4px;padding:9px 14px;background:var(--p);border-bottom:1px solid var(--pd);text-align:left;white-space:nowrap;}
-.tbl td{padding:10px 14px;border-bottom:1px solid var(--ln2);font-size:12.5px;vertical-align:middle;}
+.tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
+.tbl th{font-size:11px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:.4px;padding:9px 14px;background:var(--p);border-bottom:1px solid var(--pd);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--ln2);font-size:12.5px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0;}
+.tbl td .rt,.tbl td .rs{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .tbl tr:last-child td{border-bottom:0;}
 .tbl tbody tr{cursor:pointer;transition:background .1s;}
 .tbl tbody tr:hover td{background:var(--ps);}
@@ -9245,9 +9246,10 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 .dr{position:fixed;top:65px;right:0;bottom:0;width:0;background:var(--surf);border-left:1px solid var(--ln);display:flex;flex-direction:column;transition:width .22s cubic-bezier(.4,0,.2,1);overflow:hidden;z-index:1500;box-shadow:-4px 0 16px rgba(26,25,51,.10);}
 .dr.on{width:460px;}
 
-/* ── FULL-PAGE DETAIL VIEW ── */
-.detail-page{display:none;flex-direction:column;min-height:calc(100vh - 65px);}
-.detail-page.on{display:flex;}
+/* ── FULL-PAGE DETAIL & CREATE VIEWS ── */
+.detail-page,.create-page{display:none;flex-direction:column;min-height:calc(100vh - 65px);}
+.detail-page.on,.create-page.on{display:flex;}
+.create-page{display:flex;}
 .detail-page-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink3);cursor:pointer;padding:0 0 16px;border:none;background:none;font-family:inherit;}
 .detail-page-back:hover{color:var(--p);}
 .detail-page-back svg{flex-shrink:0;}
@@ -10402,6 +10404,7 @@ function doLogin() {
       </div>
       <div class="card"><div class="cb p0">
         <table class="tbl">
+          <colgroup><col style="width:20%"><col style="width:28%"><col style="width:140px"><col style="width:100px"><col style="width:70px"><col style="width:110px"><col style="width:70px"><col style="width:70px"></colgroup>
           <thead><tr><th>Agent name</th><th>Intent description</th><th>Bound skill</th><th>Last run</th><th>Runs 7d</th><th>Status</th><th>Active</th><th></th></tr></thead>
           <tbody id="a-tb"></tbody>
         </table>
@@ -10432,7 +10435,128 @@ function doLogin() {
       <div class="ph"><div><div class="ph-t">Skills</div><div class="ph-s">Markdown specs that define what agents can do. SkillFinder reads these to route queries. Click a row to view the spec.</div></div><div class="ph-a"><button class="btnp" onclick="openSkillComposer()">+ Draft skill</button></div></div>
       <div class="notice" id="sk-notice">&#128161; <span><strong>2 skills pending approval</strong> &mdash; auto-drafted by SkillMaker Agent. Review and approve to make them available to agents.</span></div>
       <div class="fb"><input type="text" id="sk-q" placeholder="Search skills..." oninput="rSk()"/><select id="sk-s" onchange="rSk()"><option value="">All states</option><option value="active">Active</option><option value="pending">Pending approval</option><option value="inactive">Inactive</option><option value="draft">Draft</option></select></div>
-      <div class="card"><div class="cb p0"><table class="tbl"><thead><tr><th>Skill ID</th><th>Description</th><th>Tools</th><th>State</th><th>Agents using</th><th>Avg confidence</th><th>Updated by</th></tr></thead><tbody id="sk-tb"></tbody></table></div></div>
+      <div class="card"><div class="cb p0"><table class="tbl"><colgroup><col style="width:160px"><col style="width:28%"><col style="width:28%"><col style="width:120px"><col style="width:90px"><col style="width:110px"><col style="width:130px"></colgroup><thead><tr><th>Skill ID</th><th>Description</th><th>Tools</th><th>State</th><th>Agents using</th><th>Avg confidence</th><th>Updated by</th></tr></thead><tbody id="sk-tb"></tbody></table></div></div>
+
+      <!-- SKILL COMPOSER — full page create view -->
+      <div id="skill-composer-page" class="create-page" style="display:none;">
+        <button class="detail-page-back" onclick="closeSkillModal()">&#8592; Back</button>
+        <div class="detail-page-card" style="flex:1;">
+          <div class="detail-page-head">
+            <div style="flex:1;">
+              <div class="detail-page-title" id="skillModalTitle">Draft new skill</div>
+              <div class="detail-page-sub">Markdown spec — PlannerAgent reads this to build execution plans</div>
+            </div>
+          </div>
+          <div style="border-bottom:1px solid var(--ln);">
+            <div class="sm-tabs" style="padding:0 22px;">
+              <div class="sm-tab on" data-smtab="sm-edit-pane">Edit spec</div>
+              <div class="sm-tab" data-smtab="sm-ai-pane" style="display:flex;align-items:center;gap:5px;">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M5 8.5c.8 1 2 1.5 3 1.5s2.2-.5 3-1.5M5.5 6a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm5 0a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                Draft with AI
+              </div>
+              <div class="sm-tab" data-smtab="sm-test-pane">&#9654; Test skill</div>
+              <div class="sm-tab" data-smtab="sm-validate-pane">&#10003; Validate</div>
+            </div>
+          </div>
+
+          <!-- EDIT PANE -->
+          <div id="sm-edit-pane" style="padding:20px 24px;display:block;overflow-y:auto;">
+            <div class="g2">
+              <div class="field">
+                <label>Skill ID <span style="color:var(--ink3);font-weight:400;">(snake_case, unique)</span></label>
+                <input type="text" id="sm-id" placeholder="e.g. medication_adherence_analysis"/>
+              </div>
+              <div class="field">
+                <label>Description <span style="color:var(--ink3);font-weight:400;">— used by SkillFinder to route queries</span></label>
+                <input type="text" id="sm-desc" placeholder="e.g. Analyses medication history and refill patterns"/>
+              </div>
+            </div>
+            <div class="field">
+              <label>Tools referenced</label>
+              <div id="sm-tools-list" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;min-height:28px;padding:4px 0;"></div>
+              <select id="sm-tool-picker" onchange="smAddTool(this.value);this.value=''">
+                <option value="">+ Add a tool...</option>
+                <option value="fhir_get_patient">fhir_get_patient</option>
+                <option value="fhir_search_conditions">fhir_search_conditions</option>
+                <option value="fhir_search_medications">fhir_search_medications</option>
+                <option value="fhir_search_observations">fhir_search_observations</option>
+                <option value="fhir_search_observations_by_code">fhir_search_observations_by_code</option>
+                <option value="fhir_search_encounters">fhir_search_encounters</option>
+                <option value="fhir_search_medication_dispenses">fhir_search_medication_dispenses</option>
+                <option value="population_search_conditions">population_search_conditions</option>
+                <option value="fhir_batch_get_patients">fhir_batch_get_patients</option>
+                <option value="portal_messaging_read">portal_messaging_read</option>
+                <option value="portal_messaging_write">portal_messaging_write</option>
+                <option value="rcm_query">rcm_query</option>
+                <option value="sentiment_classifier">sentiment_classifier</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Skill spec <span style="color:var(--ink3);font-weight:400;">(Markdown)</span></label>
+              <textarea id="sm-spec" style="min-height:240px;font-size:11.5px;" placeholder="# Skill: your_skill_name&#10;## Overview&#10;Describe what this skill does and when to use it.&#10;&#10;## Available Tools&#10;### tool_name(param1, param2?)&#10;Description of what this tool returns.&#10;&#10;## Execution Guidance&#10;Describe how to combine tools, wave structure, conditions."></textarea>
+            </div>
+            <div style="background:var(--s2);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--ink3);margin-bottom:16px;">
+              <strong style="color:var(--ink2);">Approval flow:</strong> Saving creates a Draft. Submit for approval to make it available to agents. Once approved it is immediately available to SkillFinderAgent &mdash; no restart needed.
+            </div>
+            <div style="padding-top:14px;border-top:1px solid var(--ln);">
+              <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:10px;">Execution Constraints</div>
+              <div class="g2">
+                <div class="field"><label>Max waves <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">tool execution depth</span></label><input type="number" id="sm-max-waves" value="2" min="1" max="10" step="1"/></div>
+                <div class="field"><label>Timeout <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">seconds</span></label><input type="number" id="sm-timeout" value="30" min="5" max="300" step="5"/></div>
+              </div>
+              <div class="g2">
+                <div class="field"><label>Owner</label><input type="text" id="sm-owner" placeholder="e.g. Clinical Ops"/></div>
+                <div class="field"><label>Tags <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">comma-separated</span></label><input type="text" id="sm-tags" placeholder="e.g. fhir, clinical"/></div>
+              </div>
+            </div>
+          </div><!-- /sm-edit-pane -->
+
+          <!-- AI DRAFT PANE -->
+          <div id="sm-ai-pane" style="display:none;flex-direction:column;height:560px;">
+            <div id="sm-ai-messages" style="flex:1;overflow-y:auto;padding:16px 24px;display:flex;flex-direction:column;gap:12px;min-height:0;"></div>
+            <div id="sm-ai-output" style="display:none;border-top:1px solid var(--ln);padding:14px 24px;background:var(--s2);">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <span style="font-size:12px;font-weight:600;color:var(--ink2);">Generated skill spec</span>
+                <div style="display:flex;gap:6px;">
+                  <button class="btn" onclick="smAiCopyOutput()" style="font-size:11.5px;padding:4px 10px;">Copy</button>
+                  <button class="btnp" onclick="smAiApplyToForm()" style="font-size:11.5px;padding:4px 10px;">Apply to form →</button>
+                </div>
+              </div>
+              <pre id="sm-ai-spec-output" style="font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--ink2);margin:0;max-height:160px;overflow-y:auto;background:#fff;border:1px solid var(--ln);border-radius:5px;padding:10px 12px;"></pre>
+            </div>
+            <div style="border-top:1px solid var(--ln);padding:12px 16px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0;">
+              <textarea id="sm-ai-input" placeholder="Describe the skill you want to create..." style="flex:1;min-height:40px;max-height:100px;resize:none;font-size:13px;padding:8px 10px;border:1px solid var(--ln);border-radius:6px;line-height:1.5;font-family:inherit;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();smAiSend();}"></textarea>
+              <button class="btnp" id="sm-ai-send-btn" onclick="smAiSend()" style="flex-shrink:0;padding:8px 14px;font-size:13px;">Send</button>
+            </div>
+          </div><!-- /sm-ai-pane -->
+
+          <!-- TEST PANE -->
+          <div id="sm-test-pane" style="padding:20px 24px;display:none;">
+            <div class="notice" style="margin-bottom:12px;">&#9889; This sends your skill spec + sample query to <strong>Claude Sonnet 4.6</strong> acting as PlannerAgent. Returns a real execution plan (DAG). Requires your Anthropic API key in Settings &rarr; Integrations.</div>
+            <div class="field"><label>Sample query to test against</label><input type="text" id="sm-test-query" placeholder="e.g. what conditions does patient test-WCC-117408 have?"/></div>
+            <div class="field"><label>Patient ID (optional context)</label><input type="text" id="sm-test-patient" placeholder="e.g. test-WCC-117408"/></div>
+            <button class="btnp" id="sm-test-btn" onclick="smRunTest()" style="margin-bottom:14px;">&#9654; Run PlannerAgent test</button>
+            <div id="sm-test-output" style="display:none;"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:8px;">PlannerAgent output</div><div id="sm-test-result"></div></div>
+            <div id="sm-test-loading" style="display:none;padding:16px;text-align:center;color:var(--ink3);font-size:13px;"><div style="margin-bottom:8px;">&#8987; Calling Claude Sonnet 4.6 as PlannerAgent...</div><div style="font-size:11.5px;">Reading skill spec &rarr; reasoning about tools &rarr; building DAG</div></div>
+            <div id="sm-test-error" style="display:none;background:var(--ers);border:1px solid #f0c0c8;border-radius:6px;padding:10px 12px;font-size:12.5px;color:var(--er);"></div>
+          </div><!-- /sm-test-pane -->
+
+          <!-- VALIDATE PANE -->
+          <div id="sm-validate-pane" style="padding:20px 24px;display:none;">
+            <button class="btnp" onclick="smRunValidate()" style="margin-bottom:14px;">&#10003; Run validation checks</button>
+            <div id="sm-validate-output"></div>
+          </div><!-- /sm-validate-pane -->
+
+          <!-- FOOTER -->
+          <div class="detail-page-foot" style="justify-content:space-between;">
+            <button class="btn" onclick="closeSkillModal()">Cancel</button>
+            <div style="display:flex;gap:8px;">
+              <button class="btn" onclick="smSaveDraft()">Save as draft</button>
+              <button class="btnp" onclick="smSubmitApproval()">Save &amp; submit for approval</button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /skill-composer-page -->
     </div>
 
     <div class="pg" id="pg-runs">
@@ -10444,12 +10568,12 @@ function doLogin() {
         <div class="stat"><div class="stat-l">Total LLM cost (7d)</div><div class="stat-v">$12.40</div></div>
       </div>
       <div class="fb"><input type="text" id="r-q" placeholder="Search by agent or run ID..." oninput="rR()"/><select id="r-s" onchange="rR()"><option value="">All statuses</option><option value="success">Success</option><option value="review">Needs review</option><option value="failed">Failed</option></select><select id="r-tr" onchange="rR()"><option value="">All triggers</option><option value="Schedule">Schedule</option><option value="Manual">Manual</option><option value="Event">Event</option></select></div>
-      <div class="card"><div class="cb p0"><table class="tbl"><thead><tr><th>Run ID</th><th>Agent</th><th>Trigger</th><th>Skill</th><th>Path</th><th>Waves</th><th>Duration</th><th>Cost</th><th>Status</th></tr></thead><tbody id="r-tb"></tbody></table></div></div>
+      <div class="card"><div class="cb p0"><table class="tbl"><colgroup><col style="width:100px"><col style="width:22%"><col style="width:90px"><col style="width:160px"><col style="width:100px"><col style="width:60px"><col style="width:80px"><col style="width:80px"><col style="width:90px"></colgroup><thead><tr><th>Run ID</th><th>Agent</th><th>Trigger</th><th>Skill</th><th>Path</th><th>Waves</th><th>Duration</th><th>Cost</th><th>Status</th></tr></thead><tbody id="r-tb"></tbody></table></div></div>
     </div>
 
     <div class="pg" id="pg-tools">
       <div class="ph"><div><div class="ph-t">Tools</div><div class="ph-s">Python functions in the Tool Registry. Agents call tools exclusively through the registry. Click a tool to see RBAC and usage.</div></div><div class="ph-a"><button class="btnp" onclick="openNewToolModal()">+ New tool</button></div></div>
-      <div class="card"><div class="cb p0"><table class="tbl"><thead><tr><th>Tool name</th><th>Toolkit</th><th>Auth</th><th>Write ops</th><th>Required roles</th><th>Used by agents</th><th>Updated by</th></tr></thead><tbody id="t-tb"></tbody></table></div></div>
+      <div class="card"><div class="cb p0"><table class="tbl"><colgroup><col style="width:220px"><col style="width:140px"><col style="width:100px"><col style="width:110px"><col style="width:22%"><col style="width:22%"><col style="width:120px"></colgroup><thead><tr><th>Tool name</th><th>Toolkit</th><th>Auth</th><th>Write ops</th><th>Required roles</th><th>Used by agents</th><th>Updated by</th></tr></thead><tbody id="t-tb"></tbody></table></div></div>
     </div>
 
     <div class="pg" id="pg-flows">
@@ -10942,148 +11066,83 @@ function doLogin() {
 </div>
 
 <div class="modal-bg" id="modal">
-  <div class="modal">
+  <div class="modal" style="width:580px;max-height:90vh;overflow-y:auto;">
     <div class="modal-h"><h3>New agent</h3><button class="dr-x" onclick="closeModal()">&#10005;</button></div>
-    <div class="modal-b">
+    <div class="modal-b" style="display:flex;flex-direction:column;gap:0;">
+
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:10px;">Identity</div>
       <div class="field"><label>Agent name</label><input type="text" id="na-name" placeholder="e.g. Medication Adherence Checker"/></div>
-      <div class="field"><label>Description</label><input type="text" id="na-desc" placeholder="What does this agent do?"/></div>
+      <div class="field"><label>Intent description <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">— used by SkillFinder to route queries</span></label><input type="text" id="na-desc" placeholder="What does this agent do in plain English?"/></div>
+
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Model & Execution</div>
       <div class="g2">
-        <div class="field"><label>Model</label><select id="na-model"><option>Claude Sonnet 4.6</option><option>Claude Opus 4.6</option><option>Claude Haiku 4.5</option><option>Sevida-Med-7B</option></select></div>
-        <div class="field"><label>Skill</label><select id="na-skill"></select></div>
+        <div class="field"><label>Model</label><select id="na-model"><option value="Sonnet 4.6">Claude Sonnet 4.6</option><option value="Opus 4.6">Claude Opus 4.6</option><option value="Haiku 4.5">Claude Haiku 4.5</option><option value="Sevida-Med-7B">Sevida-Med-7B</option></select></div>
+        <div class="field"><label>Bound skill <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">(optional)</span></label><select id="na-skill"></select></div>
       </div>
-      <div class="field"><label>Trigger</label><select id="na-trigger"><option value="Manual invoke">Manual only</option><option value="Schedule (cron)">Schedule (cron)</option><option value="Event: appointment-booked">Event: appointment-booked</option><option value="Event: message-received">Event: message-received</option></select></div>
-      <div class="field"><label>System prompt</label><textarea id="na-prompt" placeholder="You are a clinical agent. Never invent clinical facts..."></textarea></div>
+      <div class="g2">
+        <div class="field"><label>Trigger</label><select id="na-trigger"><option value="Manual invoke">Manual only</option><option value="Schedule (cron)">Schedule (cron)</option><option value="Event: appointment-booked">Event: appointment-booked</option><option value="Event: message-received">Event: message-received</option></select></div>
+        <div class="field"><label>Memory scope</label><select id="na-memory"><option value="Ephemeral">Ephemeral — cleared after each run</option><option value="Agent-private">Agent-private — persists across runs</option><option value="Agent + Org scopes">Agent + Org — shared read, private write</option><option value="Org shared">Org shared — all agents can read</option></select></div>
+      </div>
+
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Model Parameters</div>
+      <div class="g2">
+        <div class="field">
+          <label>Temperature <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">0 = deterministic · 1 = creative</span></label>
+          <input type="number" id="na-temperature" value="0.2" min="0" max="1" step="0.1" style="width:100%;"/>
+        </div>
+        <div class="field">
+          <label>Max tokens <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">per response</span></label>
+          <input type="number" id="na-max-tokens" value="1000" min="256" max="8192" step="256" style="width:100%;"/>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="field">
+          <label>Timeout <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">seconds before fallback</span></label>
+          <input type="number" id="na-timeout" value="30" min="5" max="300" step="5" style="width:100%;"/>
+        </div>
+        <div class="field">
+          <label>Rate limit <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">max runs / user / day</span></label>
+          <input type="number" id="na-rate-limit" value="50" min="1" max="1000" step="1" style="width:100%;"/>
+        </div>
+      </div>
+
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Governance</div>
+      <div class="g2">
+        <div class="field">
+          <label>Owner <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">responsible team or person</span></label>
+          <input type="text" id="na-owner" placeholder="e.g. Clinical Ops"/>
+        </div>
+        <div class="field">
+          <label>Tags <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">comma-separated</span></label>
+          <input type="text" id="na-tags" placeholder="e.g. clinical, fhir, summarization"/>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="field"><label>Output format</label><select id="na-output"><option value="plain-text">Plain text</option><option value="structured-card">Structured card</option><option value="soap-note">SOAP note</option><option value="table">Table</option><option value="json">JSON (developer)</option></select></div>
+        <div class="field"><label>Fallback behavior</label><select id="na-fallback"><option value="show-partial">Show partial results</option><option value="return-empty">Return empty response</option><option value="escalate">Escalate to care manager</option><option value="retry">Retry once then escalate</option></select></div>
+      </div>
+
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Guardrails</div>
+      <div id="na-guardrails" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
+        <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;"><input type="checkbox" class="na-gr-cb" value="PHI redaction" checked style="accent-color:var(--p);width:14px;height:14px;"> PHI redaction</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;"><input type="checkbox" class="na-gr-cb" value="Clinical domain only" style="accent-color:var(--p);width:14px;height:14px;"> Clinical domain only</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;"><input type="checkbox" class="na-gr-cb" value="Read-only" style="accent-color:var(--p);width:14px;height:14px;"> Read-only (no write tools)</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;"><input type="checkbox" class="na-gr-cb" value="No web search" style="accent-color:var(--p);width:14px;height:14px;"> No web search</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;"><input type="checkbox" class="na-gr-cb" value="Cite FHIR resource IDs" style="accent-color:var(--p);width:14px;height:14px;"> Cite FHIR resource IDs</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;"><input type="checkbox" class="na-gr-cb" value="Human approval for outbound" style="accent-color:var(--p);width:14px;height:14px;"> Human approval for outbound messages</label>
+      </div>
+
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">System Prompt</div>
+      <div class="field"><textarea id="na-prompt" style="min-height:80px;" placeholder="You are a clinical agent. Never invent clinical facts..."></textarea><div style="font-size:11.5px;color:var(--ink3);margin-top:3px;">Leave blank to use the default orchestrator prompt</div></div>
+
     </div>
     <div class="modal-f"><button class="btn" onclick="closeModal()">Cancel</button><button class="btnp" onclick="createAgent()">Create agent</button></div>
   </div>
 </div>
 
 
-<!-- SKILL COMPOSER MODAL -->
-<div class="modal-bg" id="skillComposerModal">
-  <div class="modal" style="width:620px;max-height:88vh;">
-    <div class="modal-h">
-      <h3 id="skillModalTitle">Draft new skill</h3>
-      <button class="dr-x" onclick="closeSkillModal()">&#10005;</button>
-    </div>
-    <div class="modal-b" style="padding:0;">
-      <div class="sm-tabs">
-        <div class="sm-tab on" data-smtab="sm-edit-pane">Edit spec</div>
-        <div class="sm-tab" data-smtab="sm-ai-pane" style="display:flex;align-items:center;gap:5px;">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M5 8.5c.8 1 2 1.5 3 1.5s2.2-.5 3-1.5M5.5 6a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm5 0a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-          Draft with AI
-        </div>
-        <div class="sm-tab" data-smtab="sm-test-pane">&#9654; Test skill</div>
-        <div class="sm-tab" data-smtab="sm-validate-pane">&#10003; Validate</div>
-      </div>
-
-      <!-- EDIT PANE -->
-      <div id="sm-edit-pane" style="padding:16px 20px;display:block;">
-      <div class="field">
-        <label>Skill ID <span style="color:var(--ink3);font-weight:400;">(snake_case, unique)</span></label>
-        <input type="text" id="sm-id" placeholder="e.g. medication_adherence_analysis"/>
-      </div>
-      <div class="field">
-        <label>Description <span style="color:var(--ink3);font-weight:400;">(one line — used by SkillFinder to route queries)</span></label>
-        <input type="text" id="sm-desc" placeholder="e.g. Analyses medication history and refill patterns for a patient"/>
-      </div>
-      <div class="field">
-        <label>Tools referenced</label>
-        <div id="sm-tools-list" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;min-height:28px;padding:4px 0;"></div>
-        <select id="sm-tool-picker" onchange="smAddTool(this.value);this.value=''">
-          <option value="">+ Add a tool...</option>
-          <option value="fhir_get_patient">fhir_get_patient</option>
-          <option value="fhir_search_conditions">fhir_search_conditions</option>
-          <option value="fhir_search_medications">fhir_search_medications</option>
-          <option value="fhir_search_observations">fhir_search_observations</option>
-          <option value="fhir_search_observations_by_code">fhir_search_observations_by_code</option>
-          <option value="fhir_search_encounters">fhir_search_encounters</option>
-          <option value="fhir_search_medication_dispenses">fhir_search_medication_dispenses</option>
-          <option value="population_search_conditions">population_search_conditions</option>
-          <option value="fhir_batch_get_patients">fhir_batch_get_patients</option>
-          <option value="portal_messaging_read">portal_messaging_read</option>
-          <option value="portal_messaging_write">portal_messaging_write</option>
-          <option value="rcm_query">rcm_query</option>
-          <option value="sentiment_classifier">sentiment_classifier</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Skill spec <span style="color:var(--ink3);font-weight:400;">(Markdown — PlannerAgent reads this to build execution plans)</span></label>
-        <textarea id="sm-spec" style="min-height:220px;font-size:11.5px;" placeholder="# Skill: your_skill_name&#10;## Overview&#10;Describe what this skill does and when to use it.&#10;&#10;## Available Tools&#10;### tool_name(param1, param2?)&#10;Description of what this tool returns.&#10;&#10;## Execution Guidance&#10;Describe how to combine tools, wave structure, conditions."></textarea>
-      </div>
-      <div style="background:var(--s2);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--ink3);">
-        <strong style="color:var(--ink2);">Approval flow:</strong> Saving creates a Draft. Submit for approval to make it available to agents. Once approved it is immediately available to SkillFinderAgent &mdash; no restart needed.
-      </div>
-      </div><!-- /sm-edit-pane -->
-
-      <!-- AI DRAFT PANE -->
-      <div id="sm-ai-pane" style="display:none;height:480px;flex-direction:column;">
-
-        <!-- Chat messages -->
-        <div id="sm-ai-messages" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;min-height:0;"></div>
-
-        <!-- Generated output -->
-        <div id="sm-ai-output" style="display:none;border-top:1px solid var(--ln);padding:14px 20px;background:var(--s2);">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <span style="font-size:12px;font-weight:600;color:var(--ink2);">Generated skill spec</span>
-            <div style="display:flex;gap:6px;">
-              <button class="btn" onclick="smAiCopyOutput()" style="font-size:11.5px;padding:4px 10px;">Copy</button>
-              <button class="btnp" onclick="smAiApplyToForm()" style="font-size:11.5px;padding:4px 10px;">Apply to form →</button>
-            </div>
-          </div>
-          <pre id="sm-ai-spec-output" style="font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--ink2);margin:0;max-height:160px;overflow-y:auto;background:#fff;border:1px solid var(--ln);border-radius:5px;padding:10px 12px;"></pre>
-        </div>
-
-        <!-- Input area -->
-        <div style="border-top:1px solid var(--ln);padding:12px 16px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0;">
-          <textarea id="sm-ai-input" placeholder="Describe the skill you want to create..." style="flex:1;min-height:40px;max-height:100px;resize:none;font-size:13px;padding:8px 10px;border:1px solid var(--ln);border-radius:6px;line-height:1.5;font-family:inherit;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();smAiSend();}"></textarea>
-          <button class="btnp" id="sm-ai-send-btn" onclick="smAiSend()" style="flex-shrink:0;padding:8px 14px;font-size:13px;">Send</button>
-        </div>
-      </div><!-- /sm-ai-pane -->
-
-      <!-- TEST PANE -->
-      <div id="sm-test-pane" style="padding:16px 20px;display:none;">
-        <div class="notice" style="margin-bottom:12px;">
-          &#9889; This sends your skill spec + sample query to <strong>Claude Sonnet 4.6</strong> acting as PlannerAgent. Returns a real execution plan (DAG) — not a simulation. Requires your Anthropic API key in Settings &rarr; Integrations.
-        </div>
-        <div class="field">
-          <label>Sample query to test against</label>
-          <input type="text" id="sm-test-query" placeholder="e.g. what conditions does patient test-WCC-117408 have?"/>
-        </div>
-        <div class="field">
-          <label>Patient ID (optional context)</label>
-          <input type="text" id="sm-test-patient" placeholder="e.g. test-WCC-117408"/>
-        </div>
-        <button class="btnp" id="sm-test-btn" onclick="smRunTest()" style="margin-bottom:14px;">
-          &#9654; Run PlannerAgent test
-        </button>
-        <div id="sm-test-output" style="display:none;">
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:8px;">PlannerAgent output</div>
-          <div id="sm-test-result"></div>
-        </div>
-        <div id="sm-test-loading" style="display:none;padding:16px;text-align:center;color:var(--ink3);font-size:13px;">
-          <div style="margin-bottom:8px;">&#8987; Calling Claude Sonnet 4.6 as PlannerAgent...</div>
-          <div style="font-size:11.5px;">Reading skill spec &rarr; reasoning about tools &rarr; building DAG</div>
-        </div>
-        <div id="sm-test-error" style="display:none;background:var(--ers);border:1px solid #f0c0c8;border-radius:6px;padding:10px 12px;font-size:12.5px;color:var(--er);"></div>
-      </div><!-- /sm-test-pane -->
-
-      <!-- VALIDATE PANE -->
-      <div id="sm-validate-pane" style="padding:16px 20px;display:none;">
-        <button class="btnp" onclick="smRunValidate()" style="margin-bottom:14px;">&#10003; Run validation checks</button>
-        <div id="sm-validate-output"></div>
-      </div><!-- /sm-validate-pane -->
-
-    </div>
-    <div class="modal-f" style="justify-content:space-between;">
-      <button class="btn" onclick="closeSkillModal()">Cancel</button>
-      <div style="display:flex;gap:8px;">
-        <button class="btn" onclick="smSaveDraft()">Save as draft</button>
-        <button class="btnp" onclick="smSubmitApproval()">Save &amp; submit for approval</button>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- SKILL COMPOSER — content lives in pg-skills as a full create page (see openSkillComposer JS) -->
+<div id="skillComposerModal" style="display:none;"><!-- kept for JS compat, never shown --></div>
 
 <!-- RUN AGENT MODAL -->
 <div class="modal-bg" id="runAgentModal">
@@ -34775,7 +34834,7 @@ function doReassignCM() {
 </script>
 
 
-<script type="application/json" id="_d">{"AGENTS":[{"id":"a1","name":"Pre-Visit Summarizer","desc":"Generates pre-visit summaries from EHR FHIR data","skill":"fhir_query","model":"Sonnet 4.6","trigger":"Schedule - 7:45a CT","lastRun":"Today 7:45a","runs7d":48,"status":"active","guardrails":["PHI redaction","Cite FHIR resource IDs","Read-only","No web search"],"memory":"Agent + Org scopes","tools":["fhir_get_patient","fhir_search_conditions","fhir_search_medications","fhir_search_observations","fhir_search_encounters"],"recentRuns":["run-8842","run-8836"],"createdBy":"Sam","createdAt":"Mar 12, 2025","updatedBy":"Marcus Reid","updatedAt":"2d ago","surfaces":["member-dashboard"],"context_map":[{"surface":"member-dashboard","tab":"member-tab__dashboard","priority":"primary","prompts":["Summarize chart before my 9am visit","What should I focus on today?","Generate pre-visit briefing"]},{"surface":"member-dashboard","tab":"member-tab__screenings","priority":"secondary","prompts":["Are screenings up to date?","Review assessment history"]},{"surface":"member-dashboard","tab":"member-tab__timeline","priority":"secondary","prompts":["Summarize recent events","What changed since my last visit?"]},{"surface":"member-dashboard","tab":"member-tab__medications","priority":"secondary","prompts":["Review medication changes since last visit","Check adherence trends"]},{"surface":"member-dashboard","tab":"member-tab__health-history","priority":"primary","prompts":["Summarize health history","What chronic conditions are active?"]}]},{"id":"a2","name":"Inbox Triage","desc":"Prioritises and categorises incoming patient portal messages","skill":"inbox_triage","model":"Haiku 4.5","trigger":"Event: message-received","lastRun":"3 min ago","runs7d":112,"status":"active","guardrails":["PHI redaction","Read-only","Clinical domain only"],"memory":"Ephemeral","tools":["portal_messaging_read","sentiment_classifier"],"recentRuns":["run-8841","run-8839","run-8838"],"createdBy":"Marcus Reid","createdAt":"Mar 18, 2025","updatedBy":"Marcus Reid","updatedAt":"5d ago","surfaces":["member-dashboard","inbox"],"context_map":[{"surface":"member-dashboard","tab":"member-tab__dashboard","priority":"secondary","prompts":["Any urgent messages from this patient?","Check unread messages"]},{"surface":"inbox","tab":"all","priority":"primary","prompts":["Triage all unread messages","Show urgent messages first","Categorize inbox by priority"]}]},{"id":"a3","name":"Prior Auth Helper","desc":"Gathers chart evidence and drafts prior auth requests","skill":"prior_auth","model":"Opus 4.6","trigger":"Manual invoke","lastRun":"1h ago","runs7d":22,"status":"review","guardrails":["PHI redaction","Human approval for outbound","Clinical domain only"],"memory":"Agent-private","tools":["fhir_search_conditions","fhir_search_encounters","rcm_query","portal_messaging_write"],"recentRuns":["run-8840"],"createdBy":"Emma Watson","createdAt":"Apr 2, 2025","updatedBy":"Emma Watson","updatedAt":"1h ago","surfaces":["member-dashboard"],"context_map":[{"surface":"member-dashboard","tab":"member-tab__dashboard","priority":"secondary","prompts":["Check pending prior auths","Draft PA request for this patient"]},{"surface":"member-dashboard","tab":"member-tab__medications","priority":"primary","prompts":["Draft prior auth for current medications","Check formulary status"]},{"surface":"member-dashboard","tab":"member-tab__insurance","priority":"primary","prompts":["Review insurance coverage","Draft PA based on coverage"]}]},{"id":"a4","name":"Care Gap Finder","desc":"Identifies overdue screenings and HEDIS quality measure gaps panel-wide","skill":"population_query","model":"Sonnet 4.6","trigger":"Schedule - Mon 6:00a","lastRun":"6h ago","runs7d":31,"status":"active","guardrails":["PHI redaction","Clinical domain only","Read-only"],"memory":"Org shared","tools":["population_search_conditions","fhir_batch_get_patients"],"recentRuns":[],"createdBy":"Sam","createdAt":"Apr 10, 2025","updatedBy":"Marcus Reid","updatedAt":"6h ago","surfaces":["member-dashboard","caseload"],"context_map":[{"surface":"member-dashboard","tab":"member-tab__dashboard","priority":"secondary","prompts":["What care gaps are open?","Full gap analysis for this member"]},{"surface":"member-dashboard","tab":"member-tab__screenings","priority":"primary","prompts":["What screenings are overdue?","Show all open HEDIS gaps","Which screenings are due this quarter?"]},{"surface":"caseload","tab":"all","priority":"primary","prompts":["Find members with open care gaps","Prioritize caseload by gap status"]}]},{"id":"a5","name":"Denial Appeal","desc":"Detects claim denials and drafts appeal letters for physician sign-off","skill":"denial_appeal","model":"Opus 4.6","trigger":"Manual invoke","lastRun":"Never","runs7d":0,"status":"draft","guardrails":["PHI redaction","Human approval for outbound","Read-only"],"memory":"Ephemeral","tools":["rcm_query","fhir_search_encounters"],"recentRuns":[],"createdBy":"Emma Watson","createdAt":"May 5, 2025","updatedBy":"Emma Watson","updatedAt":"3d ago","surfaces":["member-dashboard"],"context_map":[{"surface":"member-dashboard","tab":"member-tab__dashboard","priority":"secondary","prompts":["Check for claim denials","Draft appeal letter for this patient"]},{"surface":"member-dashboard","tab":"member-tab__insurance","priority":"primary","prompts":["Review denied claims","Draft appeal for most recent denial"]}]}],"SKILLS":[{"id":"fhir_query","desc":"Single-patient FHIR data retrieval","tools":["fhir_get_patient","fhir_search_conditions","fhir_search_medications","fhir_search_observations","fhir_search_encounters"],"state":"active","agents":6,"confidence":0.94,"source":"authored","spec":"# Skill: fhir_query\n## Overview\nRetrieves clinical data for a single known patient.\nDo NOT use for population queries.\n\n## Available Tools\n### fhir_get_patient(patientId)\n### fhir_search_conditions(patientId, clinicalStatus?)\n### fhir_search_medications(patientId, status?)\n### fhir_search_observations(patientId, category?)\n### fhir_search_encounters(patientId, status?)\n\n## Execution Guidance\nFull summary: fetch all in parallel (Wave 0).\nConditional: fetch condition first, gate next steps on result.","createdBy":"Sam","createdAt":"Feb 20, 2025","updatedBy":"Marcus Reid","updatedAt":"4d ago"},{"id":"population_query","desc":"Panel-wide population search. No patientId required.","tools":["population_search_conditions","fhir_batch_get_patients"],"state":"active","agents":3,"confidence":0.91,"source":"authored","spec":"# Skill: population_query\n## Overview\nSearches across the entire care panel.\n\n## Available Tools\n### population_search_conditions(code, clinicalStatus?)\n### fhir_batch_get_patients(patientIds[])\n\n## Execution Guidance\nFirst call returns IDs. Use fhir_batch_get_patients in Wave 1 for demographics.","createdBy":"Sam","createdAt":"Mar 1, 2025","updatedBy":"Sam","updatedAt":"1w ago"},{"id":"prior_auth","desc":"Prior authorisation evidence gathering and appeal drafting.","tools":["fhir_search_conditions","fhir_search_encounters","rcm_query","portal_messaging_write"],"state":"active","agents":1,"confidence":0.88,"source":"authored","spec":"# Skill: prior_auth\n## Overview\nGathers clinical evidence and drafts an appeal letter.\n\n## Available Tools\n### fhir_search_conditions(patientId)\n### fhir_search_encounters(patientId)\n### rcm_query(claimId) - Read-only SQL\n### portal_messaging_write(patientId, message) - WRITE, requires approval\n\n## Execution Guidance\nFetch all in parallel (Wave 0). Do not send without approval.","createdBy":"Emma Watson","createdAt":"Apr 2, 2025","updatedBy":"Emma Watson","updatedAt":"1h ago"},{"id":"inbox_triage","desc":"Patient portal message classification and prioritisation.","tools":["portal_messaging_read","sentiment_classifier"],"state":"active","agents":1,"confidence":0.96,"source":"authored","spec":"# Skill: inbox_triage\n## Overview\nReads unread portal messages and assigns priority.\n\n## Available Tools\n### portal_messaging_read()\n### sentiment_classifier(text)\n\n## Execution Guidance\nFetch messages (Wave 0). Run classifier in parallel (Wave 1).","createdBy":"Marcus Reid","createdAt":"Mar 18, 2025","updatedBy":"Marcus Reid","updatedAt":"5d ago"},{"id":"medication_adherence","desc":"AUTO-DRAFTED by SkillMaker Agent. Analyses medication history and refill patterns.","tools":["fhir_search_medications","fhir_search_medication_dispenses"],"state":"pending","agents":0,"confidence":null,"source":"skillmaker","spec":"# Skill: medication_adherence_analysis\n## Overview\n[AUTO-DRAFTED - pending review]\nAnalyses medication history and refill patterns.\n\n## Available Tools\n### fhir_search_medications(patientId, status?)\n### fhir_search_medication_dispenses(patientId, dateFrom?, dateTo?)\n\n## Execution Guidance\nFetch both in parallel (Wave 0).","createdBy":"SkillMaker Agent","createdAt":"May 6, 2025","updatedBy":"SkillMaker Agent","updatedAt":"Yesterday"},{"id":"denial_appeal","desc":"Claim denial detection and appeal letter drafting.","tools":["rcm_query","fhir_search_encounters"],"state":"draft","agents":1,"confidence":null,"source":"authored","spec":"# Skill: denial_appeal\n## Overview\n[DRAFT - not yet approved]\n\n## Available Tools\n### rcm_query(claimId)\n### fhir_search_encounters(patientId)","createdBy":"Emma Watson","createdAt":"May 5, 2025","updatedBy":"Emma Watson","updatedAt":"3d ago"}],"RUNS":[{"id":"run-8842","agent":"Pre-Visit Summarizer","trigger":"Schedule","skill":"fhir_query","path":"Frozen DAG","waves":1,"duration":"2.8s","cost":"$0.020","status":"success","tokens":12400,"agentId":"a1","dag":[{"wave":0,"steps":[{"tool":"fhir_get_patient","params":"patientId: test-WCC-117408","result":"Jane Doe, F, DOB 1968-04-12","ok":true,"skip":false},{"tool":"fhir_search_conditions","params":"clinicalStatus: active","result":"T2DM, Essential HTN","ok":true,"skip":false},{"tool":"fhir_search_medications","params":"status: active","result":"Metformin 500mg, Lisinopril 10mg","ok":true,"skip":false},{"tool":"fhir_search_observations","params":"category: laboratory","result":"HbA1c 7.8%","ok":true,"skip":false},{"tool":"fhir_search_observations","params":"category: vital-signs","result":"BP 132/84, BMI 31.2","ok":true,"skip":false},{"tool":"fhir_search_encounters","params":"","result":"Office visit Sep 2024","ok":true,"skip":false}]}],"llmCosts":[{"agent":"ConverterAgent","model":"Sonnet 4.6","tokens":310,"cost":"$0.002"},{"agent":"SynthesizerAgent","model":"Sonnet 4.6","tokens":4200,"cost":"$0.018"}]},{"id":"run-8841","agent":"Inbox Triage","trigger":"Event","skill":"inbox_triage","path":"Dynamic","waves":2,"duration":"0.8s","cost":"$0.005","status":"success","tokens":4200,"agentId":"a2","dag":[{"wave":0,"steps":[{"tool":"portal_messaging_read","params":"","result":"4 unread messages","ok":true,"skip":false}]},{"wave":1,"steps":[{"tool":"sentiment_classifier","params":"text: msg-1","result":"urgency:0.9, Clinical","ok":true,"skip":false},{"tool":"sentiment_classifier","params":"text: msg-2","result":"urgency:0.3, Admin","ok":true,"skip":false}]}],"llmCosts":[{"agent":"IntentAgent","model":"Haiku 4.5","tokens":680,"cost":"$0.001"},{"agent":"SkillFinderAgent","model":"Sonnet 4.6","tokens":490,"cost":"$0.002"},{"agent":"PlannerAgent","model":"Sonnet 4.6","tokens":1800,"cost":"$0.002"},{"agent":"SynthesizerAgent","model":"Sonnet 4.6","tokens":1230,"cost":"$0.005"}]},{"id":"run-8840","agent":"Prior Auth Helper","trigger":"Manual","skill":"prior_auth","path":"Dynamic","waves":2,"duration":"8.4s","cost":"$0.081","status":"review","tokens":32100,"agentId":"a3","dag":[{"wave":0,"steps":[{"tool":"fhir_search_conditions","params":"patientId: P-8214","result":"CHF, CKD-3","ok":true,"skip":false},{"tool":"rcm_query","params":"claimId: CLM-8214-A","result":"Denial: not medically necessary","ok":true,"skip":false}]},{"wave":1,"steps":[{"tool":"portal_messaging_write","params":"type: appeal-letter","result":"SKIPPED - awaiting human approval","ok":false,"skip":true}]}],"llmCosts":[{"agent":"IntentAgent","model":"Haiku 4.5","tokens":720,"cost":"$0.001"},{"agent":"PlannerAgent","model":"Sonnet 4.6","tokens":6200,"cost":"$0.020"},{"agent":"SynthesizerAgent","model":"Sonnet 4.6","tokens":10800,"cost":"$0.057"}]},{"id":"run-8839","agent":"Care Gap Finder","trigger":"Schedule","skill":"population_query","path":"Dynamic","waves":2,"duration":"5.1s","cost":"$0.041","status":"success","tokens":22800,"agentId":"a4","dag":[{"wave":0,"steps":[{"tool":"population_search_conditions","params":"code: 38341003","result":"23 patients with active HTN","ok":true,"skip":false}]},{"wave":1,"steps":[{"tool":"fhir_batch_get_patients","params":"count: 23","result":"Demographics for 23 patients","ok":true,"skip":false}]}],"llmCosts":[{"agent":"IntentAgent","model":"Haiku 4.5","tokens":640,"cost":"$0.001"},{"agent":"PlannerAgent","model":"Sonnet 4.6","tokens":5100,"cost":"$0.017"},{"agent":"SynthesizerAgent","model":"Sonnet 4.6","tokens":2800,"cost":"$0.012"}]},{"id":"run-8838","agent":"Inbox Triage","trigger":"Event","skill":"inbox_triage","path":"Dynamic","waves":1,"duration":"0.4s","cost":"$0.003","status":"failed","tokens":2100,"agentId":"a2","dag":[{"wave":0,"steps":[{"tool":"portal_messaging_read","params":"","result":"Error: portal API timeout (504)","ok":false,"skip":false}]}],"llmCosts":[{"agent":"IntentAgent","model":"Haiku 4.5","tokens":630,"cost":"$0.001"},{"agent":"SkillFinderAgent","model":"Sonnet 4.6","tokens":490,"cost":"$0.002"}]}],"TOOLS":[{"id":"fhir_get_patient","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Pre-Visit Summarizer","Care Gap Finder"],"desc":"Returns patient demographics, DOB, gender, MRN, address.","createdBy":"Marcus Reid","createdAt":"Feb 10, 2025","updatedBy":"Marcus Reid","updatedAt":"1w ago"},{"id":"fhir_search_conditions","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Pre-Visit Summarizer","Prior Auth Helper","Care Gap Finder"],"desc":"Returns condition list. Supports clinicalStatus, dateFrom, dateTo filters.","createdBy":"Marcus Reid","createdAt":"Feb 10, 2025","updatedBy":"Marcus Reid","updatedAt":"1w ago"},{"id":"fhir_search_medications","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Pre-Visit Summarizer"],"desc":"Returns medication requests. Supports status and date filters.","createdBy":"Marcus Reid","createdAt":"Feb 10, 2025","updatedBy":"Marcus Reid","updatedAt":"1w ago"},{"id":"fhir_search_observations","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Pre-Visit Summarizer"],"desc":"Returns observations. category: vital-signs or laboratory.","createdBy":"Marcus Reid","createdAt":"Feb 10, 2025","updatedBy":"Marcus Reid","updatedAt":"1w ago"},{"id":"fhir_search_observations_by_code","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":[],"desc":"Returns observations filtered by LOINC code.","createdBy":"Sam","createdAt":"Mar 5, 2025","updatedBy":"Sam","updatedAt":"2w ago"},{"id":"fhir_search_encounters","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Pre-Visit Summarizer","Prior Auth Helper"],"desc":"Returns encounters and visits.","createdBy":"Marcus Reid","createdAt":"Feb 10, 2025","updatedBy":"Marcus Reid","updatedAt":"1w ago"},{"id":"fhir_search_medication_dispenses","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":[],"desc":"Returns dispense records including daysSupply.","createdBy":"Sam","createdAt":"Mar 20, 2025","updatedBy":"Sam","updatedAt":"2w ago"},{"id":"population_search_conditions","toolkit":"FHIRPopulationToolkit","auth":"OAuth 2.0","write":false,"roles":["supervisor","org_admin","super_admin"],"agents":["Care Gap Finder"],"desc":"Panel-wide condition search. Returns list of matching patientIds.","createdBy":"Sam","createdAt":"Mar 1, 2025","updatedBy":"Sam","updatedAt":"1w ago"},{"id":"fhir_batch_get_patients","toolkit":"FHIRPopulationToolkit","auth":"OAuth 2.0","write":false,"roles":["supervisor","org_admin","super_admin"],"agents":["Care Gap Finder"],"desc":"Fetches demographics for a list of patient IDs in parallel.","createdBy":"Sam","createdAt":"Mar 1, 2025","updatedBy":"Sam","updatedAt":"1w ago"},{"id":"portal_messaging_read","toolkit":"PortalToolkit","auth":"HMAC","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Inbox Triage"],"desc":"Reads unread messages from the patient portal.","createdBy":"Marcus Reid","createdAt":"Mar 18, 2025","updatedBy":"Marcus Reid","updatedAt":"5d ago"},{"id":"portal_messaging_write","toolkit":"PortalToolkit","auth":"HMAC","write":true,"roles":["org_admin","super_admin"],"agents":["Prior Auth Helper"],"desc":"Sends a message via the patient portal. WRITE - requires human approval.","createdBy":"Emma Watson","createdAt":"Apr 2, 2025","updatedBy":"Emma Watson","updatedAt":"1h ago"},{"id":"rcm_query","toolkit":"RCMToolkit","auth":"Internal SQL","write":false,"roles":["org_admin","super_admin"],"agents":["Prior Auth Helper"],"desc":"Read-only SQL on the RCM database. Returns claim status, denial reason.","createdBy":"Emma Watson","createdAt":"Apr 5, 2025","updatedBy":"Emma Watson","updatedAt":"3d ago"},{"id":"sentiment_classifier","toolkit":"MLToolkit","auth":"Internal","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Inbox Triage"],"desc":"Returns urgency score 0-1 and category for a given text string.","createdBy":"Marcus Reid","createdAt":"Mar 18, 2025","updatedBy":"Marcus Reid","updatedAt":"5d ago"}],"TRACES":[{"session":"sess-9a2f3b","agent":"Pre-Visit Summarizer","path":"Frozen DAG","spans":2,"gens":2,"tokens":12400,"cost":"$0.020","dur":"2.8s"},{"session":"sess-7b1c4a","agent":"Inbox Triage","path":"Dynamic","spans":4,"gens":4,"tokens":4200,"cost":"$0.005","dur":"0.8s"},{"session":"sess-3d8e2f","agent":"Prior Auth Helper","path":"Dynamic","spans":6,"gens":6,"tokens":32100,"cost":"$0.081","dur":"8.4s"},{"session":"sess-1a9f8c","agent":"Inbox Triage","path":"Dynamic","spans":4,"gens":4,"tokens":3800,"cost":"$0.005","dur":"0.9s"},{"session":"sess-0b7e5d","agent":"Inbox Triage","path":"Dynamic","spans":2,"gens":2,"tokens":2100,"cost":"$0.003","dur":"0.4s"}],"PROMPTS":[]}</script>
+<script type="application/json" id="_d">{"AGENTS":[{"id":"a1","name":"Pre-Visit Summarizer","desc":"Generates pre-visit summaries from EHR FHIR data","skill":"fhir_query","model":"Sonnet 4.6","trigger":"Schedule - 7:45a CT","lastRun":"Today 7:45a","runs7d":48,"status":"active","guardrails":["PHI redaction","Cite FHIR resource IDs","Read-only","No web search"],"memory":"Agent + Org scopes","tools":["fhir_get_patient","fhir_search_conditions","fhir_search_medications","fhir_search_observations","fhir_search_encounters"],"recentRuns":["run-8842","run-8836"],"createdBy":"Sam","createdAt":"Mar 12, 2025","updatedBy":"Marcus Reid","updatedAt":"2d ago","surfaces":["member-dashboard"],"context_map":[{"surface":"member-dashboard","tab":"member-tab__dashboard","priority":"primary","prompts":["Summarize chart before my 9am visit","What should I focus on today?","Generate pre-visit briefing"]},{"surface":"member-dashboard","tab":"member-tab__screenings","priority":"secondary","prompts":["Are screenings up to date?","Review assessment history"]},{"surface":"member-dashboard","tab":"member-tab__timeline","priority":"secondary","prompts":["Summarize recent events","What changed since my last visit?"]},{"surface":"member-dashboard","tab":"member-tab__medications","priority":"secondary","prompts":["Review medication changes since last visit","Check adherence trends"]},{"surface":"member-dashboard","tab":"member-tab__health-history","priority":"primary","prompts":["Summarize health history","What chronic conditions are active?"]}],"humanReview":false,"outputFormat":"structured-card","fallback":"show-partial","systemPrompt":"","temperature":0.2,"maxTokens":1500,"timeout":30,"rateLimitPerUser":100,"owner":"Clinical Ops","tags":["clinical","fhir","summarization"],"version":3},{"id":"a2","name":"Inbox Triage","desc":"Prioritises and categorises incoming patient portal messages","skill":"inbox_triage","model":"Haiku 4.5","trigger":"Event: message-received","lastRun":"3 min ago","runs7d":112,"status":"active","guardrails":["PHI redaction","Read-only","Clinical domain only"],"memory":"Ephemeral","tools":["portal_messaging_read","sentiment_classifier"],"recentRuns":["run-8841","run-8839","run-8838"],"createdBy":"Marcus Reid","createdAt":"Mar 18, 2025","updatedBy":"Marcus Reid","updatedAt":"5d ago","surfaces":["member-dashboard","inbox"],"context_map":[{"surface":"member-dashboard","tab":"member-tab__dashboard","priority":"secondary","prompts":["Any urgent messages from this patient?","Check unread messages"]},{"surface":"inbox","tab":"all","priority":"primary","prompts":["Triage all unread messages","Show urgent messages first","Categorize inbox by priority"]}],"humanReview":false,"outputFormat":"plain-text","fallback":"return-empty","systemPrompt":"","temperature":0.2,"maxTokens":512,"timeout":10,"rateLimitPerUser":500,"owner":"Clinical Ops","tags":["inbox","triage","classification"],"version":2},{"id":"a3","name":"Prior Auth Helper","desc":"Gathers chart evidence and drafts prior auth requests","skill":"prior_auth","model":"Opus 4.6","trigger":"Manual invoke","lastRun":"1h ago","runs7d":22,"status":"review","guardrails":["PHI redaction","Human approval for outbound","Clinical domain only"],"memory":"Agent-private","tools":["fhir_search_conditions","fhir_search_encounters","rcm_query","portal_messaging_write"],"recentRuns":["run-8840"],"createdBy":"Emma Watson","createdAt":"Apr 2, 2025","updatedBy":"Emma Watson","updatedAt":"1h ago","surfaces":["member-dashboard"],"context_map":[{"surface":"member-dashboard","tab":"member-tab__dashboard","priority":"secondary","prompts":["Check pending prior auths","Draft PA request for this patient"]},{"surface":"member-dashboard","tab":"member-tab__medications","priority":"primary","prompts":["Draft prior auth for current medications","Check formulary status"]},{"surface":"member-dashboard","tab":"member-tab__insurance","priority":"primary","prompts":["Review insurance coverage","Draft PA based on coverage"]}],"humanReview":true,"outputFormat":"soap-note","fallback":"escalate","systemPrompt":"","temperature":0.1,"maxTokens":2000,"timeout":60,"rateLimitPerUser":50,"owner":"RCM Team","tags":["prior-auth","rcm","write"],"version":1},{"id":"a4","name":"Care Gap Finder","desc":"Identifies overdue screenings and HEDIS quality measure gaps panel-wide","skill":"population_query","model":"Sonnet 4.6","trigger":"Schedule - Mon 6:00a","lastRun":"6h ago","runs7d":31,"status":"active","guardrails":["PHI redaction","Clinical domain only","Read-only"],"memory":"Org shared","tools":["population_search_conditions","fhir_batch_get_patients"],"recentRuns":[],"createdBy":"Sam","createdAt":"Apr 10, 2025","updatedBy":"Marcus Reid","updatedAt":"6h ago","surfaces":["member-dashboard","caseload"],"context_map":[{"surface":"member-dashboard","tab":"member-tab__dashboard","priority":"secondary","prompts":["What care gaps are open?","Full gap analysis for this member"]},{"surface":"member-dashboard","tab":"member-tab__screenings","priority":"primary","prompts":["What screenings are overdue?","Show all open HEDIS gaps","Which screenings are due this quarter?"]},{"surface":"caseload","tab":"all","priority":"primary","prompts":["Find members with open care gaps","Prioritize caseload by gap status"]}],"humanReview":false,"outputFormat":"structured-card","fallback":"show-partial","systemPrompt":"","temperature":0.2,"maxTokens":1000,"timeout":45,"rateLimitPerUser":200,"owner":"Population Health","tags":["population","hedis","care-gaps"],"version":2},{"id":"a5","name":"Denial Appeal","desc":"Detects claim denials and drafts appeal letters for physician sign-off","skill":"denial_appeal","model":"Opus 4.6","trigger":"Manual invoke","lastRun":"Never","runs7d":0,"status":"draft","guardrails":["PHI redaction","Human approval for outbound","Read-only"],"memory":"Ephemeral","tools":["rcm_query","fhir_search_encounters"],"recentRuns":[],"createdBy":"Emma Watson","createdAt":"May 5, 2025","updatedBy":"Emma Watson","updatedAt":"3d ago","surfaces":["member-dashboard"],"context_map":[{"surface":"member-dashboard","tab":"member-tab__dashboard","priority":"secondary","prompts":["Check for claim denials","Draft appeal letter for this patient"]},{"surface":"member-dashboard","tab":"member-tab__insurance","priority":"primary","prompts":["Review denied claims","Draft appeal for most recent denial"]}],"humanReview":true,"outputFormat":"plain-text","fallback":"escalate","systemPrompt":"","temperature":0.1,"maxTokens":2000,"timeout":60,"rateLimitPerUser":20,"owner":"RCM Team","tags":["denial","appeal","write"],"version":1}],"SKILLS":[{"id":"fhir_query","desc":"Single-patient FHIR data retrieval","tools":["fhir_get_patient","fhir_search_conditions","fhir_search_medications","fhir_search_observations","fhir_search_encounters"],"state":"active","agents":6,"confidence":0.94,"source":"authored","spec":"# Skill: fhir_query\n## Overview\nRetrieves clinical data for a single known patient.\nDo NOT use for population queries.\n\n## Available Tools\n### fhir_get_patient(patientId)\n### fhir_search_conditions(patientId, clinicalStatus?)\n### fhir_search_medications(patientId, status?)\n### fhir_search_observations(patientId, category?)\n### fhir_search_encounters(patientId, status?)\n\n## Execution Guidance\nFull summary: fetch all in parallel (Wave 0).\nConditional: fetch condition first, gate next steps on result.","createdBy":"Sam","createdAt":"Feb 20, 2025","updatedBy":"Marcus Reid","updatedAt":"4d ago","maxWaves":2,"timeout":20,"tags":["fhir","single-patient"],"owner":"Clinical Ops","version":4},{"id":"population_query","desc":"Panel-wide population search. No patientId required.","tools":["population_search_conditions","fhir_batch_get_patients"],"state":"active","agents":3,"confidence":0.91,"source":"authored","spec":"# Skill: population_query\n## Overview\nSearches across the entire care panel.\n\n## Available Tools\n### population_search_conditions(code, clinicalStatus?)\n### fhir_batch_get_patients(patientIds[])\n\n## Execution Guidance\nFirst call returns IDs. Use fhir_batch_get_patients in Wave 1 for demographics.","createdBy":"Sam","createdAt":"Mar 1, 2025","updatedBy":"Sam","updatedAt":"1w ago","maxWaves":2,"timeout":45,"tags":["fhir","population"],"owner":"Population Health","version":2},{"id":"prior_auth","desc":"Prior authorisation evidence gathering and appeal drafting.","tools":["fhir_search_conditions","fhir_search_encounters","rcm_query","portal_messaging_write"],"state":"active","agents":1,"confidence":0.88,"source":"authored","spec":"# Skill: prior_auth\n## Overview\nGathers clinical evidence and drafts an appeal letter.\n\n## Available Tools\n### fhir_search_conditions(patientId)\n### fhir_search_encounters(patientId)\n### rcm_query(claimId) - Read-only SQL\n### portal_messaging_write(patientId, message) - WRITE, requires approval\n\n## Execution Guidance\nFetch all in parallel (Wave 0). Do not send without approval.","createdBy":"Emma Watson","createdAt":"Apr 2, 2025","updatedBy":"Emma Watson","updatedAt":"1h ago","maxWaves":3,"timeout":60,"tags":["rcm","write","approval"],"owner":"RCM Team","version":1},{"id":"inbox_triage","desc":"Patient portal message classification and prioritisation.","tools":["portal_messaging_read","sentiment_classifier"],"state":"active","agents":1,"confidence":0.96,"source":"authored","spec":"# Skill: inbox_triage\n## Overview\nReads unread portal messages and assigns priority.\n\n## Available Tools\n### portal_messaging_read()\n### sentiment_classifier(text)\n\n## Execution Guidance\nFetch messages (Wave 0). Run classifier in parallel (Wave 1).","createdBy":"Marcus Reid","createdAt":"Mar 18, 2025","updatedBy":"Marcus Reid","updatedAt":"5d ago","maxWaves":2,"timeout":10,"tags":["portal","messaging","ml"],"owner":"Clinical Ops","version":2},{"id":"medication_adherence","desc":"AUTO-DRAFTED by SkillMaker Agent. Analyses medication history and refill patterns.","tools":["fhir_search_medications","fhir_search_medication_dispenses"],"state":"pending","agents":0,"confidence":null,"source":"skillmaker","spec":"# Skill: medication_adherence_analysis\n## Overview\n[AUTO-DRAFTED - pending review]\nAnalyses medication history and refill patterns.\n\n## Available Tools\n### fhir_search_medications(patientId, status?)\n### fhir_search_medication_dispenses(patientId, dateFrom?, dateTo?)\n\n## Execution Guidance\nFetch both in parallel (Wave 0).","createdBy":"SkillMaker Agent","createdAt":"May 6, 2025","updatedBy":"SkillMaker Agent","updatedAt":"Yesterday","maxWaves":1,"timeout":15,"tags":["medication","adherence"],"owner":"Clinical Ops","version":1},{"id":"denial_appeal","desc":"Claim denial detection and appeal letter drafting.","tools":["rcm_query","fhir_search_encounters"],"state":"draft","agents":1,"confidence":null,"source":"authored","spec":"# Skill: denial_appeal\n## Overview\n[DRAFT - not yet approved]\n\n## Available Tools\n### rcm_query(claimId)\n### fhir_search_encounters(patientId)","createdBy":"Emma Watson","createdAt":"May 5, 2025","updatedBy":"Emma Watson","updatedAt":"3d ago","maxWaves":2,"timeout":60,"tags":["rcm","denial","write"],"owner":"RCM Team","version":1}],"RUNS":[{"id":"run-8842","agent":"Pre-Visit Summarizer","trigger":"Schedule","skill":"fhir_query","path":"Frozen DAG","waves":1,"duration":"2.8s","cost":"$0.020","status":"success","tokens":12400,"agentId":"a1","dag":[{"wave":0,"steps":[{"tool":"fhir_get_patient","params":"patientId: test-WCC-117408","result":"Jane Doe, F, DOB 1968-04-12","ok":true,"skip":false},{"tool":"fhir_search_conditions","params":"clinicalStatus: active","result":"T2DM, Essential HTN","ok":true,"skip":false},{"tool":"fhir_search_medications","params":"status: active","result":"Metformin 500mg, Lisinopril 10mg","ok":true,"skip":false},{"tool":"fhir_search_observations","params":"category: laboratory","result":"HbA1c 7.8%","ok":true,"skip":false},{"tool":"fhir_search_observations","params":"category: vital-signs","result":"BP 132/84, BMI 31.2","ok":true,"skip":false},{"tool":"fhir_search_encounters","params":"","result":"Office visit Sep 2024","ok":true,"skip":false}]}],"llmCosts":[{"agent":"ConverterAgent","model":"Sonnet 4.6","tokens":310,"cost":"$0.002"},{"agent":"SynthesizerAgent","model":"Sonnet 4.6","tokens":4200,"cost":"$0.018"}]},{"id":"run-8841","agent":"Inbox Triage","trigger":"Event","skill":"inbox_triage","path":"Dynamic","waves":2,"duration":"0.8s","cost":"$0.005","status":"success","tokens":4200,"agentId":"a2","dag":[{"wave":0,"steps":[{"tool":"portal_messaging_read","params":"","result":"4 unread messages","ok":true,"skip":false}]},{"wave":1,"steps":[{"tool":"sentiment_classifier","params":"text: msg-1","result":"urgency:0.9, Clinical","ok":true,"skip":false},{"tool":"sentiment_classifier","params":"text: msg-2","result":"urgency:0.3, Admin","ok":true,"skip":false}]}],"llmCosts":[{"agent":"IntentAgent","model":"Haiku 4.5","tokens":680,"cost":"$0.001"},{"agent":"SkillFinderAgent","model":"Sonnet 4.6","tokens":490,"cost":"$0.002"},{"agent":"PlannerAgent","model":"Sonnet 4.6","tokens":1800,"cost":"$0.002"},{"agent":"SynthesizerAgent","model":"Sonnet 4.6","tokens":1230,"cost":"$0.005"}]},{"id":"run-8840","agent":"Prior Auth Helper","trigger":"Manual","skill":"prior_auth","path":"Dynamic","waves":2,"duration":"8.4s","cost":"$0.081","status":"review","tokens":32100,"agentId":"a3","dag":[{"wave":0,"steps":[{"tool":"fhir_search_conditions","params":"patientId: P-8214","result":"CHF, CKD-3","ok":true,"skip":false},{"tool":"rcm_query","params":"claimId: CLM-8214-A","result":"Denial: not medically necessary","ok":true,"skip":false}]},{"wave":1,"steps":[{"tool":"portal_messaging_write","params":"type: appeal-letter","result":"SKIPPED - awaiting human approval","ok":false,"skip":true}]}],"llmCosts":[{"agent":"IntentAgent","model":"Haiku 4.5","tokens":720,"cost":"$0.001"},{"agent":"PlannerAgent","model":"Sonnet 4.6","tokens":6200,"cost":"$0.020"},{"agent":"SynthesizerAgent","model":"Sonnet 4.6","tokens":10800,"cost":"$0.057"}]},{"id":"run-8839","agent":"Care Gap Finder","trigger":"Schedule","skill":"population_query","path":"Dynamic","waves":2,"duration":"5.1s","cost":"$0.041","status":"success","tokens":22800,"agentId":"a4","dag":[{"wave":0,"steps":[{"tool":"population_search_conditions","params":"code: 38341003","result":"23 patients with active HTN","ok":true,"skip":false}]},{"wave":1,"steps":[{"tool":"fhir_batch_get_patients","params":"count: 23","result":"Demographics for 23 patients","ok":true,"skip":false}]}],"llmCosts":[{"agent":"IntentAgent","model":"Haiku 4.5","tokens":640,"cost":"$0.001"},{"agent":"PlannerAgent","model":"Sonnet 4.6","tokens":5100,"cost":"$0.017"},{"agent":"SynthesizerAgent","model":"Sonnet 4.6","tokens":2800,"cost":"$0.012"}]},{"id":"run-8838","agent":"Inbox Triage","trigger":"Event","skill":"inbox_triage","path":"Dynamic","waves":1,"duration":"0.4s","cost":"$0.003","status":"failed","tokens":2100,"agentId":"a2","dag":[{"wave":0,"steps":[{"tool":"portal_messaging_read","params":"","result":"Error: portal API timeout (504)","ok":false,"skip":false}]}],"llmCosts":[{"agent":"IntentAgent","model":"Haiku 4.5","tokens":630,"cost":"$0.001"},{"agent":"SkillFinderAgent","model":"Sonnet 4.6","tokens":490,"cost":"$0.002"}]}],"TOOLS":[{"id":"fhir_get_patient","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Pre-Visit Summarizer","Care Gap Finder"],"desc":"Returns patient demographics, DOB, gender, MRN, address.","createdBy":"Marcus Reid","createdAt":"Feb 10, 2025","updatedBy":"Marcus Reid","updatedAt":"1w ago","path":"toolkits.fhir.patient.get_patient","timeout":10,"rateLimit":120,"retry":"Retry once then fail","onError":"Return error message","returnType":"object","outputDesc":"{ patientId, name, dob, gender, mrn, address, phone }","owner":"Clinical Ops","tags":["fhir","patient","demographics"],"params":[{"name":"patientId","type":"string","required":true,"desc":"FHIR patient resource ID"}],"version":2},{"id":"fhir_search_conditions","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Pre-Visit Summarizer","Prior Auth Helper","Care Gap Finder"],"desc":"Returns condition list. Supports clinicalStatus, dateFrom, dateTo filters.","createdBy":"Marcus Reid","createdAt":"Feb 10, 2025","updatedBy":"Marcus Reid","updatedAt":"1w ago","path":"toolkits.fhir.conditions.search","timeout":12,"rateLimit":100,"retry":"Retry once then fail","onError":"Return empty result","returnType":"array","outputDesc":"[{ conditionId, code, display, clinicalStatus, onsetDate }]","owner":"Clinical Ops","tags":["fhir","conditions","clinical"],"params":[{"name":"patientId","type":"string","required":true,"desc":"FHIR patient resource ID"},{"name":"clinicalStatus","type":"string","required":false,"desc":"Filter by status: active, resolved, inactive"}],"version":2},{"id":"fhir_search_medications","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Pre-Visit Summarizer"],"desc":"Returns medication requests. Supports status and date filters.","createdBy":"Marcus Reid","createdAt":"Feb 10, 2025","updatedBy":"Marcus Reid","updatedAt":"1w ago","path":"toolkits.fhir.medications.search","timeout":12,"rateLimit":100,"retry":"Retry once then fail","onError":"Return empty result","returnType":"array","outputDesc":"[{ medicationId, code, display, status, dosage, prescriber }]","owner":"Clinical Ops","tags":["fhir","medications"],"params":[{"name":"patientId","type":"string","required":true,"desc":"FHIR patient resource ID"},{"name":"status","type":"string","required":false,"desc":"Filter: active, stopped, completed"}],"version":1},{"id":"fhir_search_observations","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Pre-Visit Summarizer"],"desc":"Returns observations. category: vital-signs or laboratory.","createdBy":"Marcus Reid","createdAt":"Feb 10, 2025","updatedBy":"Marcus Reid","updatedAt":"1w ago","path":"toolkits.fhir.observations.search","timeout":12,"rateLimit":100,"retry":"Retry once then fail","onError":"Return empty result","returnType":"array","outputDesc":"[{ obsId, code, display, value, unit, effectiveDate }]","owner":"Clinical Ops","tags":["fhir","observations","labs","vitals"],"params":[{"name":"patientId","type":"string","required":true,"desc":"FHIR patient resource ID"},{"name":"category","type":"string","required":false,"desc":"vital-signs or laboratory"}],"version":1},{"id":"fhir_search_observations_by_code","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":[],"desc":"Returns observations filtered by LOINC code.","createdBy":"Sam","createdAt":"Mar 5, 2025","updatedBy":"Sam","updatedAt":"2w ago","path":"toolkits.fhir.observations.search_by_code","timeout":12,"rateLimit":100,"retry":"Retry once then fail","onError":"Return empty result","returnType":"array","outputDesc":"[{ obsId, code, display, value, unit, effectiveDate }]","owner":"Clinical Ops","tags":["fhir","observations","loinc"],"params":[{"name":"patientId","type":"string","required":true,"desc":"FHIR patient resource ID"},{"name":"loincCode","type":"string","required":true,"desc":"LOINC code e.g. 4548-4 for HbA1c"}],"version":1},{"id":"fhir_search_encounters","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Pre-Visit Summarizer","Prior Auth Helper"],"desc":"Returns encounters and visits.","createdBy":"Marcus Reid","createdAt":"Feb 10, 2025","updatedBy":"Marcus Reid","updatedAt":"1w ago","path":"toolkits.fhir.encounters.search","timeout":12,"rateLimit":100,"retry":"Retry once then fail","onError":"Return empty result","returnType":"array","outputDesc":"[{ encounterId, type, status, start, end, provider, facility }]","owner":"Clinical Ops","tags":["fhir","encounters","visits"],"params":[{"name":"patientId","type":"string","required":true,"desc":"FHIR patient resource ID"},{"name":"status","type":"string","required":false,"desc":"Filter: finished, in-progress, planned"}],"version":1},{"id":"fhir_search_medication_dispenses","toolkit":"FHIRToolkit","auth":"OAuth 2.0","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":[],"desc":"Returns dispense records including daysSupply.","createdBy":"Sam","createdAt":"Mar 20, 2025","updatedBy":"Sam","updatedAt":"2w ago","path":"toolkits.fhir.medications.dispenses","timeout":12,"rateLimit":80,"retry":"Retry once then fail","onError":"Return empty result","returnType":"array","outputDesc":"[{ dispenseId, medicationCode, quantity, daysSupply, whenHandedOver }]","owner":"Clinical Ops","tags":["fhir","medications","adherence"],"params":[{"name":"patientId","type":"string","required":true,"desc":"FHIR patient resource ID"},{"name":"dateFrom","type":"string","required":false,"desc":"ISO date start"},{"name":"dateTo","type":"string","required":false,"desc":"ISO date end"}],"version":1},{"id":"population_search_conditions","toolkit":"FHIRPopulationToolkit","auth":"OAuth 2.0","write":false,"roles":["supervisor","org_admin","super_admin"],"agents":["Care Gap Finder"],"desc":"Panel-wide condition search. Returns list of matching patientIds.","createdBy":"Sam","createdAt":"Mar 1, 2025","updatedBy":"Sam","updatedAt":"1w ago","path":"toolkits.fhir.population.search_conditions","timeout":30,"rateLimit":20,"retry":"Retry twice then escalate","onError":"Return error message","returnType":"array","outputDesc":"[patientId, ...]  — list of FHIR patient IDs matching condition","owner":"Population Health","tags":["fhir","population","conditions"],"params":[{"name":"code","type":"string","required":true,"desc":"SNOMED or ICD-10 code"},{"name":"clinicalStatus","type":"string","required":false,"desc":"active, resolved"}],"version":2},{"id":"fhir_batch_get_patients","toolkit":"FHIRPopulationToolkit","auth":"OAuth 2.0","write":false,"roles":["supervisor","org_admin","super_admin"],"agents":["Care Gap Finder"],"desc":"Fetches demographics for a list of patient IDs in parallel.","createdBy":"Sam","createdAt":"Mar 1, 2025","updatedBy":"Sam","updatedAt":"1w ago","path":"toolkits.fhir.patient.batch_get","timeout":20,"rateLimit":30,"retry":"Retry once then fail","onError":"Return partial result","returnType":"array","outputDesc":"[{ patientId, name, dob, gender, mrn }]","owner":"Population Health","tags":["fhir","population","batch"],"params":[{"name":"patientIds","type":"array","required":true,"desc":"Array of FHIR patient IDs (max 100)"}],"version":1},{"id":"portal_messaging_read","toolkit":"PortalToolkit","auth":"HMAC","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Inbox Triage"],"desc":"Reads unread messages from the patient portal.","createdBy":"Marcus Reid","createdAt":"Mar 18, 2025","updatedBy":"Marcus Reid","updatedAt":"5d ago","path":"toolkits.portal.messaging.read_unread","timeout":8,"rateLimit":200,"retry":"Retry once then fail","onError":"Return empty result","returnType":"array","outputDesc":"[{ messageId, from, subject, body, sentAt, urgency }]","owner":"Clinical Ops","tags":["portal","messaging","inbox"],"params":[],"version":2},{"id":"portal_messaging_write","toolkit":"PortalToolkit","auth":"HMAC","write":true,"roles":["org_admin","super_admin"],"agents":["Prior Auth Helper"],"desc":"Sends a message via the patient portal. WRITE - requires human approval.","createdBy":"Emma Watson","createdAt":"Apr 2, 2025","updatedBy":"Emma Watson","updatedAt":"1h ago","path":"toolkits.portal.messaging.send","timeout":15,"rateLimit":30,"retry":"No retry — fail immediately","onError":"Throw exception","returnType":"object","outputDesc":"{ messageId, status, sentAt }","owner":"Clinical Ops","tags":["portal","messaging","write"],"params":[{"name":"patientId","type":"string","required":true,"desc":"FHIR patient resource ID"},{"name":"subject","type":"string","required":true,"desc":"Message subject"},{"name":"body","type":"string","required":true,"desc":"Message body text"},{"name":"type","type":"string","required":false,"desc":"Message type: appeal-letter, care-plan, general"}],"version":1},{"id":"rcm_query","toolkit":"RCMToolkit","auth":"Internal SQL","write":false,"roles":["org_admin","super_admin"],"agents":["Prior Auth Helper"],"desc":"Read-only SQL on the RCM database. Returns claim status, denial reason.","createdBy":"Emma Watson","createdAt":"Apr 5, 2025","updatedBy":"Emma Watson","updatedAt":"3d ago","path":"toolkits.rcm.sql.query","timeout":20,"rateLimit":50,"retry":"Retry once then fail","onError":"Return error message","returnType":"object","outputDesc":"{ claimId, status, denialReason, amount, payer, serviceDate }","owner":"RCM Team","tags":["rcm","sql","claims"],"params":[{"name":"claimId","type":"string","required":true,"desc":"Claim ID to look up"}],"version":1},{"id":"sentiment_classifier","toolkit":"MLToolkit","auth":"Internal","write":false,"roles":["care_manager","supervisor","org_admin","super_admin"],"agents":["Inbox Triage"],"desc":"Returns urgency score 0-1 and category for a given text string.","createdBy":"Marcus Reid","createdAt":"Mar 18, 2025","updatedBy":"Marcus Reid","updatedAt":"5d ago","path":"toolkits.ml.sentiment.classify","timeout":5,"rateLimit":500,"retry":"Retry once then fail","onError":"Return empty result","returnType":"object","outputDesc":"{ urgency: 0.0-1.0, category: Clinical|Admin|Billing|General, sentiment: positive|neutral|negative }","owner":"Clinical Ops","tags":["ml","nlp","classification"],"params":[{"name":"text","type":"string","required":true,"desc":"Text to classify"}],"version":3}],"TRACES":[{"session":"sess-9a2f3b","agent":"Pre-Visit Summarizer","path":"Frozen DAG","spans":2,"gens":2,"tokens":12400,"cost":"$0.020","dur":"2.8s"},{"session":"sess-7b1c4a","agent":"Inbox Triage","path":"Dynamic","spans":4,"gens":4,"tokens":4200,"cost":"$0.005","dur":"0.8s"},{"session":"sess-3d8e2f","agent":"Prior Auth Helper","path":"Dynamic","spans":6,"gens":6,"tokens":32100,"cost":"$0.081","dur":"8.4s"},{"session":"sess-1a9f8c","agent":"Inbox Triage","path":"Dynamic","spans":4,"gens":4,"tokens":3800,"cost":"$0.005","dur":"0.9s"},{"session":"sess-0b7e5d","agent":"Inbox Triage","path":"Dynamic","spans":2,"gens":2,"tokens":2100,"cost":"$0.003","dur":"0.4s"}],"PROMPTS":[]}</script>
 <script>
 /* ═══ SEVIDA AI JS ═══ */
 (function() {
@@ -35189,27 +35248,82 @@ function doReassignCM() {
 
     var skillOpts='<option value="">None (auto-routed by SkillFinder)</option>'+SKILLS.map(function(s){return '<option'+(s.id===a.skill?' selected':'')+' value="'+esc(s.id)+'">'+esc(s.id)+'</option>';}).join('');
     var sysPrompt=a.systemPrompt||'';
+    var outputFmtLabels={'plain-text':'Plain text','structured-card':'Structured card','soap-note':'SOAP note','table':'Table','json':'JSON (developer)'};
+    var fallbackLabels={'show-partial':'Show partial results','return-empty':'Return empty response','escalate':'Escalate to care manager','retry':'Retry once then escalate'};
+    var allGuardrails=['PHI redaction','Clinical domain only','Read-only','No web search','Cite FHIR resource IDs','Human approval for outbound'];
 
     document.getElementById('dr-a-b').innerHTML=
       '<div class="tabs"><div class="tab on" data-tab="ta-ov">Overview</div><div class="tab" data-tab="ta-edit">Edit</div><div class="tab" data-tab="ta-runs">Recent runs</div></div>'
+
+      // ── OVERVIEW TAB ──
       +'<div class="tab-pane on" id="ta-ov">'
         +'<div class="dl">Intent</div>'
         +'<p style="font-size:13px;color:var(--ink2);line-height:1.55;margin-bottom:12px;">'+esc(a.desc)+'</p>'
         +'<div class="dl">Configuration</div>'
         +'<div class="dr-row"><span class="dr-k">Bound skill</span><span class="dr-v">'+(a.skill?'<span style="font-family:ui-monospace,monospace;font-size:12px;">'+esc(a.skill)+'</span>':'<span style="color:var(--mu);">Auto-routed by SkillFinder</span>')+'</span></div>'
+        +'<div class="dr-row"><span class="dr-k">Model</span><span class="dr-v">'+esc(a.model||'Sonnet 4.6')+'</span></div>'
+        +'<div class="dr-row"><span class="dr-k">Trigger</span><span class="dr-v">'+esc(a.trigger||'Manual invoke')+'</span></div>'
+        +'<div class="dr-row"><span class="dr-k">Memory scope</span><span class="dr-v">'+esc(a.memory||'Ephemeral')+'</span></div>'
         +'<div class="dr-row"><span class="dr-k">Status</span><span class="dr-v">'+statusChip(a.status)+'</span></div>'
         +'<div class="dr-row"><span class="dr-k">Last run</span><span class="dr-v">'+esc(a.lastRun)+'</span></div>'
         +'<div class="dr-row"><span class="dr-k">Runs (7d)</span><span class="dr-v">'+a.runs7d+'</span></div>'
+        +'<div class="dl">Model Parameters</div>'
+        +'<div class="dr-row"><span class="dr-k">Temperature</span><span class="dr-v">'+(a.temperature!==undefined?a.temperature:0.2)+'</span></div>'
+        +'<div class="dr-row"><span class="dr-k">Max tokens</span><span class="dr-v">'+(a.maxTokens||1000).toLocaleString()+'</span></div>'
+        +'<div class="dr-row"><span class="dr-k">Timeout</span><span class="dr-v">'+(a.timeout||30)+'s</span></div>'
+        +'<div class="dr-row"><span class="dr-k">Rate limit</span><span class="dr-v">'+(a.rateLimitPerUser||50)+' runs / user / day</span></div>'
+        +'<div class="dl">Governance</div>'
+        +'<div class="dr-row"><span class="dr-k">Version</span><span class="dr-v">v'+(a.version||1)+'</span></div>'
+        +'<div class="dr-row"><span class="dr-k">Owner</span><span class="dr-v">'+esc(a.owner||'—')+'</span></div>'
+        +'<div class="dr-row"><span class="dr-k">Tags</span><span class="dr-v">'+(a.tags&&a.tags.length?a.tags.map(function(t){return '<span style="background:var(--s2);border:1px solid var(--ln);border-radius:4px;padding:2px 7px;font-size:11.5px;">'+esc(t)+'</span>';}).join(' '):'<span style="color:var(--mu);">None</span>')+'</span></div>'
+        +'<div class="dl">Output & Review</div>'
+        +'<div class="dr-row"><span class="dr-k">Output format</span><span class="dr-v">'+esc(outputFmtLabels[a.outputFormat]||a.outputFormat||'Plain text')+'</span></div>'
+        +'<div class="dr-row"><span class="dr-k">Fallback</span><span class="dr-v">'+esc(fallbackLabels[a.fallback]||a.fallback||'Show partial results')+'</span></div>'
+        +'<div class="dl">Guardrails</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:5px;padding:4px 0 12px;">'+(a.guardrails&&a.guardrails.length?a.guardrails.map(function(g){return '<span style="background:#f1f0fb;color:var(--p);border-radius:4px;padding:3px 8px;font-size:11.5px;font-weight:500;">'+esc(g)+'</span>';}).join(''):'<span style="color:var(--mu);font-size:12.5px;">None configured</span>')+'</div>'
         +(sysPrompt?'<div class="dl">System prompt</div><pre class="spec" style="max-height:100px;">'+esc(sysPrompt)+'</pre>':'<div class="dl">System prompt</div><div style="color:var(--mu);font-size:12.5px;padding:4px 0;">Using default orchestrator prompt</div>')
       +'</div>'
+
+      // ── EDIT TAB ──
       +'<div class="tab-pane" id="ta-edit">'
+        +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:10px;">Identity</div>'
         +'<div class="field"><label>Agent name</label><input type="text" id="ae-name" value="'+esc(a.name)+'"/></div>'
         +'<div class="field"><label>Intent description</label><input type="text" id="ae-desc" value="'+esc(a.desc)+'"/><div style="font-size:11.5px;color:var(--ink3);margin-top:3px;">Plain English — used by SkillFinder to match this agent to queries</div></div>'
-        +'<div class="field"><label>Bound skill <span style="color:var(--ink3);font-weight:400;">(optional — skips SkillFinder if set)</span></label><select id="ae-skill">'+skillOpts+'</select><div style="font-size:11.5px;color:var(--ink3);margin-top:3px;">Leave blank to let SkillFinder match the best skill on every query</div></div>'
-        +'<div class="field"><label>System prompt <span style="color:var(--ink3);font-weight:400;">(optional override)</span></label><textarea id="ae-prompt" style="min-height:90px;" placeholder="Leave blank to use the default orchestrator prompt...">'+esc(sysPrompt)+'</textarea></div>'
+        +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:14px 0 10px;">Model Parameters</div>'
+        +'<div class="g2">'
+          +'<div class="field"><label>Temperature</label><input type="number" id="ae-temperature" value="'+(a.temperature!==undefined?a.temperature:0.2)+'" min="0" max="1" step="0.1" style="width:100%;"/><div style="font-size:11.5px;color:var(--ink3);margin-top:3px;">0 = deterministic · 1 = creative</div></div>'
+          +'<div class="field"><label>Max tokens</label><input type="number" id="ae-max-tokens" value="'+(a.maxTokens||1000)+'" min="256" max="8192" step="256" style="width:100%;"/></div>'
+        +'</div>'
+        +'<div class="g2">'
+          +'<div class="field"><label>Timeout <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">(seconds)</span></label><input type="number" id="ae-timeout" value="'+(a.timeout||30)+'" min="5" max="300" step="5" style="width:100%;"/></div>'
+          +'<div class="field"><label>Rate limit <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">(runs/user/day)</span></label><input type="number" id="ae-rate-limit" value="'+(a.rateLimitPerUser||50)+'" min="1" max="1000" style="width:100%;"/></div>'
+        +'</div>'
+        +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:14px 0 10px;">Governance</div>'
+        +'<div class="g2">'
+          +'<div class="field"><label>Owner</label><input type="text" id="ae-owner" value="'+esc(a.owner||'')+'" placeholder="e.g. Clinical Ops"/></div>'
+          +'<div class="field"><label>Tags <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">comma-separated</span></label><input type="text" id="ae-tags" value="'+esc((a.tags||[]).join(', '))+'" placeholder="e.g. clinical, fhir"/></div>'
+        +'</div>'
+        +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:14px 0 10px;">Model & Execution</div>'
+        +'<div class="g2">'
+          +'<div class="field"><label>Model</label><select id="ae-model"><option value="Sonnet 4.6"'+(a.model==='Sonnet 4.6'?' selected':'')+'>Claude Sonnet 4.6</option><option value="Opus 4.6"'+(a.model==='Opus 4.6'?' selected':'')+'>Claude Opus 4.6</option><option value="Haiku 4.5"'+(a.model==='Haiku 4.5'?' selected':'')+'>Claude Haiku 4.5</option><option value="Sevida-Med-7B"'+(a.model==='Sevida-Med-7B'?' selected':'')+'>Sevida-Med-7B</option></select></div>'
+          +'<div class="field"><label>Bound skill <span style="color:var(--ink3);font-weight:400;">(optional)</span></label><select id="ae-skill">'+skillOpts+'</select></div>'
+        +'</div>'
+        +'<div class="g2">'
+          +'<div class="field"><label>Trigger</label><select id="ae-trigger"><option value="Manual invoke"'+(a.trigger==='Manual invoke'?' selected':'')+'>Manual only</option><option value="Schedule (cron)"'+(a.trigger==='Schedule (cron)'?' selected':'')+'>Schedule (cron)</option><option value="Event: appointment-booked"'+(a.trigger==='Event: appointment-booked'?' selected':'')+'>Event: appointment-booked</option><option value="Event: message-received"'+(a.trigger==='Event: message-received'?' selected':'')+'>Event: message-received</option></select></div>'
+          +'<div class="field"><label>Memory scope</label><select id="ae-memory"><option value="Ephemeral"'+(a.memory==='Ephemeral'?' selected':'')+'>Ephemeral</option><option value="Agent-private"'+(a.memory==='Agent-private'?' selected':'')+'>Agent-private</option><option value="Agent + Org scopes"'+(a.memory==='Agent + Org scopes'?' selected':'')+'>Agent + Org scopes</option><option value="Org shared"'+(a.memory==='Org shared'?' selected':'')+'>Org shared</option></select></div>'
+        +'</div>'
+        +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:14px 0 10px;">Output & Review</div>'
+        +'<div class="g2">'
+          +'<div class="field"><label>Output format</label><select id="ae-output"><option value="plain-text"'+(a.outputFormat==='plain-text'?' selected':'')+'>Plain text</option><option value="structured-card"'+(a.outputFormat==='structured-card'?' selected':'')+'>Structured card</option><option value="soap-note"'+(a.outputFormat==='soap-note'?' selected':'')+'>SOAP note</option><option value="table"'+(a.outputFormat==='table'?' selected':'')+'>Table</option><option value="json"'+(a.outputFormat==='json'?' selected':'')+'>JSON (developer)</option></select></div>'
+          +'<div class="field"><label>Fallback behavior</label><select id="ae-fallback"><option value="show-partial"'+(a.fallback==='show-partial'?' selected':'')+'>Show partial results</option><option value="return-empty"'+(a.fallback==='return-empty'?' selected':'')+'>Return empty response</option><option value="escalate"'+(a.fallback==='escalate'?' selected':'')+'>Escalate to care manager</option><option value="retry"'+(a.fallback==='retry'?' selected':'')+'>Retry once then escalate</option></select></div>'
+        +'</div>'
+        +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:14px 0 10px;">Guardrails</div>'
+        +'<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;" id="ae-guardrails">'
+        +allGuardrails.map(function(g){var chk=(a.guardrails||[]).indexOf(g)>-1?' checked':'';return '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;"><input type="checkbox" class="ae-gr-cb" value="'+esc(g)+'"'+chk+' style="accent-color:var(--p);width:14px;height:14px;"> '+esc(g)+'</label>';}).join('')
+        +'</div>'
+        +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:14px 0 10px;">System Prompt</div>'
+        +'<div class="field"><textarea id="ae-prompt" style="min-height:80px;" placeholder="Leave blank to use the default orchestrator prompt...">'+esc(sysPrompt)+'</textarea></div>'
         +(function(){
-          var surfs=['member-dashboard','inbox','caseload','dashboard'];
-          var sLbl={'member-dashboard':'Member pages','inbox':'Inbox / Messages','caseload':'Members list','dashboard':'CM Dashboard'};
           var tOpts=[
             {v:'all',l:'All tabs'},{v:'member-tab__dashboard',l:'Member Dashboard'},{v:'member-tab__screenings',l:'Screenings'},
             {v:'member-tab__medications',l:'Medications'},{v:'member-tab__timeline',l:'Timeline'},
@@ -35220,32 +35334,31 @@ function doReassignCM() {
             {v:'member-dashboard',l:'Member pages'},{v:'inbox',l:'Inbox'},{v:'caseload',l:'Members list'},
             {v:'dashboard',l:'CM Dashboard'},{v:'all',l:'All surfaces'}
           ];
+          var surfs=['member-dashboard','inbox','caseload','dashboard'];
+          var sLbl={'member-dashboard':'Member pages','inbox':'Inbox / Messages','caseload':'Members list','dashboard':'CM Dashboard'};
           var mk=function(opts,sel){return opts.map(function(o){return '<option value="'+o.v+'"'+(o.v===sel?' selected':'')+'>'+o.l+'</option>';}).join('');};
-          var h='<div class="field" style="margin-top:16px;"><label style="font-weight:600;color:#374151;">Surfaces <span style="font-weight:400;color:#94a3b8;font-size:11.5px;">where chip appears</span></label><div style="margin-top:8px;">';
-          surfs.forEach(function(sid){
-            var chk=(a.surfaces||[]).indexOf(sid)>-1?' checked':'';
-            h+='<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;margin-bottom:7px;cursor:pointer;"><input type="checkbox" class="ae-surf-cb" value="'+sid+'"'+chk+' style="width:14px;height:14px;accent-color:#484581;flex-shrink:0;"><span>'+sLbl[sid]+'</span></label>';
-          });
-          h+='</div></div>';
-          h+='<div class="field" style="margin-top:16px;"><label style="font-weight:600;color:#374151;">Context Map <span style="font-weight:400;color:#94a3b8;font-size:11.5px;">prompts per surface+tab</span></label>';
-          h+='<div style="font-size:11.5px;color:#94a3b8;margin:4px 0 10px;">First prompt becomes the click-to-run query. Agents with primary priority show bold and first.</div>';
+          var h='<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:14px 0 10px;">Surfaces <span style="text-transform:none;font-size:11.5px;font-weight:400;color:var(--ink3);letter-spacing:0;">where agent button appears</span></div>';
+          h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">';
+          surfs.forEach(function(sid){var chk=(a.surfaces||[]).indexOf(sid)>-1?' checked':'';h+='<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;background:var(--s2);border:1px solid var(--ln);border-radius:6px;padding:5px 10px;"><input type="checkbox" class="ae-surf-cb" value="'+sid+'"'+chk+' style="width:13px;height:13px;accent-color:var(--p);flex-shrink:0;"><span>'+sLbl[sid]+'</span></label>';});
+          h+='</div>';
+          h+='<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:6px;">Context Map <span style="text-transform:none;font-size:11.5px;font-weight:400;letter-spacing:0;">— suggested prompts per surface + tab</span></div>';
+          h+='<div style="font-size:11.5px;color:var(--ink3);margin-bottom:10px;">First prompt becomes the click-to-run query. Primary agents appear bold and first in the chat UI.</div>';
           h+='<div id="ae-ctx-rows" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">';
           (a.context_map||[]).forEach(function(e){
             var sp=e.priority==='primary'?'<option value="primary" selected>Primary</option><option value="secondary">Secondary</option>':'<option value="primary">Primary</option><option value="secondary" selected>Secondary</option>';
-            h+='<div class="ae-ctx-row" style="border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;background:#f8fafc;">';
+            h+='<div class="ae-ctx-row" style="border:1px solid var(--ln);border-radius:8px;padding:10px 12px;background:var(--s2);">';
             h+='<div style="display:grid;grid-template-columns:1fr 1fr 90px 28px;gap:6px;align-items:center;margin-bottom:8px;">';
-            h+='<select class="ae-ctx-surface" style="font-size:12px;border:1px solid #e2e8f0;border-radius:5px;padding:4px;">'+mk(sOpts,e.surface)+'</select>';
-            h+='<select class="ae-ctx-tab" style="font-size:12px;border:1px solid #e2e8f0;border-radius:5px;padding:4px;">'+mk(tOpts,e.tab)+'</select>';
-            h+='<select class="ae-ctx-priority" style="font-size:12px;border:1px solid #e2e8f0;border-radius:5px;padding:4px;">'+sp+'</select>';
+            h+='<select class="ae-ctx-surface" style="font-size:12px;border:1px solid var(--ln);border-radius:5px;padding:4px;">'+mk(sOpts,e.surface)+'</select>';
+            h+='<select class="ae-ctx-tab" style="font-size:12px;border:1px solid var(--ln);border-radius:5px;padding:4px;">'+mk(tOpts,e.tab)+'</select>';
+            h+='<select class="ae-ctx-priority" style="font-size:12px;border:1px solid var(--ln);border-radius:5px;padding:4px;">'+sp+'</select>';
             h+='<button type="button" onclick="var r=this.parentNode.parentNode;r.parentNode.removeChild(r);" style="background:#fee2e2;border:none;border-radius:4px;width:24px;height:24px;cursor:pointer;color:#dc2626;font-size:14px;display:flex;align-items:center;justify-content:center;">&times;</button>';
             h+='</div>';
-            h+='<div style="font-size:11px;color:#94a3b8;margin-bottom:4px;">Quick prompts (one per line — first is click query):</div>';
-            h+='<textarea class="ae-ctx-prompts" style="width:100%;box-sizing:border-box;font-size:12px;min-height:58px;resize:vertical;border:1px solid #e2e8f0;border-radius:5px;padding:6px;">'+(e.prompts||[]).join('\n')+'</textarea>';
+            h+='<div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">Quick prompts (one per line — first is click query):</div>';
+            h+='<textarea class="ae-ctx-prompts" style="width:100%;box-sizing:border-box;font-size:12px;min-height:58px;resize:vertical;border:1px solid var(--ln);border-radius:5px;padding:6px;">'+(e.prompts||[]).join('\n')+'</textarea>';
             h+='</div>';
           });
           h+='</div>';
-          h+='<button type="button" onclick="window._addCtxRow()" style="font-size:12px;background:none;border:1px dashed #cbd5e1;border-radius:6px;padding:6px 12px;cursor:pointer;color:#64748b;width:100%;margin-bottom:4px;">+ Add surface / tab row</button>';
-          h+='</div>';
+          h+='<button type="button" onclick="window._addCtxRow()" style="font-size:12px;background:none;border:1px dashed var(--ln);border-radius:6px;padding:6px 12px;cursor:pointer;color:var(--ink3);width:100%;margin-bottom:4px;">+ Add surface / tab row</button>';
           return h;
         })()
         +'<div style="margin-top:4px;"></div>'
@@ -35261,10 +35374,30 @@ function doReassignCM() {
     var a = AGENTS.find(function(x){ return x.id===id; });
     if(!a) return;
     var n=document.getElementById('ae-name'), d=document.getElementById('ae-desc'), s=document.getElementById('ae-skill'), p=document.getElementById('ae-prompt');
-    if(n) a.name=n.value.trim()||a.name;
-    if(d) a.desc=d.value.trim()||a.desc;
-    if(s) a.skill=s.value;
-    if(p) a.systemPrompt=p.value.trim();
+    var m=document.getElementById('ae-model'), tr=document.getElementById('ae-trigger'), mem=document.getElementById('ae-memory');
+    var out=document.getElementById('ae-output'), fb=document.getElementById('ae-fallback');
+    var temp=document.getElementById('ae-temperature'), mt=document.getElementById('ae-max-tokens');
+    var to=document.getElementById('ae-timeout'), rl=document.getElementById('ae-rate-limit');
+    var ow=document.getElementById('ae-owner'), tg=document.getElementById('ae-tags');
+    if(n)   a.name         = n.value.trim()||a.name;
+    if(d)   a.desc         = d.value.trim()||a.desc;
+    if(s)   a.skill        = s.value;
+    if(p)   a.systemPrompt = p.value.trim();
+    if(m)   a.model        = m.value;
+    if(tr)  a.trigger      = tr.value;
+    if(mem) a.memory       = mem.value;
+    if(out)  a.outputFormat     = out.value;
+    if(fb)   a.fallback         = fb.value;
+    if(temp) a.temperature      = parseFloat(temp.value) || 0.2;
+    if(mt)   a.maxTokens        = parseInt(mt.value) || 1000;
+    if(to)   a.timeout          = parseInt(to.value) || 30;
+    if(rl)   a.rateLimitPerUser = parseInt(rl.value) || 50;
+    if(ow)   a.owner            = ow.value.trim();
+    if(tg)   a.tags             = tg.value.split(',').map(function(t){return t.trim();}).filter(Boolean);
+    a.version = (a.version||1) + 1;
+    // Save guardrails
+    a.guardrails = [];
+    document.querySelectorAll('.ae-gr-cb:checked').forEach(function(cb){ a.guardrails.push(cb.value); });
     // Save surfaces
     a.surfaces = [];
     document.querySelectorAll('.ae-surf-cb:checked').forEach(function(cb){ a.surfaces.push(cb.value); });
@@ -35272,22 +35405,22 @@ function doReassignCM() {
     a.context_map = [];
     document.querySelectorAll('#ae-ctx-rows .ae-ctx-row').forEach(function(row){
         var surf = row.querySelector('.ae-ctx-surface');
-        var tab = row.querySelector('.ae-ctx-tab');
-        var pri = row.querySelector('.ae-ctx-priority');
+        var tab  = row.querySelector('.ae-ctx-tab');
+        var pri  = row.querySelector('.ae-ctx-priority');
         var prom = row.querySelector('.ae-ctx-prompts');
         if(!surf) return;
         a.context_map.push({
-            surface: surf.value,
-            tab: tab ? tab.value : 'all',
-            priority: pri ? pri.value : 'secondary',
-            prompts: prom ? prom.value.split('\n').map(function(p){return p.trim();}).filter(Boolean) : []
+            surface:  surf.value,
+            tab:      tab  ? tab.value  : 'all',
+            priority: pri  ? pri.value  : 'secondary',
+            prompts:  prom ? prom.value.split('\n').map(function(p){return p.trim();}).filter(Boolean) : []
         });
     });
     a.updatedBy = 'You'; a.updatedAt = 'Just now';
-    // Refresh chips in chat with new config
     if(typeof window.renderAgentChips === 'function') window.renderAgentChips();
+    if(typeof window.renderWelcomeScreen === 'function') window.renderWelcomeScreen();
     closedr('dr-a'); rA();
-    toast('\u201c'+a.name+'\u201d saved — surfaces & context map updated');
+    toast('\u201c'+a.name+'\u201d saved');
   };
 
 
@@ -35311,8 +35444,13 @@ function doReassignCM() {
       +'<div class="dl">Metadata</div>'
       +'<div class="dr-row"><span class="dr-k">State</span><span class="dr-v">'+esc(s.state)+'</span></div>'
       +'<div class="dr-row"><span class="dr-k">Source</span><span class="dr-v">'+(s.source==='skillmaker'?'SkillMaker Agent (auto-drafted)':'Manually authored')+'</span></div>'
+      +'<div class="dr-row"><span class="dr-k">Version</span><span class="dr-v">v'+(s.version||1)+'</span></div>'
       +'<div class="dr-row"><span class="dr-k">Agents using</span><span class="dr-v">'+s.agents+'</span></div>'
       +'<div class="dr-row"><span class="dr-k">Avg confidence</span><span class="dr-v">'+(s.confidence!==null?s.confidence:'&mdash;')+'</span></div>'
+      +'<div class="dr-row"><span class="dr-k">Max waves</span><span class="dr-v">'+(s.maxWaves||2)+'</span></div>'
+      +'<div class="dr-row"><span class="dr-k">Timeout</span><span class="dr-v">'+(s.timeout||30)+'s</span></div>'
+      +'<div class="dr-row"><span class="dr-k">Owner</span><span class="dr-v">'+esc(s.owner||'—')+'</span></div>'
+      +'<div class="dr-row"><span class="dr-k">Tags</span><span class="dr-v">'+(s.tags&&s.tags.length?s.tags.map(function(t){return '<span style="background:var(--s2);border:1px solid var(--ln);border-radius:4px;padding:2px 7px;font-size:11.5px;">'+esc(t)+'</span>';}).join(' '):'<span style="color:var(--mu);">None</span>')+'</span></div>'
       +'<div class="dl">Tools referenced</div><div class="dr-tags">'+toolTags+'</div>'
       +'<div class="dl">Audit</div>'
       +'<div class="dr-row"><span class="dr-k">Created by</span><span class="dr-v">'+(s.createdBy?esc(s.createdBy)+' &middot; <span style="color:var(--ink3);font-weight:400;">'+esc(s.createdAt)+'</span>':'&mdash;')+'</span></div>'
@@ -35383,8 +35521,28 @@ function doReassignCM() {
       +'<div class="dr-row"><span class="dr-k">Toolkit</span><span class="dr-v">'+esc(t.toolkit)+'</span></div>'
       +'<div class="dr-row"><span class="dr-k">Auth</span><span class="dr-v">'+esc(t.auth)+'</span></div>'
       +'<div class="dr-row"><span class="dr-k">Write op</span><span class="dr-v">'+(t.write?'<span class="chip c-wa">&#9888; Yes &mdash; requires approval</span>':'<span class="chip c-ok">No &mdash; read-only</span>')+'</span></div>'
+      +(t.path?'<div class="dr-row"><span class="dr-k">Function path</span><span class="dr-v" style="font-family:ui-monospace,monospace;font-size:11.5px;">'+esc(t.path)+'</span></div>':'')
+      +(t.timeout?'<div class="dr-row"><span class="dr-k">Timeout</span><span class="dr-v">'+t.timeout+'s</span></div>':'')
+      +(t.rateLimit?'<div class="dr-row"><span class="dr-k">Rate limit</span><span class="dr-v">'+t.rateLimit+' calls/min</span></div>':'')
+      +(t.retry?'<div class="dr-row"><span class="dr-k">Retry policy</span><span class="dr-v">'+esc(t.retry)+'</span></div>':'')
+      +(t.owner?'<div class="dr-row"><span class="dr-k">Owner</span><span class="dr-v">'+esc(t.owner)+'</span></div>':'')
+      +(t.tags&&t.tags.length?'<div class="dr-row"><span class="dr-k">Tags</span><span class="dr-v">'+t.tags.map(function(tg){return '<span style="background:var(--s2);border:1px solid var(--ln);border-radius:4px;padding:2px 7px;font-size:11px;">'+esc(tg)+'</span>';}).join(' ')+'</span></div>':'')
       +'<div class="dl">Description</div>'
       +'<p style="font-size:12.5px;color:var(--ink2);line-height:1.6;">'+esc(t.desc)+'</p>'
+      +(t.outputDesc?'<div class="dl">Output schema</div><p style="font-size:12px;color:var(--ink2);line-height:1.6;font-family:ui-monospace,monospace;">'+esc(t.outputDesc)+'</p>':'')
+      +(t.params&&t.params.length
+        ?'<div class="dl">Input parameters</div>'
+          +'<div style="display:flex;flex-direction:column;gap:4px;">'
+          +t.params.map(function(p){
+            return '<div style="display:flex;gap:8px;align-items:baseline;font-size:12px;">'
+              +'<span style="font-family:ui-monospace,monospace;font-weight:600;color:var(--p);">'+esc(p.name)+'</span>'
+              +'<span style="color:var(--ink3);font-size:11px;">'+esc(p.type)+'</span>'
+              +(p.required?'<span style="color:#dc2626;font-size:10.5px;font-weight:600;">required</span>':'<span style="color:var(--mu);font-size:10.5px;">optional</span>')
+              +(p.desc?'<span style="color:var(--ink3);">— '+esc(p.desc)+'</span>':'')
+              +'</div>';
+          }).join('')
+          +'</div>'
+        :'')
       +'<div class="dl">Required roles (at least one)</div><div class="dr-tags">'+roleH+'</div>'
       +'<div class="dl">Agents using this tool</div>'+agentH
       +'<div class="dl">Audit</div>'
@@ -35416,7 +35574,9 @@ function doReassignCM() {
     'dr-resource':'resources',
     'dr-review': 'review',
     'dr-model':  'models',
-    'dr-sch':    'schedules'
+    'dr-sch':    'schedules',
+    'dr-eval':   'evals',
+    'dr-resource':'resources'
   };
 
   // Back button arrow SVG
@@ -35629,24 +35789,37 @@ function doReassignCM() {
   window.closeModal=function(){document.getElementById('modal').classList.remove('on');};
 
   window.createAgent = function() {
-    var name   = document.getElementById('na-name').value.trim();
-    var desc   = document.getElementById('na-desc').value.trim();
-    var model  = document.getElementById('na-model').value;
-    var skill  = document.getElementById('na-skill').value;
-    var trigger= document.getElementById('na-trigger').value;
+    var name    = document.getElementById('na-name').value.trim();
+    var desc    = document.getElementById('na-desc').value.trim();
+    var model   = document.getElementById('na-model').value;
+    var skill   = document.getElementById('na-skill').value;
+    var trigger = document.getElementById('na-trigger').value;
+    var memory  = document.getElementById('na-memory').value;
+    var output  = document.getElementById('na-output').value;
+    var fallback= document.getElementById('na-fallback').value;
+    var prompt  = document.getElementById('na-prompt').value.trim();
+    var temperature = parseFloat(document.getElementById('na-temperature').value) || 0.2;
+    var maxTokens   = parseInt(document.getElementById('na-max-tokens').value) || 1000;
+    var timeout     = parseInt(document.getElementById('na-timeout').value) || 30;
+    var rateLimit   = parseInt(document.getElementById('na-rate-limit').value) || 50;
+    var owner       = (document.getElementById('na-owner').value || '').trim();
+    var tagsRaw     = (document.getElementById('na-tags').value || '').trim();
+    var tags        = tagsRaw ? tagsRaw.split(',').map(function(t){return t.trim();}).filter(Boolean) : [];
+    var guardrails = Array.prototype.slice.call(document.querySelectorAll('.na-gr-cb:checked')).map(function(cb){return cb.value;});
     if (!name) { toast('Please enter an agent name'); return; }
     if (!desc) { toast('Please enter a description'); return; }
-    // Find tools from skill
     var skillObj = null;
     for (var i=0;i<SKILLS.length;i++){if(SKILLS[i].id===skill){skillObj=SKILLS[i];break;}}
     var newAgent = {
       id: 'a'+(AGENTS.length+1),
       name: name, desc: desc, skill: skill, model: model, trigger: trigger,
+      memory: memory, outputFormat: output, fallback: fallback,
+      humanReview: false, systemPrompt: prompt, guardrails: guardrails,
+      temperature: temperature, maxTokens: maxTokens, timeout: timeout, rateLimitPerUser: rateLimit,
+      owner: owner, tags: tags, version: 1,
       lastRun: 'Never', runs7d: 0, status: 'draft',
-      guardrails: ['PHI redaction','Clinical domain only'],
-      memory: 'Ephemeral',
       tools: skillObj ? skillObj.tools.slice() : [],
-      recentRuns: [],
+      recentRuns: [], surfaces: [], context_map: [],
       createdBy: currentUser(), createdAt: nowStamp(),
       updatedBy: currentUser(), updatedAt: nowStamp()
     };
@@ -35718,6 +35891,11 @@ function doReassignCM() {
       document.getElementById('sm-desc').value = s.desc;
       document.getElementById('sm-spec').value = s.spec;
       s.tools.forEach(function(t) { smAddTool(t); });
+      // Populate new fields if they exist
+      var mw = document.getElementById('sm-max-waves'); if(mw) mw.value = s.maxWaves||2;
+      var st = document.getElementById('sm-timeout');   if(st) st.value = s.timeout||30;
+      var so = document.getElementById('sm-owner');     if(so) so.value = s.owner||'';
+      var sg = document.getElementById('sm-tags');      if(sg) sg.value = (s.tags||[]).join(', ');
     } else {
       document.getElementById('skillModalTitle').textContent = 'Draft new skill';
       document.getElementById('sm-id').value = '';
@@ -35725,7 +35903,17 @@ function doReassignCM() {
       document.getElementById('sm-desc').value = '';
       document.getElementById('sm-spec').value = '';
     }
-    document.getElementById('skillComposerModal').classList.add('on');
+    document.getElementById('skillComposerModal').classList.add('on'); // compat stub — actual open below
+    // Show the full-page skill composer
+    var cp = document.getElementById('skill-composer-page');
+    var pg = document.getElementById('pg-skills');
+    if (cp && pg) {
+      // Hide list elements
+      Array.prototype.slice.call(pg.children).forEach(function(c) {
+        if (c !== cp) c.classList.add('pg-list-hide');
+      });
+      cp.style.display = 'flex';
+    }
     // Reset AI pane conversation
     smAiHistory = [];
     smAiGeneratedSpec = null;
@@ -35744,7 +35932,11 @@ function doReassignCM() {
   };
 
   window.closeSkillModal = function() {
-    document.getElementById('skillComposerModal').classList.remove('on');
+    document.getElementById('skillComposerModal').classList.remove('on'); // compat
+    var cp = document.getElementById('skill-composer-page');
+    var pg = document.getElementById('pg-skills');
+    if (cp) cp.style.display = 'none';
+    if (pg) Array.prototype.slice.call(pg.children).forEach(function(c){ c.classList.remove('pg-list-hide'); });
     document.getElementById('sm-id').disabled = false;
     smEditingId = null;
   };
@@ -35766,6 +35958,15 @@ function doReassignCM() {
     list.appendChild(tag);
   };
 
+  function smGetNewFields() {
+    return {
+      maxWaves: parseInt((document.getElementById('sm-max-waves')||{value:2}).value)||2,
+      timeout:  parseInt((document.getElementById('sm-timeout')||{value:30}).value)||30,
+      owner:    ((document.getElementById('sm-owner')||{value:''}).value||'').trim(),
+      tags:     ((document.getElementById('sm-tags')||{value:''}).value||'').split(',').map(function(t){return t.trim();}).filter(Boolean)
+    };
+  }
+
   window.smSaveDraft = function() {
     var id = document.getElementById('sm-id').value.trim();
     var desc = document.getElementById('sm-desc').value.trim();
@@ -35776,9 +35977,15 @@ function doReassignCM() {
       // Update existing skill
       for (var i = 0; i < SKILLS.length; i++) {
         if (SKILLS[i].id === smEditingId) {
+          var nf = smGetNewFields();
           SKILLS[i].desc = desc;
           SKILLS[i].spec = spec;
           SKILLS[i].tools = smSelectedTools.slice();
+          SKILLS[i].maxWaves = nf.maxWaves;
+          SKILLS[i].timeout  = nf.timeout;
+          SKILLS[i].owner    = nf.owner;
+          SKILLS[i].tags     = nf.tags;
+          SKILLS[i].version  = (SKILLS[i].version||1) + 1;
           SKILLS[i].updatedBy = currentUser();
           SKILLS[i].updatedAt = nowStamp();
           if (!smKeepPending) SKILLS[i].state = 'draft';
@@ -35791,7 +35998,10 @@ function doReassignCM() {
       toast(smKeepPending ? 'Spec updated — still pending approval' : 'Skill updated and saved as draft');
     } else {
       // Add new skill
-      SKILLS.push({id:id, desc:desc, tools:smSelectedTools.slice(), state:'draft', agents:0, confidence:null, source:'authored', spec:spec, createdBy:currentUser(), createdAt:nowStamp(), updatedBy:currentUser(), updatedAt:nowStamp()});
+      var nf = smGetNewFields();
+      SKILLS.push({id:id, desc:desc, tools:smSelectedTools.slice(), state:'draft', agents:0, confidence:null, source:'authored', spec:spec,
+        maxWaves:nf.maxWaves, timeout:nf.timeout, owner:nf.owner, tags:nf.tags, version:1,
+        createdBy:currentUser(), createdAt:nowStamp(), updatedBy:currentUser(), updatedAt:nowStamp()});
       closeSkillModal();
       rSk();
       toast('Skill drafted — state: Draft');
@@ -35807,9 +36017,15 @@ function doReassignCM() {
     if (smEditingId) {
       for (var i = 0; i < SKILLS.length; i++) {
         if (SKILLS[i].id === smEditingId) {
+          var nf = smGetNewFields();
           SKILLS[i].desc = desc;
           SKILLS[i].spec = spec;
           SKILLS[i].tools = smSelectedTools.slice();
+          SKILLS[i].maxWaves = nf.maxWaves;
+          SKILLS[i].timeout  = nf.timeout;
+          SKILLS[i].owner    = nf.owner;
+          SKILLS[i].tags     = nf.tags;
+          SKILLS[i].version  = (SKILLS[i].version||1) + 1;
           SKILLS[i].state = 'pending';
           SKILLS[i].updatedBy = currentUser();
           SKILLS[i].updatedAt = nowStamp();
@@ -35825,7 +36041,10 @@ function doReassignCM() {
       if (n) n.innerHTML = '&#128161; <span><strong>' + pending + ' skill' + (pending>1?'s':'') + ' pending approval</strong> &mdash; Review and approve to make them available to agents.</span>';
       toast('Skill submitted for approval');
     } else {
-      SKILLS.push({id:id, desc:desc, tools:smSelectedTools.slice(), state:'pending', agents:0, confidence:null, source:'authored', spec:spec, createdBy:currentUser(), createdAt:nowStamp(), updatedBy:currentUser(), updatedAt:nowStamp()});
+      var nf = smGetNewFields();
+      SKILLS.push({id:id, desc:desc, tools:smSelectedTools.slice(), state:'pending', agents:0, confidence:null, source:'authored', spec:spec,
+        maxWaves:nf.maxWaves, timeout:nf.timeout, owner:nf.owner, tags:nf.tags, version:1,
+        createdBy:currentUser(), createdAt:nowStamp(), updatedBy:currentUser(), updatedAt:nowStamp()});
       closeSkillModal();
       rSk();
       var pending = SKILLS.filter(function(s){ return s.state === 'pending'; }).length;
@@ -35845,9 +36064,7 @@ function doReassignCM() {
   });
 
   // Close skill modal on background click
-  document.getElementById('skillComposerModal').addEventListener('click', function(e) {
-    if (e.target === e.currentTarget) closeSkillModal();
-  });
+  // skillComposerModal background click — handled by create page back button
 
 
   // ── SKILL COMPOSER TABS ──
@@ -36553,6 +36770,19 @@ function doReassignCM() {
     list.appendChild(tag);
   };
 
+  window.ntGetParams = function() {
+    var rows = document.querySelectorAll('.nt-param-row');
+    var params = [];
+    rows.forEach(function(row) {
+      var name = (row.querySelector('.nt-p-name')||{value:''}).value.trim();
+      var type = (row.querySelector('.nt-p-type')||{value:'string'}).value;
+      var req  = !!(row.querySelector('.nt-p-req')||{checked:false}).checked;
+      var desc = (row.querySelector('.nt-p-desc')||{value:''}).value.trim();
+      if (name) params.push({name:name, type:type, required:req, desc:desc});
+    });
+    return params;
+  };
+
   window.registerNewTool = function() {
     var id = document.getElementById('nt-id').value.trim();
     var desc = document.getElementById('nt-desc').value.trim();
@@ -36573,6 +36803,16 @@ function doReassignCM() {
           TOOLS[i].auth = auth;
           TOOLS[i].write = isWrite;
           TOOLS[i].roles = ntSelectedRoles.slice();
+          TOOLS[i].path = (document.getElementById('nt-path')||{value:''}).value.trim();
+          TOOLS[i].timeout = parseInt((document.getElementById('nt-timeout')||{value:15}).value)||15;
+          TOOLS[i].rateLimit = parseInt((document.getElementById('nt-rate-limit')||{value:60}).value)||60;
+          TOOLS[i].retry = (document.getElementById('nt-retry')||{value:''}).value;
+          TOOLS[i].onError = (document.getElementById('nt-on-error')||{value:''}).value;
+          TOOLS[i].returnType = (document.getElementById('nt-return-type')||{value:'object'}).value;
+          TOOLS[i].outputDesc = (document.getElementById('nt-output-desc')||{value:''}).value.trim();
+          TOOLS[i].owner = (document.getElementById('nt-owner')||{value:''}).value.trim();
+          TOOLS[i].tags = ((document.getElementById('nt-tags')||{value:''}).value||'').split(',').map(function(t){return t.trim();}).filter(Boolean);
+          TOOLS[i].params = ntGetParams();
           TOOLS[i].updatedBy = currentUser();
           TOOLS[i].updatedAt = nowStamp();
           break;
@@ -36590,7 +36830,21 @@ function doReassignCM() {
       if (isWrite && ntSelectedRoles.indexOf('org_admin') === -1 && ntSelectedRoles.indexOf('super_admin') === -1) {
         toast('Warning: write tools should require org_admin or super_admin');
       }
-      TOOLS.push({id:id, toolkit:toolkit, auth:auth, write:isWrite, roles:ntSelectedRoles.slice(), agents:[], desc:desc, createdBy:currentUser(), createdAt:nowStamp(), updatedBy:currentUser(), updatedAt:nowStamp()});
+      TOOLS.push({
+        id:id, toolkit:toolkit, auth:auth, write:isWrite, roles:ntSelectedRoles.slice(),
+        agents:[], desc:desc,
+        path:(document.getElementById('nt-path')||{value:''}).value.trim(),
+        timeout:parseInt((document.getElementById('nt-timeout')||{value:15}).value)||15,
+        rateLimit:parseInt((document.getElementById('nt-rate-limit')||{value:60}).value)||60,
+        retry:(document.getElementById('nt-retry')||{value:''}).value,
+        onError:(document.getElementById('nt-on-error')||{value:''}).value,
+        returnType:(document.getElementById('nt-return-type')||{value:'object'}).value,
+        outputDesc:(document.getElementById('nt-output-desc')||{value:''}).value.trim(),
+        owner:(document.getElementById('nt-owner')||{value:''}).value.trim(),
+        tags:((document.getElementById('nt-tags')||{value:''}).value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
+        params:ntGetParams(),
+        createdBy:currentUser(), createdAt:nowStamp(), updatedBy:currentUser(), updatedAt:nowStamp()
+      });
       closeNewToolModal();
       rT();
       toast('Tool "' + id + '" registered in the Tool Registry');
@@ -36598,7 +36852,7 @@ function doReassignCM() {
   };
 
   document.getElementById('newToolModal').addEventListener('click', function(e) {
-    if (e.target === e.currentTarget) closeNewToolModal();
+    // tool modal background click handled by create page system
   });
 
 
@@ -37146,9 +37400,7 @@ function doReassignCM() {
   });
 
   // ── NEW APPLICATION AGENT MODAL ──
-  window.openNewAppAgentModal = function() {
-    document.getElementById('modal').classList.add('on');
-  };
+  // openNewAppAgentModal handled by full-page create system below
 
   // ── INIT SYSTEM AGENTS TABLE ──
   rSysAgents();
@@ -37211,14 +37463,14 @@ function doReassignCM() {
 
   // ── RESOURCES DATA ──
   var RESOURCES=[
-    {id:'r1',name:'HEDIS 2025 measure specifications',type:'Clinical guideline',sync:'Manual upload',lastSync:'3 days ago',agents:['Care Gap Finder'],status:'ok',size:'2.4 MB',desc:'Full HEDIS 2025 measure specifications from NCQA. Used by Care Gap Finder to identify eligible patients.'},
-    {id:'r2',name:'ICD-10-CM code lookup',type:'Code reference',sync:'Live API',lastSync:'1 hour ago',agents:['Prior Auth Helper','Denial Appeal'],status:'ok',size:'18 MB',desc:'Full ICD-10-CM code set. Auto-syncs from CMS daily.'},
-    {id:'r3',name:'CPT code reference 2025',type:'Code reference',sync:'Live API',lastSync:'2 hours ago',agents:['Prior Auth Helper','Denial Appeal'],status:'ok',size:'4.1 MB',desc:'Current CPT code set with clinical descriptions and billing rules.'},
-    {id:'r4',name:'Drug formulary - Tier 1-4',type:'Drug reference',sync:'Live API',lastSync:'6 hours ago',agents:['Pre-Visit Summarizer'],status:'ok',size:'890 KB',desc:'Current drug formulary with tier classifications.'},
-    {id:'r5',name:'ADA diabetes standards of care 2025',type:'Clinical guideline',sync:'Manual upload',lastSync:'1 week ago',agents:['Pre-Visit Summarizer','Care Gap Finder'],status:'stale',size:'1.2 MB',desc:'American Diabetes Association Standards of Medical Care 2025.'},
-    {id:'r6',name:'Panel roster - WCC',type:'Patient panel',sync:'Live FHIR',lastSync:'15 min ago',agents:['Care Gap Finder'],status:'ok',size:'340 KB',desc:'Current patient panel for WCC care management. Syncs from Epic FHIR every 15 minutes.'},
-    {id:'r7',name:'JNC 8 hypertension guidelines',type:'Clinical guideline',sync:'Manual upload',lastSync:'2 weeks ago',agents:['Pre-Visit Summarizer'],status:'stale',size:'560 KB',desc:'Joint National Committee guidelines for hypertension management.'},
-    {id:'r8',name:'Prior auth criteria - Blue Shield',type:'Payer policy',sync:'Manual upload',lastSync:'1 month ago',agents:['Prior Auth Helper'],status:'ok',size:'3.2 MB',desc:'Blue Shield of California prior authorization criteria document.'},
+    {id:'r1',name:'HEDIS 2025 measure specifications',type:'Clinical guideline',sync:'Manual upload',lastSync:'3 days ago',agents:['Care Gap Finder'],status:'ok',size:'2.4 MB',desc:'Full HEDIS 2025 measure specifications from NCQA. Used by Care Gap Finder to identify eligible patients.',owner:'Population Health',version:'2025',tags:['hedis','quality','screening'],url:'',auth:'None',freq:'on-demand'},
+    {id:'r2',name:'ICD-10-CM code lookup',type:'Code reference',sync:'Live API',lastSync:'1 hour ago',agents:['Prior Auth Helper','Denial Appeal'],status:'ok',size:'18 MB',desc:'Full ICD-10-CM code set. Auto-syncs from CMS daily.',owner:'RCM Team',version:'FY2025',tags:['icd10','codes','billing'],url:'https://clinicaltables.nlm.nih.gov/api/icd10cm/v3/search',auth:'API Key',freq:'daily'},
+    {id:'r3',name:'CPT code reference 2025',type:'Code reference',sync:'Live API',lastSync:'2 hours ago',agents:['Prior Auth Helper','Denial Appeal'],status:'ok',size:'4.1 MB',desc:'Current CPT code set with clinical descriptions and billing rules.',owner:'RCM Team',version:'2025',tags:['cpt','codes','billing'],url:'https://api.ama-assn.org/cpt/v1/codes',auth:'OAuth 2.0',freq:'daily'},
+    {id:'r4',name:'Drug formulary - Tier 1-4',type:'Drug reference',sync:'Live API',lastSync:'6 hours ago',agents:['Pre-Visit Summarizer'],status:'ok',size:'890 KB',desc:'Current drug formulary with tier classifications.',owner:'Clinical Ops',version:'2025-Q2',tags:['formulary','medications','pharmacy'],url:'https://api.leapmetrics.io/formulary/v2',auth:'Internal',freq:'hourly'},
+    {id:'r5',name:'ADA diabetes standards of care 2025',type:'Clinical guideline',sync:'Manual upload',lastSync:'1 week ago',agents:['Pre-Visit Summarizer','Care Gap Finder'],status:'stale',size:'1.2 MB',desc:'American Diabetes Association Standards of Medical Care 2025.',owner:'Clinical Ops',version:'2025',tags:['diabetes','guidelines','ada'],url:'',auth:'None',freq:'on-demand'},
+    {id:'r6',name:'Panel roster - WCC',type:'Patient panel',sync:'Live FHIR',lastSync:'15 min ago',agents:['Care Gap Finder'],status:'ok',size:'340 KB',desc:'Current patient panel for WCC care management. Syncs from Epic FHIR every 15 minutes.',owner:'Population Health',version:'live',tags:['panel','roster','wcc'],url:'https://fhir.epic.leapmetrics.io/api/FHIR/R4/Group',auth:'OAuth 2.0',freq:'15min'},
+    {id:'r7',name:'JNC 8 hypertension guidelines',type:'Clinical guideline',sync:'Manual upload',lastSync:'2 weeks ago',agents:['Pre-Visit Summarizer'],status:'stale',size:'560 KB',desc:'Joint National Committee guidelines for hypertension management.',owner:'Clinical Ops',version:'JNC8',tags:['hypertension','guidelines','cardiovascular'],url:'',auth:'None',freq:'on-demand'},
+    {id:'r8',name:'Prior auth criteria - Blue Shield',type:'Payer policy',sync:'Manual upload',lastSync:'1 month ago',agents:['Prior Auth Helper'],status:'ok',size:'3.2 MB',desc:'Blue Shield of California prior authorization criteria document.',owner:'RCM Team',version:'2025-v2',tags:['prior-auth','payer','blue-shield'],url:'',auth:'None',freq:'on-demand'},
   ];
   window.RESOURCES=RESOURCES;
   window.PROMPTS=PROMPTS;
@@ -37262,9 +37514,320 @@ function doReassignCM() {
     }
   });
 
-  window.openNewFlowModal=function(){document.getElementById('newFlowModal').classList.add('on');};
-  window.openNewPromptModal=function(){document.getElementById('newPromptModal').classList.add('on');};
-  window.openNewResourceModal=function(){document.getElementById('newResourceModal').classList.add('on');};
+  // ── FULL-PAGE CREATE SYSTEM ──
+  // Generic function to show a create form as a full page inside a pg-* container
+  var BACK_SVG_CP = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  window.showCreatePage = function(pageId, title, subtitle, bodyHTML, footHTML) {
+    var pg = document.getElementById('pg-' + pageId);
+    if (!pg) return;
+    // Hide list content
+    Array.prototype.slice.call(pg.children).forEach(function(c) {
+      if (!c.classList.contains('create-page')) c.classList.add('pg-list-hide');
+    });
+    // Remove existing create page
+    var existing = pg.querySelector('.create-page');
+    if (existing) existing.remove();
+    // Build create page
+    var cp = document.createElement('div');
+    cp.className = 'create-page';
+    cp.innerHTML =
+      '<button class="detail-page-back" onclick="closeCreatePage(\'' + pageId + '\')">' + BACK_SVG_CP + ' Back</button>'
+      + '<div class="detail-page-card">'
+        + '<div class="detail-page-head"><div style="flex:1;">'
+          + '<div class="detail-page-title">' + title + '</div>'
+          + (subtitle ? '<div class="detail-page-sub">' + subtitle + '</div>' : '')
+        + '</div></div>'
+        + '<div class="detail-page-body" style="padding:24px 28px;">' + bodyHTML + '</div>'
+        + '<div class="detail-page-foot">' + footHTML + '</div>'
+      + '</div>';
+    pg.appendChild(cp);
+  };
+
+  window.closeCreatePage = function(pageId) {
+    var pg = document.getElementById('pg-' + pageId);
+    if (!pg) return;
+    var cp = pg.querySelector('.create-page');
+    if (cp) cp.remove();
+    Array.prototype.slice.call(pg.children).forEach(function(c) {
+      c.classList.remove('pg-list-hide');
+    });
+  };
+
+  // ── NEW APPLICATION AGENT — full page ──
+  window.openNewAppAgentModal = function() {
+    // Populate skill options
+    var skillOpts = '<option value="">None (auto-routed by SkillFinder)</option>'
+      + SKILLS.map(function(s){return '<option value="'+s.id+'">'+s.id+'</option>';}).join('');
+    var body =
+      '<div style="display:flex;flex-direction:column;gap:0;">'
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:10px;">Identity</div>'
+      +'<div class="field"><label>Agent name</label><input type="text" id="na-name" placeholder="e.g. Medication Adherence Checker"/></div>'
+      +'<div class="field"><label>Intent description <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">— used by SkillFinder to route queries</span></label><input type="text" id="na-desc" placeholder="What does this agent do in plain English?"/></div>'
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Model & Execution</div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Model</label><select id="na-model"><option value="Sonnet 4.6">Claude Sonnet 4.6</option><option value="Opus 4.6">Claude Opus 4.6</option><option value="Haiku 4.5">Claude Haiku 4.5</option><option value="Sevida-Med-7B">Sevida-Med-7B</option></select></div>'
+        +'<div class="field"><label>Bound skill <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">(optional)</span></label><select id="na-skill">'+skillOpts+'</select></div>'
+      +'</div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Trigger</label><select id="na-trigger"><option value="Manual invoke">Manual only</option><option value="Schedule (cron)">Schedule (cron)</option><option value="Event: appointment-booked">Event: appointment-booked</option><option value="Event: message-received">Event: message-received</option></select></div>'
+        +'<div class="field"><label>Memory scope</label><select id="na-memory"><option value="Ephemeral">Ephemeral — cleared after each run</option><option value="Agent-private">Agent-private — persists across runs</option><option value="Agent + Org scopes">Agent + Org — shared read, private write</option><option value="Org shared">Org shared — all agents can read</option></select></div>'
+      +'</div>'
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Model Parameters</div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Temperature <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">0 = deterministic · 1 = creative</span></label><input type="number" id="na-temperature" value="0.2" min="0" max="1" step="0.1"/></div>'
+        +'<div class="field"><label>Max tokens</label><input type="number" id="na-max-tokens" value="1000" min="256" max="8192" step="256"/></div>'
+      +'</div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Timeout <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">(seconds)</span></label><input type="number" id="na-timeout" value="30" min="5" max="300" step="5"/></div>'
+        +'<div class="field"><label>Rate limit <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">(runs/user/day)</span></label><input type="number" id="na-rate-limit" value="50" min="1" max="1000"/></div>'
+      +'</div>'
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Output & Review</div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Output format</label><select id="na-output"><option value="plain-text">Plain text</option><option value="structured-card">Structured card</option><option value="soap-note">SOAP note</option><option value="table">Table</option><option value="json">JSON (developer)</option></select></div>'
+        +'<div class="field"><label>Fallback behavior</label><select id="na-fallback"><option value="show-partial">Show partial results</option><option value="return-empty">Return empty response</option><option value="escalate">Escalate to care manager</option><option value="retry">Retry once then escalate</option></select></div>'
+      +'</div>'
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Governance</div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Owner</label><input type="text" id="na-owner" placeholder="e.g. Clinical Ops"/></div>'
+        +'<div class="field"><label>Tags <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">comma-separated</span></label><input type="text" id="na-tags" placeholder="e.g. clinical, fhir"/></div>'
+      +'</div>'
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Guardrails</div>'
+      +'<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">'
+        +['PHI redaction','Clinical domain only','Read-only','No web search','Cite FHIR resource IDs','Human approval for outbound'].map(function(g,i){
+          return '<label style="display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;"><input type="checkbox" class="na-gr-cb" value="'+g+'"'+(i<2?' checked':'')+' style="accent-color:var(--p);width:14px;height:14px;"> '+g+'</label>';
+        }).join('')
+      +'</div>'
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">System Prompt</div>'
+      +'<div class="field"><textarea id="na-prompt" style="min-height:80px;" placeholder="You are a clinical agent. Never invent clinical facts..."></textarea><div style="font-size:11.5px;color:var(--ink3);margin-top:3px;">Leave blank to use the default orchestrator prompt</div></div>'
+      +'</div>';
+    var foot = '<button class="btn" onclick="closeCreatePage(\'app-agents\')">Cancel</button>'
+      +'<button class="btnp" onclick="createAgent();closeCreatePage(\'app-agents\')">Create agent</button>';
+    showCreatePage('app-agents', 'New application agent', 'UI-triggered agents that appear as action buttons in the care manager app', body, foot);
+  };
+
+  // ── NEW TOOL — full page ──
+  // helper — add a param row to the tool form
+  window.ntAddParamRow = function(name, type, required, desc) {
+    var list = document.getElementById('nt-params-list');
+    if (!list) return;
+    var row = document.createElement('div');
+    row.className = 'nt-param-row';
+    row.style.cssText = 'display:grid;grid-template-columns:1fr 120px 80px 1fr 28px;gap:6px;align-items:center;margin-bottom:6px;';
+    row.innerHTML =
+      '<input type="text" placeholder="param_name" value="'+(name||'')+'" class="nt-p-name" style="font-family:ui-monospace,monospace;font-size:12px;border:1px solid var(--ln);border-radius:5px;padding:5px 8px;"/>'
+      +'<select class="nt-p-type" style="font-size:12px;border:1px solid var(--ln);border-radius:5px;padding:5px;">'
+        +['string','integer','float','boolean','array','object'].map(function(tp){return '<option'+(tp===type?' selected':'')+'>'+tp+'</option>';}).join('')
+      +'</select>'
+      +'<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;justify-content:center;">'
+        +'<input type="checkbox" class="nt-p-req"'+(required?' checked':'')+' style="accent-color:var(--p);"> Required'
+      +'</label>'
+      +'<input type="text" placeholder="Description" value="'+(desc||'')+'" class="nt-p-desc" style="font-size:12px;border:1px solid var(--ln);border-radius:5px;padding:5px 8px;"/>'
+      +'<button type="button" onclick="this.parentNode.remove()" style="background:#fee2e2;border:none;border-radius:4px;width:24px;height:24px;cursor:pointer;color:#dc2626;font-size:14px;display:flex;align-items:center;justify-content:center;">&times;</button>';
+    list.appendChild(row);
+  };
+
+  window.openNewToolModal = function(toolId) {
+    var isEdit = !!toolId;
+    var t = null;
+    if (isEdit) { for(var i=0;i<TOOLS.length;i++){if(TOOLS[i].id===toolId){t=TOOLS[i];break;}} }
+    window.ntEditingId = toolId || null;
+
+    var body =
+      '<div>'
+      // ── IDENTITY ──
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:10px;">Identity</div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Tool name <span style="color:var(--ink3);font-weight:400;">(snake_case, exact Python function name)</span></label>'
+          +'<input type="text" id="nt-id" value="'+(t?t.id:'')+'" placeholder="e.g. fhir_search_allergies"'+(isEdit?' disabled style="background:var(--s2);"':'')+'/>'
+        +'</div>'
+        +'<div class="field"><label>Toolkit</label>'
+          +'<select id="nt-toolkit">'+['FHIRToolkit','FHIRPopulationToolkit','PortalToolkit','RCMToolkit','MLToolkit','Custom'].map(function(k){return '<option'+(t&&t.toolkit===k?' selected':'')+'>'+k+'</option>';}).join('')+'</select>'
+        +'</div>'
+      +'</div>'
+      +'<div class="field"><label>Description <span style="color:var(--ink3);font-weight:400;">— what this tool returns and when to use it</span></label>'
+        +'<input type="text" id="nt-desc" value="'+(t?t.desc:'')+'" placeholder="e.g. Returns allergy list for a given patientId"/>'
+      +'</div>'
+      +'<div class="field"><label>Function path <span style="color:var(--ink3);font-weight:400;">— exact import path in the Tool Registry</span></label>'
+        +'<input type="text" id="nt-path" value="'+(t&&t.path?t.path:'')+'" placeholder="e.g. toolkits.fhir.patient.search_allergies" style="font-family:ui-monospace,monospace;font-size:12.5px;"/>'
+      +'</div>'
+
+      // ── AUTH & ACCESS ──
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Auth & Access</div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Auth method</label>'
+          +'<select id="nt-auth">'+['OAuth 2.0','HMAC','Internal SQL','API Key','Internal'].map(function(a){return '<option'+(t&&t.auth===a?' selected':'')+'>'+a+'</option>';}).join('')+'</select>'
+        +'</div>'
+        +'<div class="field"><label>Write operation?</label>'
+          +'<select id="nt-write">'
+            +'<option value="false"'+(t&&!t.write?' selected':'')+'>No — read-only</option>'
+            +'<option value="true"'+(t&&t.write?' selected':'')+'>Yes — write (requires human approval)</option>'
+          +'</select>'
+        +'</div>'
+      +'</div>'
+      +'<div class="field"><label>Required roles <span style="color:var(--ink3);font-weight:400;">(at least one must be held by the caller)</span></label>'
+        +'<div id="nt-roles-list" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;min-height:28px;padding:4px 0;"></div>'
+        +'<select id="nt-role-picker" onchange="ntAddRole(this.value);this.value=\'\'"><option value="">+ Add a role...</option>'
+          +['care_manager','supervisor','org_admin','super_admin'].map(function(r){return '<option value="'+r+'">'+r+'</option>';}).join('')
+        +'</select>'
+        +'<div style="font-size:11px;color:var(--ink3);margin-top:4px;">Leave empty to allow all authenticated users. Write tools should require org_admin or higher.</div>'
+      +'</div>'
+
+      // ── INPUT PARAMETERS ──
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 6px;">Input Parameters</div>'
+      +'<div style="font-size:11.5px;color:var(--ink3);margin-bottom:10px;">Define what this tool accepts. PlannerAgent uses this to construct calls correctly.</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 120px 80px 1fr 28px;gap:6px;margin-bottom:6px;">'
+        +'<div style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.4px;">Name</div>'
+        +'<div style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.4px;">Type</div>'
+        +'<div style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.4px;text-align:center;">Required</div>'
+        +'<div style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.4px;">Description</div>'
+        +'<div></div>'
+      +'</div>'
+      +'<div id="nt-params-list"></div>'
+      +'<button type="button" onclick="ntAddParamRow()" style="font-size:12px;background:none;border:1px dashed var(--ln);border-radius:6px;padding:5px 12px;cursor:pointer;color:var(--ink3);width:100%;margin-bottom:4px;">+ Add parameter</button>'
+
+      // ── OUTPUT SCHEMA ──
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Output Schema</div>'
+      +'<div class="field"><label>Return type</label>'
+        +'<select id="nt-return-type">'
+          +['object','array','string','integer','boolean','void'].map(function(rt){return '<option'+(t&&t.returnType===rt?' selected':'')+'>'+rt+'</option>';}).join('')
+        +'</select>'
+      +'</div>'
+      +'<div class="field"><label>Output description <span style="color:var(--ink3);font-weight:400;">— what fields/structure does it return</span></label>'
+        +'<textarea id="nt-output-desc" style="min-height:60px;font-size:12.5px;" placeholder="e.g. Returns { patientId, allergyList: [{code, display, severity}], total }">'+(t&&t.outputDesc?t.outputDesc:'')+'</textarea>'
+      +'</div>'
+
+      // ── EXECUTION ──
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Execution</div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Timeout <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">(seconds)</span></label>'
+          +'<input type="number" id="nt-timeout" value="'+(t&&t.timeout?t.timeout:15)+'" min="1" max="120" step="1"/>'
+        +'</div>'
+        +'<div class="field"><label>Rate limit <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">(calls/min)</span></label>'
+          +'<input type="number" id="nt-rate-limit" value="'+(t&&t.rateLimit?t.rateLimit:60)+'" min="1" max="1000"/>'
+        +'</div>'
+      +'</div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Retry policy</label>'
+          +'<select id="nt-retry">'
+            +['No retry — fail immediately','Retry once then fail','Retry twice then escalate','Retry with backoff'].map(function(r){return '<option'+(t&&t.retry===r?' selected':'')+'>'+r+'</option>';}).join('')
+          +'</select>'
+        +'</div>'
+        +'<div class="field"><label>On error</label>'
+          +'<select id="nt-on-error">'
+            +['Return empty result','Return error message','Throw exception','Return partial result'].map(function(e){return '<option'+(t&&t.onError===e?' selected':'')+'>'+e+'</option>';}).join('')
+          +'</select>'
+        +'</div>'
+      +'</div>'
+
+      // ── GOVERNANCE ──
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin:16px 0 10px;">Governance</div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Owner</label><input type="text" id="nt-owner" value="'+(t&&t.owner?t.owner:'')+'" placeholder="e.g. Clinical Ops"/></div>'
+        +'<div class="field"><label>Tags <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">comma-separated</span></label><input type="text" id="nt-tags" value="'+(t&&t.tags?(t.tags.join(', ')):'')+'" placeholder="e.g. fhir, read-only, patient"/></div>'
+      +'</div>'
+
+      // ── INFO NOTICE ──
+      +'<div style="background:var(--s2);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--ink3);margin-top:4px;">'
+        +'<strong style="color:var(--ink2);">After registering:</strong> The tool becomes available to PlannerAgent via the registry. Write tools require the <code style="font-family:ui-monospace,monospace;">human_approval_for_outbound</code> guardrail on any agent that uses them.'
+      +'</div>'
+      +'</div>';
+
+    var foot = '<button class="btn" onclick="closeCreatePage(\'tools\')">Cancel</button>'
+      +'<button class="btnp" onclick="registerNewTool()">'+(isEdit?'Save changes':'Register tool')+'</button>';
+    showCreatePage('tools', isEdit ? 'Edit tool — '+toolId : 'Register new tool', 'Python functions in the Tool Registry', body, foot);
+
+    // Wire up roles and params after DOM is ready
+    window.ntSelectedRoles = [];
+    if (t && t.roles) { t.roles.forEach(function(r){ ntAddRole(r); }); }
+    // Pre-populate params if editing
+    if (t && t.params && t.params.length) {
+      t.params.forEach(function(p){ ntAddParamRow(p.name, p.type, p.required, p.desc); });
+    }
+  };
+  window.closeNewToolModal = function() { closeCreatePage('tools'); };
+
+  // ── NEW FLOW — full page ──
+  window.openNewFlowModal = function() {
+    var skillOpts = SKILLS.map(function(s){return '<option>'+s.id+'</option>';}).join('');
+    var body =
+      '<div>'
+      +'<div class="field"><label>Flow name <span style="color:var(--ink3);font-weight:400;">(snake_case)</span></label><input type="text" id="nfl-name" placeholder="e.g. pvs_data_fetch"/></div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Bound skill</label><select id="nfl-skill">'+skillOpts+'</select></div>'
+        +'<div class="field"><label>Description</label><input type="text" id="nfl-desc" placeholder="What does this frozen DAG do?"/></div>'
+      +'</div>'
+      +'<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;padding:10px 12px;font-size:12px;color:#92400e;margin-bottom:14px;">Frozen DAGs skip IntentAgent, SkillFinderAgent, and PlannerAgent on every run — reducing cost by ~50%. Only use when the execution plan is stable and predictable.</div>'
+      +'<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);margin-bottom:10px;">Wave structure</div>'
+      +'<div id="flow-waves" style="display:flex;flex-direction:column;gap:8px;">'
+        +'<div style="background:var(--s2);border:1px solid var(--ln);border-radius:6px;padding:12px 14px;">'
+          +'<div style="font-size:11.5px;font-weight:500;margin-bottom:8px;">Wave 0 — parallel</div>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:5px;" id="wave0-tools">'
+            +'<span class="chip c-tl">fhir_get_patient &#10005;</span>'
+            +'<span class="chip c-tl">fhir_search_conditions &#10005;</span>'
+          +'</div>'
+          +'<select style="margin-top:8px;font-size:12px;" onchange="toast(\'Tool added to Wave 0\')"><option value="">+ Add tool to wave...</option>'
+            +['fhir_search_medications','fhir_search_observations','fhir_search_encounters'].map(function(t){return '<option>'+t+'</option>';}).join('')
+          +'</select>'
+        +'</div>'
+      +'</div>'
+      +'<button class="btn" style="margin-top:8px;font-size:12px;" onclick="toast(\'Wave 1 added\')">+ Add wave</button>'
+      +'</div>';
+    var foot = '<button class="btn" onclick="closeCreatePage(\'flows\')">Cancel</button>'
+      +'<button class="btnp" onclick="closeCreatePage(\'flows\');toast(\'Frozen DAG created and active\')">Create flow</button>';
+    showCreatePage('flows', 'Create frozen DAG', 'Pre-compiled execution plan — skips intent routing on every run', body, foot);
+  };
+
+  // ── NEW PROMPT — full page ──
+  window.openNewPromptModal = function() {
+    var body =
+      '<div>'
+      +'<div class="field"><label>Prompt name</label><input type="text" id="np-name" placeholder="e.g. HIPAA compliance header"/></div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Category</label><select id="np-cat"><option>Clinical</option><option>Guardrail</option><option>Format</option><option>System</option></select></div>'
+        +'<div class="field"><label>Role</label><select id="np-role"><option value="all">All roles</option><option value="care_manager">Care Manager</option><option value="supervisor">Supervisor</option><option value="org_admin">Org Admin</option></select></div>'
+      +'</div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Surface <span style="font-weight:400;color:var(--ink3);font-size:11px;">where it appears</span></label><select id="np-surface"><option value="all">All surfaces</option><option value="member-dashboard">Member pages</option><option value="inbox">Inbox</option><option value="caseload">Members list</option><option value="dashboard">CM Dashboard</option></select></div>'
+        +'<div class="field"><label>Tab context <span style="font-weight:400;color:var(--ink3);font-size:11px;">(optional)</span></label><select id="np-context-tag"><option value="all">All tabs</option><option value="member-tab__dashboard">Member Dashboard</option><option value="member-tab__screenings">Screenings</option><option value="member-tab__medications">Medications</option><option value="member-tab__timeline">Timeline</option><option value="member-tab__health-history">Health History</option><option value="member-tab__insurance">Insurance</option><option value="member-tab__bio-psycho">Bio/Psycho</option></select></div>'
+      +'</div>'
+      +'<div class="field"><label>Prompt text</label><textarea id="np-text" style="min-height:140px;" placeholder="Write your prompt fragment here..."></textarea></div>'
+      +'<div style="background:var(--s2);border-radius:6px;padding:9px 12px;font-size:12px;color:var(--ink3);">Prompts are injected into agent system prompts at runtime. Changes apply immediately to all agents using this prompt.</div>'
+      +'</div>';
+    var foot = '<button class="btn" onclick="closeCreatePage(\'prompts\')">Cancel</button>'
+      +'<button class="btnp" onclick="saveNewPrompt()">Save prompt</button>';
+    showCreatePage('prompts', 'New prompt', 'Reusable system prompt fragment injected into agents', body, foot);
+  };
+
+  // ── NEW SCHEDULE — full page ──
+  window.openNewScheduleModal = function() {
+    var agentOpts = '<option value="">Select an agent...</option>'
+      + AGENTS.map(function(a){return '<option value="'+a.id+'">'+a.name+'</option>';}).join('');
+    var body =
+      '<div>'
+      +'<div class="field"><label>Schedule name</label><input type="text" id="ns-name" placeholder="e.g. Morning huddle prep"/></div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Agent</label><select id="ns-agent">'+agentOpts+'</select></div>'
+        +'<div class="field"><label>Timezone</label><select id="ns-tz"><option>America/Chicago (CT)</option><option>America/New_York (ET)</option><option>America/Los_Angeles (PT)</option><option>UTC</option></select></div>'
+      +'</div>'
+      +'<div class="field"><label>Cron expression</label>'
+        +'<input type="text" id="ns-cron" value="0 8 * * 1-5" oninput="updateCronPreview(this.value)" style="font-family:ui-monospace,monospace;margin-bottom:8px;"/>'
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">'
+          +'<button class="btn" style="font-size:11px;padding:3px 8px;" onclick="setCronPreset(\'45 7 * * 1-5\')">Weekdays 7:45a</button>'
+          +'<button class="btn" style="font-size:11px;padding:3px 8px;" onclick="setCronPreset(\'0 * * * *\')">Hourly</button>'
+          +'<button class="btn" style="font-size:11px;padding:3px 8px;" onclick="setCronPreset(\'0 6 * * 1\')">Mon 6:00a</button>'
+          +'<button class="btn" style="font-size:11px;padding:3px 8px;" onclick="setCronPreset(\'0 9 * * 1-5\')">Weekdays 9:00a</button>'
+          +'<button class="btn" style="font-size:11px;padding:3px 8px;" onclick="setCronPreset(\'0 0 * * *\')">Daily midnight</button>'
+        +'</div>'
+        +'<div id="ns-cron-preview" style="font-size:12px;color:var(--p);font-weight:500;">Runs at 08:00 on weekdays (Mon–Fri)</div>'
+      +'</div>'
+      +'<div style="background:var(--s2);border-radius:6px;padding:9px 12px;font-size:12px;color:var(--ink3);">Schedule starts immediately after saving. You can pause it from the Schedules list.</div>'
+      +'</div>';
+    var foot = '<button class="btn" onclick="closeCreatePage(\'schedules\')">Cancel</button>'
+      +'<button class="btnp" onclick="saveNewSchedule()">Create schedule</button>';
+    showCreatePage('schedules', 'New schedule', 'Cron-based trigger for an agent', body, foot);
+  };
+  window.closeNewScheduleModal = function() { closeCreatePage('schedules'); };
 
   function openFlow(id){
     var f=FLOWS.find(function(x){return x.id===id;});if(!f)return;
@@ -37338,7 +37901,7 @@ function doReassignCM() {
     var role=document.getElementById('np-role').value;
     if(!name||!text){toast('Please fill in all fields');return;}
     PROMPTS.push({id:'p'+(PROMPTS.length+1),name:name,category:cat,preview:text.slice(0,60)+'...',agents:[],modified:'Just now',text:text,surface:surface,context_tag:context_tag,role:role});
-    document.getElementById('newPromptModal').classList.remove('on');
+    closeCreatePage('prompts');
     rPrompts();toast('Prompt created');
   };
 
@@ -37352,12 +37915,18 @@ function doReassignCM() {
       '<div class="dl">Details</div>'
       +'<div class="dr-row"><span class="dr-k">Type</span><span class="dr-v">'+esc(r.type)+'</span></div>'
       +'<div class="dr-row"><span class="dr-k">Sync method</span><span class="dr-v">'+esc(r.sync)+'</span></div>'
+      +(r.url?'<div class="dr-row"><span class="dr-k">Endpoint</span><span class="dr-v" style="font-size:11.5px;font-family:ui-monospace,monospace;word-break:break-all;">'+esc(r.url)+'</span></div>':'')
+      +(r.auth&&r.auth!=='None'?'<div class="dr-row"><span class="dr-k">Auth</span><span class="dr-v">'+esc(r.auth)+'</span></div>':'')
+      +(r.freq?'<div class="dr-row"><span class="dr-k">Sync frequency</span><span class="dr-v">'+esc(r.freq)+'</span></div>':'')
       +'<div class="dr-row"><span class="dr-k">Last synced</span><span class="dr-v">'+esc(r.lastSync)+'</span></div>'
       +'<div class="dr-row"><span class="dr-k">Size</span><span class="dr-v">'+esc(r.size)+'</span></div>'
       +'<div class="dr-row"><span class="dr-k">Status</span><span class="dr-v">'+sh+'</span></div>'
+      +(r.version?'<div class="dr-row"><span class="dr-k">Version</span><span class="dr-v">'+esc(r.version)+'</span></div>':'')
+      +(r.owner?'<div class="dr-row"><span class="dr-k">Owner</span><span class="dr-v">'+esc(r.owner)+'</span></div>':'')
+      +(r.tags&&r.tags.length?'<div class="dr-row"><span class="dr-k">Tags</span><span class="dr-v">'+r.tags.map(function(tg){return '<span style="background:var(--s2);border:1px solid var(--ln);border-radius:4px;padding:2px 7px;font-size:11px;">'+esc(tg)+'</span>';}).join(' ')+'</span></div>':'')
       +'<div class="dl">Description</div><p style="font-size:12.5px;color:var(--ink2);line-height:1.6;">'+esc(r.desc)+'</p>'
       +'<div class="dl">Agents with access</div>'
-      +r.agents.map(function(a){return '<div class="mr" style="cursor:default;"><span class="dot d-ok"></span><span class="mt">'+esc(a)+'</span></div>';}).join('')
+      +(r.agents&&r.agents.length?r.agents.map(function(a){return '<div class="mr" style="cursor:default;"><span class="dot d-ok"></span><span class="mt">'+esc(a)+'</span></div>';}).join(''):'<div style="color:var(--mu);font-size:12.5px;padding:6px 0;">No agents assigned.</div>')
       +'<div class="dl">Actions</div>'
       +'<div style="display:flex;gap:8px;"><button class="btnp" data-sync-resource="'+esc(r.id)+'">&#8635; Sync now</button><button class="btn" data-download-resource="1">&#8659; Download</button></div>';
     document.getElementById('dr-resource').classList.add('on');
@@ -37376,10 +37945,66 @@ function doReassignCM() {
     var type=document.getElementById('nr-type').value;
     var sync=document.getElementById('nr-sync').value;
     var desc=document.getElementById('nr-desc').value.trim();
-    if(!name||!desc){toast('Please fill in all fields');return;}
-    RESOURCES.push({id:'r'+(RESOURCES.length+1),name:name,type:type,sync:sync,lastSync:'Just now',agents:[],status:'ok',size:'unknown',desc:desc});
-    document.getElementById('newResourceModal').classList.remove('on');
-    rResources();toast('Resource added');
+    var owner=(document.getElementById('nr-owner')||{value:''}).value.trim();
+    var version=(document.getElementById('nr-version')||{value:''}).value.trim();
+    var tags=((document.getElementById('nr-tags')||{value:''}).value||'').split(',').map(function(t){return t.trim();}).filter(Boolean);
+    var agentCbs=document.querySelectorAll('.nr-agent-cb:checked');
+    var agentNames=Array.prototype.slice.call(agentCbs).map(function(cb){
+      var a=AGENTS.find(function(x){return x.id===cb.value;}); return a?a.name:cb.value;
+    });
+    if(!name||!desc){toast('Please fill in name and description');return;}
+    RESOURCES.push({id:'r'+(RESOURCES.length+1),name:name,type:type,sync:sync,lastSync:'Just now',agents:agentNames,status:'ok',size:'unknown',desc:desc,owner:owner,version:version,tags:tags});
+    closeCreatePage('resources');
+    rResources();toast('Resource "'+name+'" added');
+  };
+
+  window.openNewResourceModal = function() {
+    var body =
+      '<div>'
+      +'<div class="field"><label>Resource name</label><input type="text" id="nr-name" placeholder="e.g. ADA diabetes standards 2025"/></div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Type</label><select id="nr-type"><option>Clinical guideline</option><option>Code reference</option><option>Drug reference</option><option>Patient panel</option><option>Payer policy</option></select></div>'
+        +'<div class="field"><label>Sync method</label><select id="nr-sync" onchange="nrSyncChanged(this.value)"><option value="Manual upload">Manual upload</option><option value="Live API">Live API</option><option value="Live FHIR">Live FHIR</option></select></div>'
+      +'</div>'
+      // Dynamic fields based on sync method
+      +'<div id="nr-live-fields" style="display:none;">'
+        +'<div class="field"><label>Endpoint URL</label><input type="text" id="nr-url" placeholder="e.g. https://api.example.com/v1/resources"/></div>'
+        +'<div class="g2">'
+          +'<div class="field"><label>Auth method</label><select id="nr-auth"><option>API Key</option><option>OAuth 2.0</option><option>HMAC</option><option>Internal</option><option>None</option></select></div>'
+          +'<div class="field"><label>Sync frequency</label><select id="nr-freq"><option value="15min">Every 15 minutes</option><option value="hourly">Hourly</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="on-demand">On demand only</option></select></div>'
+        +'</div>'
+      +'</div>'
+      +'<div id="nr-upload-fields">'
+        +'<div class="field"><label>Upload file <span style="color:var(--ink3);font-weight:400;">(PDF, CSV, JSON)</span></label><input type="file" style="font-size:12.5px;"/></div>'
+      +'</div>'
+      +'<div class="field"><label>Description</label><textarea id="nr-desc" style="min-height:80px;" placeholder="What is this resource and how is it used by agents?"></textarea></div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Owner <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">responsible team</span></label><input type="text" id="nr-owner" placeholder="e.g. Clinical Ops"/></div>'
+        +'<div class="field"><label>Version / effective date <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">optional</span></label><input type="text" id="nr-version" placeholder="e.g. 2025, v3.1"/></div>'
+      +'</div>'
+      +'<div class="field"><label>Agents with access</label>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">'
+        +AGENTS.map(function(a){return '<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;background:var(--s2);border:1px solid var(--ln);border-radius:6px;padding:5px 10px;"><input type="checkbox" class="nr-agent-cb" value="'+a.id+'" style="accent-color:var(--p);width:13px;height:13px;"> '+a.name+'</label>';}).join('')
+        +'</div>'
+      +'</div>'
+      +'<div class="field"><label>Tags <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">comma-separated</span></label><input type="text" id="nr-tags" placeholder="e.g. hedis, clinical, guidelines"/></div>'
+      +'</div>';
+    var foot = '<button class="btn" onclick="closeCreatePage(\'resources\')">Cancel</button>'
+      +'<button class="btnp" onclick="saveNewResource()">Add resource</button>';
+    showCreatePage('resources', 'Add resource', 'Reference data sources agents can query', body, foot);
+  };
+
+  window.nrSyncChanged = function(val) {
+    var live = document.getElementById('nr-live-fields');
+    var upload = document.getElementById('nr-upload-fields');
+    if (!live || !upload) return;
+    if (val === 'Manual upload') {
+      live.style.display = 'none';
+      upload.style.display = 'block';
+    } else {
+      live.style.display = 'block';
+      upload.style.display = 'none';
+    }
   };
 
   document.addEventListener('click',function(e){
@@ -37457,21 +38082,9 @@ function doReassignCM() {
     var inp = document.getElementById('ns-cron');
     if (inp) { inp.value = cron; updateCronPreview(cron); }
   };
-  window.openNewScheduleModal = function() {
-    var sel = document.getElementById('ns-agent');
-    if (sel) sel.innerHTML = '<option value="">Select an agent...</option>'
-      + AGENTS.map(function(a){return '<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>';}).join('');
-    document.getElementById('ns-name').value = '';
-    document.getElementById('ns-cron').value = '0 8 * * 1-5';
-    updateCronPreview('0 8 * * 1-5');
-    document.getElementById('newScheduleModal').classList.add('on');
-  };
-  window.closeNewScheduleModal = function() {
-    document.getElementById('newScheduleModal').classList.remove('on');
-  };
-  document.getElementById('newScheduleModal').addEventListener('click', function(e) {
-    if (e.target === e.currentTarget) closeNewScheduleModal();
-  });
+  // openNewScheduleModal handled by create page system above
+  // old openNewScheduleModal replaced by create page version above
+  window.closeNewScheduleModal = function() { closeCreatePage('schedules'); };
   window.saveNewSchedule = function() {
     var name = document.getElementById('ns-name').value.trim();
     var agentId = document.getElementById('ns-agent').value;
@@ -37490,7 +38103,7 @@ function doReassignCM() {
       });
       if (typeof rSch === 'function') rSch();
     }
-    closeNewScheduleModal();
+    closeCreatePage('schedules');
     toast('Schedule "'+name+'" created — '+(CRON_MAP[cron]||cron));
   };
 
@@ -38134,16 +38747,29 @@ function doReassignCM() {
   };
 
   window.openNewEvalModal = function() {
-    var sel=document.getElementById('ev-skill');
-    if(sel) sel.innerHTML=SKILLS.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.id)+'</option>';}).join('');
-    var asel=document.getElementById('ev-agent');
-    if(asel) asel.innerHTML='<option value="">Any agent using skill</option>'+AGENTS.map(function(a){return '<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>';}).join('');
-    document.getElementById('ev-query').value='';
-    document.getElementById('ev-expected').value='';
-    document.getElementById('newEvalModal').classList.add('on');
+    var skillOpts = SKILLS.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.id)+'</option>';}).join('');
+    var agentOpts = '<option value="">Any agent using skill</option>'+AGENTS.map(function(a){return '<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>';}).join('');
+    var body =
+      '<div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Skill to test</label><select id="ev-skill">'+skillOpts+'</select></div>'
+        +'<div class="field"><label>Agent <span style="font-weight:400;color:var(--ink3);font-size:11.5px;">(optional)</span></label><select id="ev-agent">'+agentOpts+'</select></div>'
+      +'</div>'
+      +'<div class="field"><label>Test query</label><textarea id="ev-query" placeholder="e.g. Summarise chart for patient 117408 before 9am visit" style="min-height:90px;"></textarea></div>'
+      +'<div class="field"><label>Expected output contains</label><textarea id="ev-expected" placeholder="e.g. medications listed, HbA1c value cited, FHIR resource ID referenced" style="min-height:80px;"></textarea></div>'
+      +'<div class="g2">'
+        +'<div class="field"><label>Minimum confidence threshold</label>'
+          +'<input type="range" id="ev-conf" min="0.5" max="1" step="0.05" value="0.8" oninput="document.getElementById(\'ev-conf-val\').textContent=parseFloat(this.value).toFixed(2)"/>'
+          +'<div style="font-size:11.5px;color:var(--ink3);margin-top:4px;">Threshold: <strong id="ev-conf-val">0.80</strong></div>'
+        +'</div>'
+        +'<div class="field"><label>Category</label><select id="ev-cat"><option>Clinical data</option><option>Prior auth</option><option>Inbox triage</option><option>Care gap</option><option>Other</option></select></div>'
+      +'</div>'
+      +'</div>';
+    var foot = '<button class="btn" onclick="closeCreatePage(\'evals\')">Cancel</button>'
+      +'<button class="btnp" onclick="saveEvalCase()">Save test case</button>';
+    showCreatePage('evals', 'New test case', 'Add a test query and expected output to validate skill performance', body, foot);
   };
-  window.closeNewEvalModal=function(){document.getElementById('newEvalModal').classList.remove('on');};
-  document.getElementById('newEvalModal').addEventListener('click',function(e){if(e.target===e.currentTarget)closeNewEvalModal();});
+  window.closeNewEvalModal=function(){ closeCreatePage('evals'); };
 
   window.saveEvalCase=function(){
     var skillId=document.getElementById('ev-skill').value;
@@ -38153,7 +38779,7 @@ function doReassignCM() {
     var cat=document.getElementById('ev-cat').value;
     if(!query){toast('Please enter a test query');return;}
     EVAL_CASES.push({id:'ev'+(EVAL_CASES.length+1),skillId:skillId,skillName:skillId,agent:'',query:query,expected:expected,minConf:conf,category:cat,lastResult:null,lastConf:null,lastRun:'Never'});
-    closeNewEvalModal(); rEvals(); toast('Test case added');
+    closeCreatePage('evals'); rEvals(); toast('Test case added');
   };
 
   rFlows(); rPrompts(); rResources(); rMemOverrides();
