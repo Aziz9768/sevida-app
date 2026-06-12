@@ -1565,7 +1565,7 @@ function frCloseModal(){
              padding: 12px 20px;
              border-radius: 6px;
              transition: background-color 0.2s, color 0.2s;
-             color: #353182;
+             color: #fff;
              text-decoration: none;
              font-size: 14px;
              font-weight: 400;
@@ -5612,7 +5612,7 @@ button.btn.btn-secondary.test {
 .member-table th {
     font-weight: 600;
     font-size: 12px;
-    color: #495057;
+    color: #fff;
     text-transform: uppercase;
 }
 
@@ -6244,7 +6244,7 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 }
 .ai-copilot-avatar svg { width: 18px; height: 18px; color: white; }
 .ai-copilot-title { font-size: 14px; font-weight: 600; color: #0f172a; }
-.ai-copilot-subtitle { font-size: 11px; color: #64748b; }
+.ai-copilot-subtitle { font-size: 11px; color: #64748b; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 2px; }
 .ai-copilot-header-actions { display: flex; gap: 4px; align-items: center; }
 .ai-copilot-header-btn {
     background: transparent; border: none; color: #94a3b8; width: 32px; height: 32px;
@@ -6444,6 +6444,398 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
     body > *:not(#aiCpPrintArea) { display: none !important; }
     #aiCpPrintArea { display: block !important; padding: 20px; font-family: Arial, sans-serif; }
     #aiCpPrintArea .no-print { display: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   VIDA COPILOT — SESSION HISTORY SYSTEM
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Panel overflow needed for sub-panels */
+.ai-copilot-panel { overflow: hidden !important; }
+
+
+
+
+/* ── QUESTION CHIPS ── */
+.ai-chips-questions {
+    padding: 4px 12px 8px; flex-shrink: 0;
+    display: flex; flex-wrap: wrap; gap: 6px;
+}
+/* ai-q-chip intentionally mirrors .ai-chip exactly */
+.ai-q-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 20px;
+    border: 1px solid #e2e8f0; background: #fff;
+    font-size: 12px; font-weight: 400; color: #374151;
+    white-space: nowrap; cursor: pointer; flex-shrink: 0;
+    transition: all .15s; font-family: inherit;
+    line-height: 1.5;
+}
+.ai-q-chip:hover { background: #f0f0ff; border-color: #484581; color: #484581; }
+
+
+/* ── CASELOAD ALERTS PANEL ── */
+.ai-alert-toggle-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 11px 14px; border-radius: 9px; margin-bottom: 8px;
+    background: #f8fafc; border: 1.5px solid #f1f5f9;
+    transition: border-color 0.15s, background 0.15s;
+}
+.ai-alert-toggle-row.on { background: #f0f0ff; border-color: #c8c6f0; }
+.ai-alert-toggle-switch {
+    position: relative; width: 36px; height: 20px; flex-shrink: 0; margin-top: 1px;
+}
+.ai-alert-toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.ai-alert-toggle-track {
+    position: absolute; inset: 0; background: #e2e8f0; border-radius: 20px;
+    cursor: pointer; transition: background 0.2s;
+}
+.ai-alert-toggle-track:before {
+    content: ''; position: absolute; width: 14px; height: 14px;
+    left: 3px; top: 3px; background: #fff; border-radius: 50%;
+    transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.ai-alert-toggle-switch input:checked + .ai-alert-toggle-track { background: #282460; }
+.ai-alert-toggle-switch input:checked + .ai-alert-toggle-track:before { transform: translateX(16px); }
+.ai-alert-toggle-body { flex: 1; min-width: 0; }
+.ai-alert-toggle-label { font-size: 12.5px; font-weight: 500; color: #1e293b; line-height: 1.4; }
+.ai-alert-toggle-desc  { font-size: 11px; color: #94a3b8; margin-top: 2px; line-height: 1.4; }
+.ai-alert-nudge-preview {
+    display: none; margin-top: 8px; padding: 7px 10px;
+    background: #fffbeb; border: 1px solid #fcd34d; border-radius: 7px;
+    font-size: 11px; color: #78350f; line-height: 1.45;
+}
+.ai-alert-toggle-row.on .ai-alert-nudge-preview { display: block; }
+
+.ai-alert-custom-section { padding: 0 14px 6px; }
+.ai-alert-custom-label {
+    font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase;
+    letter-spacing: 0.07em; padding: 12px 0 8px; display: flex;
+    align-items: center; gap: 6px;
+}
+.ai-alert-custom-item {
+    display: flex; align-items: flex-start; gap: 9px; padding: 10px 12px;
+    background: #f8f7ff; border: 1.5px solid #e6e3ff; border-radius: 9px; margin-bottom: 7px;
+}
+.ai-alert-custom-icon { width: 24px; height: 24px; background: #282460; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.ai-alert-custom-icon svg { width: 12px; height: 12px; color: #fff; }
+.ai-alert-custom-text { font-size: 12px; color: #1e293b; line-height: 1.5; flex: 1; }
+.ai-alert-custom-del { background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 18px; padding: 0; transition: color 0.15s; line-height: 1; }
+.ai-alert-custom-del:hover { color: #ef4444; }
+
+/* ── HAMBURGER MENU ── */
+.ai-hamburger-btn {
+    width: 32px; height: 32px; border: none; background: none; cursor: pointer;
+    border-radius: 7px; display: flex; align-items: center; justify-content: center;
+    color: #475569; transition: background 0.15s; flex-shrink: 0;
+}
+.ai-hamburger-btn:hover { background: #f1f5f9; color: #1e293b; }
+.ai-hamburger-btn svg { width: 18px; height: 18px; }
+
+.ai-menu-dropdown {
+    position: absolute; top: 0; left: 0; bottom: 0;
+    width: 440px; background: #fff; border-right: 1px solid #e8eaed;
+    z-index: 30; display: flex; flex-direction: column;
+    transform: translateX(-100%); transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 4px 0 20px rgba(0,0,0,0.08);
+}
+.ai-menu-dropdown.open { transform: translateX(0); }
+
+/* Close button — large, top left, Jira style */
+.ai-menu-close-btn {
+    width: 36px; height: 36px; border: 1px solid #e8eaed; background: #f8f9fa;
+    border-radius: 50%; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; color: #5f6368; transition: background 0.15s; flex-shrink: 0;
+}
+.ai-menu-close-btn:hover { background: #e8eaed; }
+.ai-menu-close-btn svg { width: 16px; height: 16px; }
+
+/* New chat action — prominent, top of list */
+.ai-menu-new-chat {
+    display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+    cursor: pointer; border: none; background: none; width: 100%;
+    text-align: left; font-family: inherit; font-size: 14px; font-weight: 500;
+    color: #1e293b; transition: background 0.15s; border-radius: 0;
+}
+.ai-menu-new-chat:hover { background: #f1f5f9; }
+.ai-menu-new-chat svg { width: 16px; height: 16px; color: #64748b; }
+
+/* Section headers — like Jira with icon */
+.ai-menu-section-hd {
+    display: flex; align-items: center; gap: 8px; padding: 14px 16px 6px;
+    font-size: 13px; font-weight: 600; color: #1e293b;
+}
+.ai-menu-section-hd svg { width: 15px; height: 15px; color: #64748b; }
+.ai-menu-section-hd-action {
+    margin-left: auto; width: 22px; height: 22px; border: none; background: none;
+    cursor: pointer; border-radius: 4px; display: flex; align-items: center;
+    justify-content: center; color: #94a3b8; transition: background 0.15s;
+}
+.ai-menu-section-hd-action:hover { background: #f1f5f9; color: #475569; }
+.ai-menu-section-hd-action svg { width: 14px; height: 14px; }
+
+/* Action items */
+.ai-menu-item {
+    display: flex; align-items: center; gap: 12px; padding: 9px 16px;
+    cursor: pointer; transition: background 0.15s; border: none; background: none;
+    width: 100%; text-align: left; font-family: inherit; font-size: 13px; color: #374151;
+}
+.ai-menu-item:hover { background: #f8fafc; }
+.ai-menu-item svg { width: 16px; height: 16px; color: #6b7280; flex-shrink: 0; }
+.ai-menu-item-label { flex: 1; }
+
+/* Chat history items — Jira style */
+.ai-menu-chat-item {
+    display: flex; align-items: flex-start; gap: 10px; padding: 9px 16px;
+    cursor: pointer; transition: background 0.15s; border-radius: 0;
+}
+.ai-menu-chat-item:hover { background: #f8fafc; }
+.ai-menu-chat-item.active { background: #f0f0ff; }
+.ai-menu-chat-icon {
+    width: 32px; height: 32px; background: #f3f4f6; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.ai-menu-chat-icon svg { width: 14px; height: 14px; color: #9ca3af; }
+.ai-menu-chat-item.active .ai-menu-chat-icon { background: #ede9fe; }
+.ai-menu-chat-item.active .ai-menu-chat-icon svg { color: #282460; }
+.ai-menu-chat-body { flex: 1; min-width: 0; }
+.ai-menu-chat-title { font-size: 13px; font-weight: 500; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-menu-chat-item.active .ai-menu-chat-title { color: #282460; font-weight: 600; }
+.ai-menu-chat-meta { font-size: 11.5px; color: #9ca3af; margin-top: 2px; }
+
+.ai-menu-divider { height: 1px; background: #f3f4f6; margin: 6px 0; }
+
+/* ── JIRA-INSPIRED WELCOME SCREEN ── */
+
+/* Member context bar */
+.ai-member-ctx {
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    flex-shrink: 0;
+}
+.ai-member-ctx-name {
+    font-size: 14px; font-weight: 600; color: #0f172a; margin-bottom: 4px;
+}
+.ai-member-ctx-tags {
+    display: flex; flex-wrap: wrap; gap: 5px;
+}
+.ai-member-ctx-tag {
+    font-size: 11px; padding: 2px 8px; border-radius: 20px;
+    font-weight: 500; white-space: nowrap;
+}
+.ai-ctx-tag-risk-high   { background: #fee2e2; color: #991b1b; }
+.ai-ctx-tag-risk-med    { background: #fff7ed; color: #9a3412; }
+.ai-ctx-tag-risk-low    { background: #f0fdf4; color: #166534; }
+.ai-ctx-tag-adt         { background: #fef9c3; color: #854d0e; }
+.ai-ctx-tag-consent     { background: #fff7ed; color: #9a3412; }
+.ai-ctx-tag-neutral     { background: #f1f5f9; color: #475569; }
+
+/* Suggested actions section */
+.ai-actions-section { padding: 10px 12px 6px; }
+.ai-actions-label {
+    font-size: 10.5px; font-weight: 600; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    padding: 0 2px 7px; display: flex; align-items: center; gap: 6px;
+}
+.ai-actions-label span { color: #282460; }
+
+/* More questions link */
+.ai-more-questions {
+    display: flex; align-items: center; gap: 5px; padding: 6px 8px;
+    font-size: 12px; color: #6366f1; border: none; background: none;
+    cursor: pointer; width: 100%; border-radius: 6px; transition: background 0.15s;
+    margin-top: 2px;
+}
+.ai-more-questions:hover { background: #f0f0ff; }
+.ai-more-questions svg { width: 13px; height: 13px; transition: transform 0.2s; }
+.ai-more-questions.open svg { transform: rotate(90deg); }
+
+/* Past chats compact list — Jira style */
+.ai-past-compact { padding: 6px 12px 10px; border-top: 1px solid #f1f5f9; margin-top: 4px; }
+.ai-past-compact-label {
+    font-size: 10.5px; font-weight: 600; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    padding: 8px 2px 6px; display: flex; align-items: center; justify-content: space-between;
+}
+.ai-past-compact-see-all {
+    font-size: 11px; color: #282460; font-weight: 500; border: none;
+    background: none; cursor: pointer; text-transform: none; letter-spacing: 0;
+    padding: 2px 5px; border-radius: 4px; transition: background 0.15s;
+}
+.ai-past-compact-see-all:hover { background: #f0f0ff; }
+.ai-past-compact-item {
+    display: flex; align-items: center; gap: 8px; padding: 7px 8px;
+    border-radius: 7px; cursor: pointer; transition: background 0.15s;
+    border: 1px solid transparent;
+}
+.ai-past-compact-item:hover { background: #f8f7ff; border-color: #e6e3ff; }
+.ai-past-compact-item.active { background: #f0f0ff; border-color: #c8c6f0; }
+.ai-past-compact-icon {
+    width: 28px; height: 28px; background: #f1f5f9; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.ai-past-compact-icon svg { width: 13px; height: 13px; color: #94a3b8; }
+.ai-past-compact-body { flex: 1; min-width: 0; }
+.ai-past-compact-title { font-size: 12px; font-weight: 500; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-past-compact-date  { font-size: 11px; color: #cbd5e1; margin-top: 1px; }
+.ai-past-compact-arrow { font-size: 14px; color: #e2e8f0; flex-shrink: 0; }
+.ai-past-compact-item:hover .ai-past-compact-arrow { color: #94a3b8; }
+
+/* ── Sub-panel base (session history + global context) ── */
+.ai-sub-panel {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: #fff; z-index: 20; display: flex; flex-direction: column;
+    transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+.ai-sub-panel.from-left  { transform: translateX(-100%); }
+.ai-sub-panel.from-right { transform: translateX(100%); }
+.ai-sub-panel.open       { transform: translateX(0); }
+
+/* ── Sub-panel shared header ── */
+.ai-sub-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 13px 16px 12px; border-bottom: 1px solid #f1f5f9; flex-shrink: 0;
+}
+.ai-sub-back {
+    width: 30px; height: 30px; border: none; background: none; cursor: pointer;
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    color: #475569; transition: background 0.15s; flex-shrink: 0;
+}
+.ai-sub-back:hover { background: #f1f5f9; }
+.ai-sub-back svg { width: 18px; height: 18px; }
+.ai-sub-title { font-size: 13px; font-weight: 600; color: #0f172a; flex: 1; }
+.ai-sub-action {
+    font-size: 11.5px; color: #282460; font-weight: 500; border: none;
+    background: none; cursor: pointer; padding: 4px 8px; border-radius: 5px;
+    transition: background 0.15s;
+}
+.ai-sub-action:hover { background: #f0f0ff; }
+
+/* ── Session list ── */
+.ai-session-list { flex: 1; overflow-y: auto; padding: 8px 10px 12px; }
+.ai-session-new-btn {
+    margin: 8px 10px 4px; padding: 9px 14px; background: #f8f7ff;
+    border: 1.5px dashed #c8c6f0; border-radius: 8px; color: #282460;
+    font-size: 12.5px; font-weight: 500; cursor: pointer; width: calc(100% - 20px);
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: background 0.15s;
+}
+.ai-session-new-btn:hover { background: #ebe9ff; border-color: #a09be0; }
+.ai-session-item {
+    padding: 10px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 5px;
+    border: 1.5px solid #f1f5f9; transition: background 0.15s, border-color 0.15s;
+}
+.ai-session-item:hover  { background: #f8f7ff; border-color: #c8c6f0; }
+.ai-session-item.active { background: #f0f0ff; border-color: #282460; }
+.ai-session-item-title   { font-size: 12.5px; font-weight: 500; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-session-item-preview { font-size: 11.5px; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-session-item-meta    { font-size: 11px; color: #cbd5e1; margin-top: 3px; display: flex; align-items: center; gap: 6px; }
+.ai-session-item-active-tag { font-size: 10px; font-weight: 600; color: #282460; background: #e6e3ff; padding: 1px 6px; border-radius: 10px; }
+
+/* ── Session breadcrumb (shown in messages when viewing a past session) ── */
+.ai-session-breadcrumb {
+    display: flex; align-items: center; gap: 8px; padding: 9px 14px 8px;
+    border-bottom: 1px solid #f1f5f9; background: #fafafa; flex-shrink: 0;
+}
+.ai-session-breadcrumb-back {
+    display: flex; align-items: center; gap: 4px; font-size: 12px; color: #475569;
+    border: none; background: none; cursor: pointer; padding: 3px 6px;
+    border-radius: 5px; transition: background 0.15s; white-space: nowrap;
+}
+.ai-session-breadcrumb-back:hover { background: #f1f5f9; color: #1e293b; }
+.ai-session-breadcrumb-back svg { width: 13px; height: 13px; }
+.ai-session-breadcrumb-divider { color: #cbd5e1; font-size: 12px; }
+.ai-session-breadcrumb-title { font-size: 12px; color: #94a3b8; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-session-breadcrumb-date  { font-size: 11px; color: #cbd5e1; flex-shrink: 0; }
+
+/* ── History button in header ── */
+.ai-history-pill {
+    display: flex; align-items: center; gap: 5px; padding: 4px 10px 4px 8px;
+    background: #f0f0ff; border: 1.5px solid #c8c6f0; border-radius: 20px;
+    cursor: pointer; color: #282460; font-size: 11.5px; font-weight: 600;
+    white-space: nowrap; transition: all 0.15s;
+}
+.ai-history-pill:hover { background: #e6e3ff; border-color: #a09be0; }
+.ai-history-pill svg { width: 13px; height: 13px; }
+
+/* ── Nudge ── */
+.ai-nudge-stack { padding: 10px 12px 2px; display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.ai-nudge {
+    background: #fffbeb; border: 1.5px solid #fcd34d; border-radius: 10px;
+    padding: 10px 12px; display: flex; align-items: flex-start; gap: 9px;
+    transition: opacity 0.2s;
+}
+.ai-nudge-icon { width: 28px; height: 28px; background: #f59e0b; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-nudge-icon svg { width: 14px; height: 14px; color: #fff; }
+.ai-nudge-body { flex: 1; min-width: 0; }
+.ai-nudge-text { font-size: 12px; color: #1e293b; line-height: 1.45; }
+.ai-nudge-actions { display: flex; gap: 6px; margin-top: 7px; }
+.ai-nudge-ask {
+    padding: 5px 12px; background: #282460; color: #fff; border: none;
+    border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; transition: background 0.15s;
+}
+.ai-nudge-ask:hover { background: #1e1b4b; }
+.ai-nudge-dismiss {
+    padding: 5px 10px; background: none; color: #94a3b8; border: 1px solid #e2e8f0;
+    border-radius: 6px; font-size: 12px; cursor: pointer; transition: background 0.15s;
+}
+.ai-nudge-dismiss:hover { background: #f8fafc; }
+
+/* ── Global AI Context ── */
+.ai-ctx-desc { font-size: 12px; color: #64748b; padding: 10px 16px 6px; line-height: 1.5; flex-shrink: 0; }
+.ai-ctx-rules { flex: 1; overflow-y: auto; padding: 4px 12px 8px; }
+.ai-ctx-rule {
+    display: flex; align-items: flex-start; gap: 9px; padding: 10px 12px;
+    background: #f8f7ff; border: 1.5px solid #e6e3ff; border-radius: 9px; margin-bottom: 7px;
+}
+.ai-ctx-rule-icon { width: 24px; height: 24px; background: #282460; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.ai-ctx-rule-icon svg { width: 12px; height: 12px; color: #fff; }
+.ai-ctx-rule-body { flex: 1; min-width: 0; }
+.ai-ctx-rule-text   { font-size: 12px; color: #1e293b; line-height: 1.5; }
+.ai-ctx-rule-status { font-size: 11px; color: #64748b; margin-top: 2px; }
+.ai-ctx-rule-del { background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 18px; padding: 0; transition: color 0.15s; line-height: 1; }
+.ai-ctx-rule-del:hover { color: #ef4444; }
+.ai-ctx-add { padding: 10px 14px 14px; border-top: 1px solid #f1f5f9; flex-shrink: 0; }
+.ai-ctx-add-label { font-size: 11px; color: #94a3b8; margin-bottom: 6px; }
+.ai-ctx-add-row { display: flex; gap: 7px; }
+.ai-ctx-input {
+    flex: 1; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 8px 12px;
+    font-size: 12.5px; color: #0f172a; font-family: inherit; background: #f8fafc;
+    transition: border-color 0.2s;
+}
+.ai-ctx-input:focus { outline: none; border-color: #282460; background: #fff; }
+.ai-ctx-input::placeholder { color: #94a3b8; font-size: 12px; }
+.ai-ctx-save { padding: 8px 14px; background: #282460; color: #fff; border: none; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.ai-ctx-save:hover { background: #1e1b4b; }
+.ai-ctx-confirm { font-size: 11.5px; color: #16a34a; padding: 6px 2px 0; display: none; }
+
+/* ── Past chats in welcome screen ── */
+.ai-past-section { padding: 0 12px 12px; }
+.ai-past-header { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; padding: 10px 2px 7px; display: flex; align-items: center; justify-content: space-between; }
+.ai-past-see-all { font-size: 11px; color: #282460; font-weight: 500; border: none; background: none; cursor: pointer; padding: 2px 5px; border-radius: 4px; transition: background 0.15s; }
+.ai-past-see-all:hover { background: #f0f0ff; }
+
+/* ── Recent conversations (non-member pages) ── */
+.ai-recent-section { padding: 0 12px 12px; border-top: 1px solid #f1f5f9; margin-top: 8px; }
+.ai-recent-header { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; padding: 12px 2px 8px; }
+.ai-recent-search {
+    width: 100%; padding: 7px 10px 7px 32px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+    font-size: 12px; color: #0f172a; font-family: inherit; background: #f8fafc; margin-bottom: 8px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: 10px center; transition: border-color 0.2s;
+}
+.ai-recent-search:focus { outline: none; border-color: #282460; background-color: #fff; }
+.ai-recent-item { padding: 9px 11px; border-radius: 8px; cursor: pointer; border: 1.5px solid #f1f5f9; margin-bottom: 5px; transition: background 0.15s, border-color 0.15s; }
+.ai-recent-item:hover { background: #f8f7ff; border-color: #c8c6f0; }
+.ai-recent-item-member  { font-size: 12px; font-weight: 600; color: #1e293b; margin-bottom: 2px; }
+.ai-recent-item-preview { font-size: 11.5px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-recent-item-date    { font-size: 10.5px; color: #cbd5e1; margin-top: 3px; }
+
+/* ── New chat confirmation toast in header ── */
+.ai-new-toast {
+    font-size: 11.5px; color: #16a34a; font-weight: 500; padding: 3px 8px;
+    background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 20px;
+    display: none; white-space: nowrap;
 }
 
 /* INPUT AREA */
@@ -9793,29 +10185,29 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 
 /* Agent chip row — horizontal scroll at bottom above input */
 .ai-chips-row {
-    display: flex; gap: 7px; padding: 10px 14px 2px;
+    display: flex; gap: 7px; padding: 8px 14px 4px;
     overflow-x: auto; flex-shrink: 0;
-    scrollbar-width: none; border-top: 1px solid #f1f5f9;
+    scrollbar-width: none;
 }
 .ai-chips-row::-webkit-scrollbar { display: none; }
 
 .ai-chip {
-    display: flex; align-items: center; gap: 6px;
+    display: inline-flex; align-items: center; gap: 6px;
     padding: 6px 12px; border-radius: 20px;
     border: 1px solid #e2e8f0; background: #fff;
-    font-size: 12px; font-weight: 500; color: #374151;
+    font-size: 12px; font-weight: 400; color: #374151;
     white-space: nowrap; cursor: pointer; flex-shrink: 0;
     transition: all .15s; user-select: none;
 }
 .ai-chip svg { width: 13px; height: 13px; opacity: .6; flex-shrink: 0; }
 .ai-chip:hover { background: #f0f0ff; border-color: #484581; color: #484581; }
 .ai-chip--primary {
-    border-color: #484581 !important;
-    background: #f0f0ff !important;
-    color: #3730a3 !important;
-    font-weight: 600 !important;
+    border-color: #e2e8f0 !important;
+    background: #fff !important;
+    color: #374151 !important;
+    font-weight: 400 !important;
 }
-.ai-chip--primary svg { opacity: 1 !important; }
+.ai-chip--primary svg { opacity: .6 !important; }
 .ai-chip:hover svg { opacity: 1; }
 .ai-chip--review { border-color: #fbbf24; color: #92400e; background: #fffbeb; }
 .ai-chip--draft  { opacity: .45; cursor: not-allowed; }
@@ -17150,7 +17542,7 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 <body>
 
 <!-- LOGIN SCREEN -->
-<div id="loginScreen" style="position:fixed;inset:0;background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<div id="loginScreen" style="position:fixed;inset:0;background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%);display:none;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <div style="background:white;border-radius:20px;padding:48px 44px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,0.3);text-align:center;animation:loginFadeIn 0.5s ease both;">
     <div style="width:52px;height:52px;background:linear-gradient(135deg,#353182,#6366f1);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 4px 16px rgba(53,49,130,0.3);">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -19929,71 +20321,219 @@ function doLogin() {
 </button>
 
 <div class="ai-copilot-panel closed" id="aiCopilotPanel">
-    <!-- Header -->
+
+    <!-- ══ SESSION HISTORY SUB-PANEL (slides from left) ══ -->
+    <div class="ai-sub-panel from-left" id="aiSessionPanel">
+        <div class="ai-sub-header">
+            <button class="ai-sub-back" onclick="closeSessionPanel()" title="Back to chat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            </button>
+            <div class="ai-sub-title" id="aiSessionPanelTitle">Chat History</div>
+            <button class="ai-sub-action" onclick="startNewSession()">+ New chat</button>
+        </div>
+        <div class="ai-session-list" id="aiSessionList"></div>
+    </div>
+
+    <!-- ══ GLOBAL AI CONTEXT SUB-PANEL (slides from right) ══ -->
+    <div class="ai-sub-panel from-right" id="aiCtxPanel">
+        <div class="ai-sub-header">
+            <button class="ai-sub-back" onclick="closeCtxPanel()" title="Back">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            </button>
+            <div class="ai-sub-title">Caseload Alerts</div>
+        </div>
+        <div class="ai-ctx-desc" style="padding:10px 16px 6px;font-size:12px;color:#64748b;line-height:1.55;">
+            Tell me what to watch for across your caseload. I'll surface these as nudges when I spot something relevant.
+        </div>
+
+        <!-- Scrollable content -->
+        <div style="flex:1;overflow-y:auto;padding:4px 14px 8px;">
+
+            <!-- Pre-built toggles -->
+            <div style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;padding:8px 2px 10px;">Common alerts</div>
+
+            <div class="ai-alert-toggle-row" id="ctxToggleADT">
+                <label class="ai-alert-toggle-switch">
+                    <input type="checkbox" id="ctxChkADT" onchange="togglePrebuiltAlert('ADT',this.checked)" />
+                    <span class="ai-alert-toggle-track"></span>
+                </label>
+                <div class="ai-alert-toggle-body">
+                    <div class="ai-alert-toggle-label">ADT admission or discharge</div>
+                    <div class="ai-alert-toggle-desc">Alert me when any of my members is admitted, discharged, or transferred</div>
+                    <div class="ai-alert-nudge-preview">
+                        💡 Example nudge: "William had an ADT admission on Jun 10. Want me to summarize the event and suggest next steps?"
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-alert-toggle-row" id="ctxToggleContact">
+                <label class="ai-alert-toggle-switch">
+                    <input type="checkbox" id="ctxChkContact" onchange="togglePrebuiltAlert('CONTACT',this.checked)" />
+                    <span class="ai-alert-toggle-track"></span>
+                </label>
+                <div class="ai-alert-toggle-body">
+                    <div class="ai-alert-toggle-label">No contact in 30+ days</div>
+                    <div class="ai-alert-toggle-desc">Alert me when a member hasn't had a successful contact in over 30 days</div>
+                    <div class="ai-alert-nudge-preview">
+                        💡 Example nudge: "Patricia hasn't been contacted in 34 days. Want me to draft an outreach note?"
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-alert-toggle-row" id="ctxToggleConsent">
+                <label class="ai-alert-toggle-switch">
+                    <input type="checkbox" id="ctxChkConsent" onchange="togglePrebuiltAlert('CONSENT',this.checked)" />
+                    <span class="ai-alert-toggle-track"></span>
+                </label>
+                <div class="ai-alert-toggle-body">
+                    <div class="ai-alert-toggle-label">Consent not obtained</div>
+                    <div class="ai-alert-toggle-desc">Remind me when a member's consent is pending or needs renewal</div>
+                    <div class="ai-alert-nudge-preview">
+                        💡 Example nudge: "Robert's consent is still pending. Want me to log a contact attempt?"
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-alert-toggle-row" id="ctxToggleOverdue">
+                <label class="ai-alert-toggle-switch">
+                    <input type="checkbox" id="ctxChkOverdue" onchange="togglePrebuiltAlert('OVERDUE',this.checked)" />
+                    <span class="ai-alert-toggle-track"></span>
+                </label>
+                <div class="ai-alert-toggle-body">
+                    <div class="ai-alert-toggle-label">Overdue tasks</div>
+                    <div class="ai-alert-toggle-desc">Alert me when a member has tasks past their due date</div>
+                    <div class="ai-alert-nudge-preview">
+                        💡 Example nudge: "David has 2 overdue tasks. Want me to show what needs action?"
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom rules -->
+            <div class="ai-alert-custom-section" style="padding:0;">
+                <div class="ai-alert-custom-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M12 5v14M5 12h14"/></svg>
+                    Custom alerts
+                </div>
+                <div id="aiCtxRules"></div>
+            </div>
+
+        </div>
+
+        <!-- Add custom alert -->
+        <div class="ai-ctx-add" style="border-top:1px solid #f1f5f9;padding:10px 14px 14px;">
+            <div class="ai-ctx-add-label">Add a custom alert</div>
+            <div class="ai-ctx-add-row">
+                <input type="text" class="ai-ctx-input" id="aiCtxInput"
+                    placeholder="e.g. Alert me when a member misses an appointment"
+                    onkeypress="if(event.key==='Enter')saveCtxRule()" />
+                <button class="ai-ctx-save" onclick="saveCtxRule()">Add</button>
+            </div>
+            <div class="ai-ctx-confirm" id="aiCtxConfirm">✓ Saved. You'll see a nudge when this fires.</div>
+        </div>
+    </div>
+
+    <!-- ══ MAIN PANEL ══ -->
+
+    <!-- Header — context-aware state indicator -->
     <div class="ai-copilot-header">
-        <div class="ai-copilot-header-left">
+        <div class="ai-copilot-header-left" style="gap:6px;">
+
+            <!-- Hamburger menu — left of logo -->
+            <button class="ai-hamburger-btn" id="aiHamburgerBtn" onclick="toggleAIMenu()" title="Menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <!-- MENU SIDEBAR — positioned relative to CoPilot panel, not hamburger button -->
+            <div class="ai-menu-dropdown" id="aiMenuDropdown">
+
+                    <!-- Close button — top left, Jira style -->
+                    <div style="padding:12px 14px 4px;flex-shrink:0;">
+                        <button class="ai-menu-close-btn" onclick="closeAIMenu()" title="Close">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Scrollable content -->
+                    <div style="flex:1;overflow-y:auto;">
+
+                        <!-- New chat — prominent single action at top -->
+                        <button class="ai-menu-new-chat" id="aiMenuNewChat" onclick="closeAIMenu();confirmNewSession();" style="display:none;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                            New chat
+                        </button>
+
+                        <div class="ai-menu-divider"></div>
+
+                        <!-- Actions section -->
+                        <div class="ai-menu-section-hd">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                            Actions
+                        </div>
+                        <button class="ai-menu-item" id="aiMenuAppt" onclick="closeAIMenu();openAICopilotForAppointment();" style="display:none;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M12 14v4M10 16h4"/></svg>
+                            <span class="ai-menu-item-label">Schedule appointment</span>
+                        </button>
+                        <button class="ai-menu-item" onclick="closeAIMenu();handleAIQuestion('mx_draft_note');">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            <span class="ai-menu-item-label">Draft service note</span>
+                        </button>
+                        <button class="ai-menu-item" onclick="closeAIMenu();openCtxPanel();">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            <span class="ai-menu-item-label">Caseload Alerts</span>
+                        </button>
+
+                        <div class="ai-menu-divider"></div>
+
+                        <!-- Chats section — Jira style with clock icon -->
+                        <div class="ai-menu-section-hd">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Recent Chats
+                            <button class="ai-menu-section-hd-action" onclick="closeAIMenu();confirmNewSession();" title="New chat">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                            </button>
+                        </div>
+                        <div id="aiMenuChatList">
+                            <div style="font-size:12px;color:#9ca3af;padding:6px 16px 12px;">No past chats yet.</div>
+                        </div>
+
+                    </div>
+            </div>
+
+            <!-- Logo + title -->
             <div class="ai-copilot-avatar">
                 <img src="https://web.dev.leapmetrics.io/img/sevida-icon.png" alt="Vida Co-pilot" style="width:100%;height:100%;object-fit:contain;" />
             </div>
             <div>
-                <div class="ai-copilot-title" id="aiPanelTitle">New chat</div>
-                <div class="ai-copilot-subtitle">Sevida AI Co-pilot</div>
+                <div class="ai-copilot-title" id="aiPanelTitle">Sevida CoPilot</div>
+                <div class="ai-copilot-subtitle" id="aiPanelSubtitle">Sevida AI Co-pilot</div>
             </div>
         </div>
+
+        <!-- Right side: toast + expand + close only -->
         <div class="ai-copilot-header-actions">
-            <button class="ai-header-appt-btn" id="aiHeaderApptBtn" onclick="openAICopilotForAppointment()" title="Schedule Appointment">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M12 14v4M10 16h4"/></svg>
-                Appt
-            </button>
-            <button class="ai-copilot-header-btn" onclick="resetAICopilot()" title="New chat">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14"/>
-                </svg>
-            </button>
-            <div style="position:relative;">
-            <button class="ai-copilot-header-btn" id="sevida-api-key-btn" onclick="toggleApiKeyPanel()" title="API Settings">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
-                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
-                </svg>
-            </button>
-            <div id="sevida-api-key-panel">
-                <h4>🔑 Anthropic API Key</h4>
-                <p>Stored in sessionStorage only. Cleared when you close the tab. Never sent anywhere except directly to Anthropic.</p>
-                <span id="sevida-api-key-status">○ No key</span>
-                <br/><br/>
-                <input type="password" id="sevida-api-key-input" placeholder="sk-ant-..." 
-                    onkeypress="if(event.key==='Enter')saveApiKey(this.value)" />
-                <div class="api-key-actions">
-                    <button class="api-key-save-btn" onclick="saveApiKey(document.getElementById('sevida-api-key-input').value)">Save key</button>
-                    <button class="api-key-clear-btn" onclick="clearApiKey()">Clear</button>
-                </div>
-            </div>
-        </div>
+            <span class="ai-new-toast" id="aiNewToast">Chat saved ✓</span>
             <button class="ai-copilot-header-btn" onclick="toggleAICopilotExpand()" title="Expand / Collapse" id="aiExpandBtn">
-                <svg class="ai-expand-icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
-                </svg>
-                <svg class="ai-expand-icon-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 14h6v6M20 10h-6V4M10 14l-7 7M14 10l7-7"/>
-                </svg>
+                <svg class="ai-expand-icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                <svg class="ai-expand-icon-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h6v6M20 10h-6V4M10 14l-7 7M14 10l7-7"/></svg>
             </button>
             <button class="ai-copilot-header-btn" onclick="toggleAICopilot()" title="Close">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
         </div>
     </div>
 
-    <!-- Messages / Content Area -->
-    <div class="ai-copilot-messages" id="aiMessages">
-        <!-- Welcome screen with questions - rendered by JS -->
-    </div>
+    <!-- Nudges — clinical event nudges, above messages, member-specific -->
+    <div class="ai-nudge-stack" id="aiNudgeStack" style="display:none;"></div>
 
-    <!-- Agent Chips Row — rendered by JS -->
+    <!-- Messages area -->
+    <div class="ai-copilot-messages" id="aiMessages"></div>
+
+    <!-- Agent chips -->
     <div class="ai-chips-row" id="aiChipsRow" style="display:none;"></div>
 
-    <!-- Input Area -->
+    <!-- Quick question chips — shown on member pages -->
+    <div class="ai-chips-questions" id="aiQuestionChips" style="display:none;"></div>
+
+    <!-- Input -->
     <div class="ai-copilot-input">
         <div class="ai-input-wrapper">
             <input type="text" class="ai-input-field" id="aiInputField"
@@ -20005,7 +20545,7 @@ function doLogin() {
             </button>
         </div>
     </div>
-</div>
+</div></div>
 
 </div>
     <script>
@@ -24159,6 +24699,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Always update the active class at the end
             updateActiveNavItem(navId);
+            // Close CoPilot on any navigation — user must reopen intentionally
+            if (typeof closeAICopilot === 'function') closeAICopilot();
             // Clear member context on any sidebar navigation (member pages set it themselves)
             if (navId !== 'navMembers') {
                 window.currentMember = null;
@@ -29394,6 +29936,8 @@ function generateDashboardHTML(member) {
 }
 
 function navigateToDetails(memberId, tabId = 'dashboard') {
+    closeAIMenu();
+    if (typeof closeAICopilot === 'function') closeAICopilot();
     const member = membersDB.find(m => m.id === memberId);
     if (!member) {
         console.error(`Member with ID ${memberId} not found.`);
@@ -29417,13 +29961,11 @@ function navigateToDetails(memberId, tabId = 'dashboard') {
             ? 'What do you need for ' + member.name.split(' ')[0] + '?'
             : 'Ask about your caseload...';
         
-        // CRITICAL FIX: Clear history so old chats don't persist on new page
-        aiCopilotState.conversationHistory = []; 
+        // SESSION SYSTEM: swap member history on navigation
+        aiCopilotState.conversationHistory = [];
         const messagesContainer = document.getElementById('aiMessages');
-        if(messagesContainer) {
-            // Remove old messages, keep welcome
-            messagesContainer.querySelectorAll('.ai-message:not(#aiWelcomeMessage)').forEach(m => m.remove());
-        }
+        if(messagesContainer) messagesContainer.querySelectorAll('.ai-message:not(#aiWelcomeMessage)').forEach(m=>m.remove());
+        if (typeof onMemberSwitch === 'function') onMemberSwitch(member);
 
         if (aiCopilotState.isOpen) {
             initializeAIWelcome(); 
@@ -30097,6 +30639,725 @@ const aiCopilotState = {
     isInConversation: false
 };
 
+// ══════════════════════════════════════════════════════════════════════════════
+// VIDA COPILOT — SESSION HISTORY SYSTEM
+// Two-axis: per Care Manager × per Member. In-memory for demo.
+// ══════════════════════════════════════════════════════════════════════════════
+const SESS = {
+    // { [memberId]: [{ id, title, preview, date, messages[] }] }
+    byMember: {},
+    // { [memberId]: sessionId | null }  null = welcome screen
+    active: {},
+    // Global AI Context rules
+    ctxRules: [],
+    // Nudges { [memberId]: [{id,text,dismissed}] }
+    nudges: {},
+    // Which member's sessions are seeded
+    seeded: {}
+};
+
+function seedSessions() {
+    if (typeof membersDB === 'undefined' || !membersDB.length) return;
+    const mA = membersDB[0], mB = membersDB[1];
+    if (!mA || !mB || SESS.seeded[mA.id]) return;
+    SESS.seeded[mA.id] = SESS.seeded[mB.id] = true;
+
+    SESS.byMember[mA.id] = [
+        {
+            id: 'sA1', title: 'Last 3 months of claims',
+            preview: '4 claims totaling $2,340 — primary care and one cardiology referral.',
+            date: new Date(Date.now() - 14*86400000),
+            messages: [
+                { role:'user', content:'Tell me about the last three months of claims for this member' },
+                { role:'assistant', content: mA.name+' has had 4 claims totaling $2,340 over the last three months. The majority were for primary care visits and one specialist referral to cardiology. No denied claims during this period.' }
+            ]
+        },
+        {
+            id: 'sA2', title: 'Care gaps review',
+            preview: '2 open care gaps — HbA1c and annual wellness visit overdue.',
+            date: new Date(Date.now() - 7*86400000),
+            messages: [
+                { role:'user', content:'Tell me about any care gaps for this member' },
+                { role:'assistant', content: mA.name+' has 2 open care gaps: a HbA1c screening that is 3 months overdue, and an annual wellness visit not yet completed this calendar year. Both are flagged as high priority.' }
+            ]
+        }
+    ];
+    SESS.active[mA.id] = null;
+    SESS.nudges[mA.id] = [
+        { id:'nA1', dismissed:false, text: mA.name.split(' ')[0]+' had an ADT admission on '+new Date(Date.now()-2*86400000).toLocaleDateString('en-US',{month:'short',day:'numeric'})+'. Want me to summarize the event and suggest next steps?' }
+    ];
+
+    SESS.byMember[mB.id] = [
+        {
+            id: 'sB1', title: 'Specialist referrals',
+            preview: '1 active outbound referral to neurology — pending response.',
+            date: new Date(Date.now() - 5*86400000),
+            messages: [
+                { role:'user', content:'Tell me about any specialist referrals this member has' },
+                { role:'assistant', content: mB.name+' has 1 active outbound referral to a neurologist created 3 weeks ago. Status is pending — the facility has not yet responded. No completed specialist referrals in the last 6 months.' }
+            ]
+        },
+        {
+            id: 'sB2', title: 'Active care plan status',
+            preview: 'Active care plan with 3 goals — next review in 18 days.',
+            date: new Date(Date.now() - 2*86400000),
+            messages: [
+                { role:'user', content:'Does this member have an active care plan?' },
+                { role:'assistant', content:'Yes — '+mB.name+' has an active care plan last updated on '+new Date(Date.now()-10*86400000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'. It includes 3 goals: medication adherence, behavioral health follow-up, and reducing ER utilization. The next review is due in 18 days.' }
+            ]
+        }
+    ];
+    SESS.active[mB.id] = null;
+
+    // ── Seed 3 more members for demo completeness ──────────────────────────
+    const mC = membersDB[2], mD = membersDB[3], mE = membersDB[4];
+
+    if (mC && !SESS.seeded[mC.id]) {
+        SESS.seeded[mC.id] = true;
+        SESS.byMember[mC.id] = [
+            {
+                id: 'sC1', title: 'Pre-visit summary',
+                preview: 'Low risk, no recent ADTs, consent pending — call scheduled for tomorrow.',
+                date: new Date(Date.now() - 3*86400000),
+                messages: [
+                    { role:'user', content:'Brief me before my call with this member' },
+                    { role:'assistant', content: mC.name+' is Low Risk with consent still pending. No recent ADTs. Last contact was 12 days ago — a voicemail. He has 1 open task: schedule annual wellness visit. Recommended focus for tomorrow\'s call: obtain consent and book the wellness visit.' }
+                ]
+            }
+        ];
+        SESS.active[mC.id] = null;
+    }
+
+    if (mD && !SESS.seeded[mD.id]) {
+        SESS.seeded[mD.id] = true;
+        SESS.byMember[mD.id] = [
+            {
+                id: 'sD1', title: 'ADT follow-up — Jun 7',
+                preview: 'A01 admission at Vidant — post-discharge plan drafted.',
+                date: new Date(Date.now() - 6*86400000),
+                messages: [
+                    { role:'user', content:'Summarize the recent ADT event for this member' },
+                    { role:'assistant', content: mD.name+' had an A01 admission at Vidant Medical Center on Jun 7. Diagnosis: hypertensive crisis. Discharge was Jun 9. Recommended next steps: schedule a post-discharge follow-up call within 48 hours, review medication adherence, and update the care plan with the new diagnosis.' }
+                ]
+            },
+            {
+                id: 'sD2', title: 'Open tasks review',
+                preview: '3 open tasks — 1 overdue wellness visit, 2 care plan actions.',
+                date: new Date(Date.now() - 1*86400000),
+                messages: [
+                    { role:'user', content:'Show open tasks for this member' },
+                    { role:'assistant', content: mD.name+' has 3 open tasks: (1) Annual wellness visit — overdue by 22 days, (2) Update care plan goals following ADT, (3) Confirm PCP follow-up appointment. The wellness visit is highest priority given the recent admission.' }
+                ]
+            }
+        ];
+        SESS.active[mD.id] = null;
+    }
+
+    if (mE && !SESS.seeded[mE.id]) {
+        SESS.seeded[mE.id] = true;
+        SESS.byMember[mE.id] = [
+            {
+                id: 'sE1', title: 'Care gaps — outreach note',
+                preview: 'Draft outreach note created for 2 overdue screenings.',
+                date: new Date(Date.now() - 10*86400000),
+                messages: [
+                    { role:'user', content:'Tell me about any care gaps for this member' },
+                    { role:'assistant', content: mE.name+' has 2 open care gaps: a colorectal cancer screening overdue by 4 months, and a diabetes foot exam not completed this year. Both are flagged by the health plan. A draft outreach note has been prepared to address both in the next contact.' }
+                ]
+            }
+        ];
+        SESS.active[mE.id] = null;
+    }
+}
+
+
+// Strip markdown syntax for clean preview text
+function stripMdPreview(text) {
+    if (!text) return '';
+    return text
+        .replace(/#{1,6} /g, '')
+        .replace(/\*\*/g, '')
+        .replace(/\*/g, '')
+        .replace(/`/g, '')
+        .replace(/\|/g, ' ')
+        .replace(/\r?\n/g, ' ')
+        .replace(/  +/g, ' ')
+        .trim()
+        .slice(0, 90);
+}
+
+// ── Session helpers ──────────────────────────────────────────────────────────
+
+function sessGet(memberId) {
+    const id = SESS.active[memberId];
+    if (!id) return null;
+    return (SESS.byMember[memberId]||[]).find(s=>s.id===id)||null;
+}
+
+function sessCreate(memberId) {
+    if (!SESS.byMember[memberId]) SESS.byMember[memberId] = [];
+    const s = { id:'s_'+memberId+'_'+Date.now(), title:'New chat', preview:'', date:new Date(), messages:[] };
+    SESS.byMember[memberId].unshift(s);
+    SESS.active[memberId] = s.id;
+    return s;
+}
+
+function sessSave(memberId, role, text) {
+    let s = sessGet(memberId);
+    if (!s) s = sessCreate(memberId);
+    s.messages.push({role, content:text});
+    if (s.title==='New chat' && role==='user') s.title = text.length>45 ? text.slice(0,45)+'…' : text;
+    if (role==='assistant') s.preview = text.length>70 ? text.slice(0,70)+'…' : text;
+    s.date = new Date();
+    updateHeaderState();
+}
+
+// ── Header state — changes based on current CoPilot state ───────────────────
+
+function updateHeaderState() {
+    const member = window.currentMember;
+    const pill   = document.getElementById('aiHistoryPill');
+    const count  = document.getElementById('aiHistoryCount');
+    const newBtn = document.getElementById('aiNewChatBtn');
+    const title  = document.getElementById('aiPanelTitle');
+    const sub    = document.getElementById('aiPanelSubtitle');
+
+    if (!member) {
+        if (pill)   pill.style.display   = 'none';
+        if (newBtn) newBtn.style.display  = 'none';
+        if (title)  title.textContent     = 'Sevida CoPilot';
+        if (sub)    sub.textContent       = 'Sevida AI Co-pilot';
+        return;
+    }
+    var _riskClass, _riskLabel, _dd, _hh, _adts, _tagHTML; // declare here for use below
+
+    const sessions  = SESS.byMember[member.id] || [];
+    const activeId  = SESS.active[member.id];
+    const activeS   = sessions.find(s=>s.id===activeId);
+
+    // Title always = member name
+    if (title) title.textContent = member.name;
+
+    // Build tag HTML for header subtitle
+    var _riskClass = member.riskCategory==='High' ? 'ai-ctx-tag-risk-high' : member.riskCategory==='Medium' ? 'ai-ctx-tag-risk-med' : 'ai-ctx-tag-risk-low';
+    var _riskLabel = (member.riskCategory||'Unknown')+' Risk';
+    var _ddH = member.dashboardData||{}; var _hhH = member.healthHistory||{};
+    var _adtsH = (_ddH.adts||[]).concat(_hhH.adts||[]).filter(function(a){return a.acknowledged==='No';});
+    var _tagHTML = '<span class="ai-member-ctx-tag '+_riskClass+'">'+_riskLabel+'</span>';
+    if (_adtsH.length) _tagHTML += '<span class="ai-member-ctx-tag ai-ctx-tag-adt">ADT Event</span>';
+    if (['To Obtain Consent','Re-consent Required'].indexOf(member.consentStatus) > -1) _tagHTML += '<span class="ai-member-ctx-tag ai-ctx-tag-consent">Consent Needed</span>';
+
+    // ── Menu items state ──
+    const menuHistory    = document.getElementById('aiMenuHistory');
+    const menuHistCount  = document.getElementById('aiMenuHistoryCount');
+    const menuNewChat    = document.getElementById('aiMenuNewChat');
+    const menuAppt       = document.getElementById('aiMenuAppt');
+
+    if (activeS && aiCopilotState.isInConversation) {
+        // IN A SESSION
+        if (sub)         sub.textContent            = activeS.title.length>30 ? activeS.title.slice(0,30)+'…' : activeS.title;
+        if (newBtn)      newBtn.style.display        = 'flex';
+        if (menuNewChat) menuNewChat.style.display   = 'flex';
+    } else {
+        // WELCOME SCREEN — show tags in subtitle
+        if (sub) sub.innerHTML = _tagHTML || 'Sevida AI Co-pilot';
+        if (newBtn)      newBtn.style.display         = 'none';
+        if (menuNewChat) menuNewChat.style.display    = 'none';
+    }
+
+    // History badge in menu
+    if (sessions.length) {
+        if (menuHistCount) { menuHistCount.textContent = sessions.length; menuHistCount.style.display = ''; }
+    } else {
+        if (menuHistCount) menuHistCount.style.display = 'none';
+    }
+
+    // Appt button — only on member pages
+    if (menuAppt) menuAppt.style.display = member ? 'flex' : 'none';
+
+    // Keep old pill hidden — replaced by menu
+    if (pill) pill.style.display = 'none';
+}
+
+// ── New session ──────────────────────────────────────────────────────────────
+
+function confirmNewSession() {
+    // Show a brief toast then start
+    const toast = document.getElementById('aiNewToast');
+    if (toast) { toast.style.display='flex'; setTimeout(()=>toast.style.display='none', 2000); }
+    startNewSession();
+}
+
+// ── Hamburger menu ──────────────────────────────────────────────────────────
+function toggleAIMenu() {
+    const menu = document.getElementById('aiMenuDropdown');
+    if (!menu) return;
+    const isOpen = menu.classList.contains('open');
+    if (isOpen) { menu.classList.remove('open'); return; }
+    // Populate chat list before opening
+    renderMenuChatList();
+    menu.classList.add('open');
+}
+
+function renderMenuChatList() {
+    const listEl = document.getElementById('aiMenuChatList');
+    if (!listEl) return;
+    const member = window.currentMember;
+    if (!member) {
+        listEl.innerHTML = '<div style="font-size:12.5px;color:#9ca3af;padding:6px 16px 12px;">Open a member profile to see chat history.</div>';
+        return;
+    }
+    const sessions = (SESS.byMember[member.id] || []);
+    const activeId = SESS.active[member.id];
+    if (!sessions.length) {
+        listEl.innerHTML = '<div style="font-size:12.5px;color:#9ca3af;padding:6px 16px 12px;">No past chats for this member yet.</div>';
+        return;
+    }
+    listEl.innerHTML = sessions.map(function(s) {
+        const isActive = s.id === activeId;
+        // Relative time like Jira
+        const diffMs = Date.now() - s.date.getTime();
+        const diffDays = Math.floor(diffMs / 86400000);
+        const relTime = diffDays === 0 ? 'Today' :
+                        diffDays === 1 ? 'Yesterday' :
+                        diffDays < 7  ? diffDays + ' days ago' :
+                        diffDays < 14 ? '1 week ago' :
+                        diffDays < 30 ? Math.floor(diffDays/7) + ' weeks ago' :
+                        s.date.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+        return '<div class="ai-menu-chat-item'+(isActive?' active':'')+'" onclick="closeAIMenu();loadSession(\'' + s.id + '\',\'' + member.id + '\')">'+
+            '<div class="ai-menu-chat-icon">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+            '</div>' +
+            '<div class="ai-menu-chat-body">' +
+                '<div class="ai-menu-chat-title">'+escapeHtml(s.title)+'</div>' +
+                '<div class="ai-menu-chat-meta">Sevida AI · '+relTime+(s.preview ? ' · '+escapeHtml(s.preview.slice(0,50)) : '')+'</div>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+function closeAIMenu() {
+    const menu = document.getElementById('aiMenuDropdown');
+    if (menu) menu.classList.remove('open');
+}
+
+// ── Quick question chips ─────────────────────────────────────────────────────
+// Fixed set of 6 most useful questions for any member — always visible at bottom
+
+const QUICK_CHIPS = [
+    { id: 'mx_open_tasks',  text: 'Show open tasks'        },
+    { id: 'mx_adt_summary', text: 'Summarize ADT events'   },
+    { id: 'mx_create_appt', text: 'Schedule appointment'   },
+    { id: 'mx_draft_note',  text: 'Draft service note'     },
+];
+
+function renderQuestionChips(member) {
+    const row = document.getElementById('aiQuestionChips');
+    if (!row) return;
+    if (!member) { row.style.display = 'none'; row.innerHTML = ''; return; }
+    row.style.display = 'flex';
+    row.innerHTML = QUICK_CHIPS.map(function(chip) {
+        return '<button class="ai-q-chip" onclick="handleAIQuestion(\'' + chip.id + '\')">' + chip.text + '</button>';
+    }).join('');
+}
+
+function toggleWelcomeChats(btn) {
+    const list = btn.parentElement.querySelector('.welcome-chats-list');
+    const chevron = btn.querySelector('.welcome-chats-chevron');
+    if (!list) return;
+    const isOpen = list.style.display !== 'none';
+    list.style.display = isOpen ? 'none' : 'block';
+    if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(90deg)';
+}
+
+function toggleMoreQuestions() {
+    const panel = document.getElementById('aiQuestionsPanel');
+    const btn   = document.getElementById('aiMoreQuestionsBtn');
+    if (!panel || !btn) return;
+    const isOpen = panel.style.display !== 'none';
+    panel.style.display = isOpen ? 'none' : 'block';
+    btn.classList.toggle('open', !isOpen);
+}
+
+function startNewSession() {
+    const member = window.currentMember;
+    closeSessionPanel();
+    if (member) SESS.active[member.id] = null;
+    aiCopilotState.conversationHistory = [];
+    aiCopilotState.isInConversation    = false;
+    updateHeaderState();
+    renderWelcomeScreen();
+}
+
+// ── Load a past session ──────────────────────────────────────────────────────
+
+function loadSession(sessionId, memberId) {
+    const sessions = SESS.byMember[memberId]||[];
+    const s = sessions.find(x=>x.id===sessionId);
+    if (!s) return;
+
+    SESS.active[memberId] = sessionId;
+    aiCopilotState.conversationHistory = s.messages.map(m=>({role:m.role,content:m.content}));
+    aiCopilotState.isInConversation    = true;
+    closeSessionPanel();
+    updateHeaderState();
+
+    // Render breadcrumb + messages
+    const container = document.getElementById('aiMessages');
+    if (!container) return;
+
+    const dateStr = s.date.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    container.innerHTML =
+        // Breadcrumb — answers "where am I + how do I go back"
+        '<div class="ai-session-breadcrumb" id="aiSessionBreadcrumb">' +
+            '<button class="ai-session-breadcrumb-back" onclick="returnToOverview()" title="Back to overview">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px;"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>' +
+                'Overview' +
+            '</button>' +
+            '<span class="ai-session-breadcrumb-divider">/</span>' +
+            '<span class="ai-session-breadcrumb-title">' + escapeHtml(s.title) + '</span>' +
+            '<span class="ai-session-breadcrumb-date">' + dateStr + '</span>' +
+        '</div>';
+
+    // Trace session — alert was dismissed without action, render with action buttons
+    var isTrace = s.id.indexOf('s_trace_') === 0;
+    if (isTrace) {
+        var alertText = s.messages[0] ? s.messages[0].content : '';
+        // Strip markdown for clean display
+        var alertClean = alertText.replace(/\*\*/g,'').replace(/\*/g,'').replace(/\n/g,' ');
+        container.innerHTML +=
+            '<div style="margin:16px 14px 0;">' +
+                '<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:14px 16px;">' +
+                    '<div style="font-size:12px;font-weight:600;color:#92400e;margin-bottom:6px;display:flex;align-items:center;gap:6px;">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' +
+                        'Alert — no action was taken' +
+                    '</div>' +
+                    '<div style="font-size:12.5px;color:#1e293b;line-height:1.55;margin-bottom:12px;">' + escapeHtml(alertClean.replace('Alert: ','').replace(/Acknowledged.*$/,'').trim()) + '</div>' +
+                    '<div style="font-size:11.5px;color:#94a3b8;margin-bottom:14px;">' + escapeHtml(s.preview || 'No action taken') + ' — you can still act on this now.</div>' +
+                    '<div style="display:flex;flex-wrap:wrap;gap:7px;">' +
+                        '<button onclick="traceAction(\"summarize\")" style="padding:6px 12px;background:#282460;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;">Summarize this ADT event</button>' +
+                        '<button onclick="traceAction(\"draft\")" style="padding:6px 12px;background:#fff;color:#282460;border:1.5px solid #282460;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;">Draft a follow-up note</button>' +
+                        '<button onclick="traceAction(\"ask\")" style="padding:6px 12px;background:#fff;color:#374151;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;">Ask AI anything</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        container.innerHTML += '<div style="padding:10px 14px 4px;"><div style="font-size:11.5px;color:#94a3b8;text-align:center;">Type below to ask anything about this member.</div></div>';
+        container.scrollTop = container.scrollHeight;
+        return;
+    }
+
+    // Normal session — render messages
+    s.messages.forEach(function(msg) {
+        if (msg.role==='user') {
+            container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-user"><div class="ai-conv-user-bubble">'+escapeHtml(msg.content)+'</div></div></div>';
+        } else {
+            container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-llm-response">'+(typeof renderMarkdown==='function'?renderMarkdown(msg.content):msg.content)+'</div></div></div></div>';
+        }
+    });
+
+    // Continuation hint
+    container.innerHTML += '<div style="padding:10px 14px 4px;"><div style="font-size:11.5px;color:#94a3b8;text-align:center;">Continuing this conversation — type below to add to it.</div></div>';
+    container.scrollTop = container.scrollHeight;
+}
+
+// ── Trace session actions — fires when CM acts from a dismissed alert session ──
+function traceAction(type) {
+    var member = window.currentMember;
+    if (!member) return;
+
+    // Rename session to reflect action taken
+    var s = (SESS.byMember[member.id]||[]).find(function(x){ return x.id === SESS.active[member.id]; });
+    var dateStr = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+
+    if (type === 'summarize') {
+        if (s) { s.title = 'ADT follow-up — ' + dateStr; s.id = s.id.replace('s_trace_','s_'); }
+        handleAIQuestion('mx_adt_summary');
+    } else if (type === 'draft') {
+        if (s) { s.title = 'ADT follow-up note — ' + dateStr; s.id = s.id.replace('s_trace_','s_'); }
+        handleSmartDraftNote('adt');
+    } else {
+        if (s) { s.title = 'ADT follow-up — ' + dateStr; s.id = s.id.replace('s_trace_','s_'); }
+        // Focus input for free typing
+        var inp = document.getElementById('aiInputField');
+        if (inp) { inp.focus(); }
+    }
+    updateHeaderState();
+}
+
+function returnToOverview() {
+    // Go back to welcome screen without losing the session
+    const member = window.currentMember;
+    if (member) SESS.active[member.id] = null;
+    aiCopilotState.conversationHistory = [];
+    aiCopilotState.isInConversation    = false;
+    updateHeaderState();
+    renderWelcomeScreen();
+}
+
+// ── Session panel ────────────────────────────────────────────────────────────
+
+function openSessionPanel() {
+    renderSessionList();
+    const panel = document.getElementById('aiSessionPanel');
+    if (panel) panel.classList.add('open');
+}
+
+function closeSessionPanel() {
+    const panel = document.getElementById('aiSessionPanel');
+    if (panel) panel.classList.remove('open');
+}
+
+function renderSessionList() {
+    const member = window.currentMember;
+    const titleEl = document.getElementById('aiSessionPanelTitle');
+    const listEl  = document.getElementById('aiSessionList');
+    if (!listEl) return;
+
+    if (member) {
+        if (titleEl) titleEl.textContent = member.name.split(' ')[0]+"'s Chat History";
+        const sessions = (SESS.byMember[member.id]||[]).slice(0,6);
+        const activeId = SESS.active[member.id];
+        if (!sessions.length) {
+            listEl.innerHTML = '<div style="padding:24px 14px;font-size:12px;color:#94a3b8;text-align:center;">No previous chats yet.<br>Start a conversation below.</div>';
+            return;
+        }
+        listEl.innerHTML = sessions.map(function(s) {
+            const isActive = s.id === activeId;
+            return '<div class="ai-session-item'+(isActive?' active':'')+'" onclick="loadSession(\'' + s.id + '\',\'' + member.id + '\')">'+
+                '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">' +
+                    '<div class="ai-session-item-title">'+escapeHtml(s.title)+'</div>' +
+                    (isActive ? '<span class="ai-session-item-active-tag">Current</span>' : '') +
+                '</div>' +
+                (s.preview ? '<div class="ai-session-item-preview">'+escapeHtml(s.preview)+'</div>' : '') +
+                '<div class="ai-session-item-meta">'+s.date.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'</div>' +
+            '</div>';
+        }).join('');
+    } else {
+        if (titleEl) titleEl.textContent = 'Recent Conversations';
+        renderRecentInPanel(listEl);
+    }
+}
+
+function renderRecentInPanel(container) {
+    const all = [];
+    if (typeof membersDB !== 'undefined') {
+        membersDB.forEach(function(m) {
+            (SESS.byMember[m.id]||[]).forEach(function(s) { all.push({session:s,member:m}); });
+        });
+    }
+    all.sort(function(a,b){return b.session.date-a.session.date;});
+    const cutoff = new Date(Date.now()-30*86400000);
+    const recent = all.filter(function(x){return x.session.date>=cutoff;});
+    if (!recent.length) {
+        container.innerHTML = '<div style="padding:24px 14px;font-size:12px;color:#94a3b8;text-align:center;">No conversations in the last 30 days.</div>';
+        return;
+    }
+    container.innerHTML =
+        '<div style="padding:4px 2px 8px;">'+
+        '<input type="text" class="ai-recent-search" placeholder="Search by member name…" oninput="filterRecentPanel(this.value)" />'+
+        '</div>'+
+        '<div id="recentPanelList">'+
+        recent.map(function(x){
+            return '<div class="ai-recent-item" onclick="navigateToDetails(\'' + x.member.id + '\')">' +
+                '<div class="ai-recent-item-member">'+escapeHtml(x.member.name)+'</div>'+
+                '<div class="ai-recent-item-preview">'+escapeHtml(x.session.title)+'</div>'+
+                '<div class="ai-recent-item-date">'+x.session.date.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</div>'+
+            '</div>';
+        }).join('')+
+        '</div>';
+}
+
+function filterRecentPanel(q) {
+    const list = document.getElementById('recentPanelList');
+    if (!list) return;
+    list.querySelectorAll('.ai-recent-item').forEach(function(item){
+        const name = (item.querySelector('.ai-recent-item-member')||{}).textContent||'';
+        item.style.display = name.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+    });
+}
+
+// ── On member navigation change ──────────────────────────────────────────────
+
+function onMemberSwitch(member) {
+    closeAIMenu();
+    if (!member) { var ns = document.getElementById('aiNudgeStack'); if(ns){ns.innerHTML='';ns.style.display='none';} }
+    seedSessions();
+    aiCopilotState.conversationHistory = [];
+    aiCopilotState.isInConversation    = false;
+    renderNudges(member);
+    updateHeaderState();
+    renderQuestionChips(member);
+}
+
+// ── Nudges ───────────────────────────────────────────────────────────────────
+
+function buildNudgesForMember(member) {
+    // Generate nudges dynamically based on member data + toggle state
+    if (!SESS.nudges[member.id]) SESS.nudges[member.id] = [];
+    var existing = SESS.nudges[member.id];
+    var dd = member.dashboardData||{}; var hh = member.healthHistory||{};
+    var allTasks = (dd.tasks||[]).concat(member.tasks||[]);
+    var today = new Date(); today.setHours(0,0,0,0);
+    var overdueTasks = allTasks.filter(function(t){ var d=parseAnyDate(t.dueDate); return d&&d<today&&(t.status||'').toLowerCase()!=='closed'; });
+    var allADTs = (dd.adts||[]).concat(hh.adts||[]);
+    var unackedADTs = allADTs.filter(function(a){return a.acknowledged==='No';});
+    var needsConsent = ['To Obtain Consent','Re-consent Required'].indexOf(member.consentStatus) > -1;
+
+    function hasNudge(type) { return existing.some(function(n){return n.type===type;}); }
+
+    // ADT toggle
+    if (PREBUILT_ALERTS.ADT && unackedADTs.length && !hasNudge('ADT')) {
+        var evt = unackedADTs[0];
+        existing.push({ id:'nudge_adt_'+member.id, type:'ADT', dismissed:false,
+            text: member.name.split(' ')[0]+' had an ADT '+(evt.type||'admission')+' on '+(evt.date||'recently')+'. Want me to summarize the event and suggest next steps?' });
+    } else if (!PREBUILT_ALERTS.ADT) {
+        SESS.nudges[member.id] = existing.filter(function(n){return n.type!=='ADT';});
+        existing = SESS.nudges[member.id];
+    }
+
+    // Consent toggle
+    if (PREBUILT_ALERTS.CONSENT && needsConsent && !hasNudge('CONSENT')) {
+        existing.push({ id:'nudge_consent_'+member.id, type:'CONSENT', dismissed:false,
+            text: member.name.split(' ')[0]+' — consent still pending. Want me to draft a contact attempt note?' });
+    } else if (!PREBUILT_ALERTS.CONSENT) {
+        SESS.nudges[member.id] = existing.filter(function(n){return n.type!=='CONSENT';});
+        existing = SESS.nudges[member.id];
+    }
+
+    // Overdue tasks toggle
+    if (PREBUILT_ALERTS.OVERDUE && overdueTasks.length && !hasNudge('OVERDUE')) {
+        existing.push({ id:'nudge_overdue_'+member.id, type:'OVERDUE', dismissed:false,
+            text: member.name.split(' ')[0]+' has '+overdueTasks.length+' overdue task'+(overdueTasks.length>1?'s':'')+'. Want me to show what needs action?' });
+    } else if (!PREBUILT_ALERTS.OVERDUE) {
+        SESS.nudges[member.id] = existing.filter(function(n){return n.type!=='OVERDUE';});
+    }
+    // CONTACT toggle — no contact in 30+ days (checked via service notes)
+    // Skipped for now — no reliable last-contact date in demo data
+}
+
+function renderNudges(member) {
+    const stack = document.getElementById('aiNudgeStack');
+    if (!stack) return;
+    if (!member) { stack.style.display='none'; stack.innerHTML=''; return; }
+    // Build nudges from member data + toggle state first
+    buildNudgesForMember(member);
+    const nudges = (SESS.nudges[member.id]||[]).filter(function(n){return !n.dismissed;});
+    if (!nudges.length) { stack.style.display='none'; stack.innerHTML=''; return; }
+    stack.style.display='flex';
+    stack.innerHTML = nudges.map(function(n){
+        return '<div class="ai-nudge" id="nudge_'+n.id+'">'+
+            '<div class="ai-nudge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>'+
+            '<div class="ai-nudge-body">'+
+                '<div class="ai-nudge-text">'+escapeHtml(n.text)+'</div>'+
+                '<div class="ai-nudge-actions">'+
+                    '<button class="ai-nudge-ask" data-id="'+n.id+'" data-text="'+escapeHtml(n.text).replace(/"/g,'&quot;')+'" onclick="nudgeAsk(this)">Ask AI</button>'+
+                    '<button class="ai-nudge-dismiss" data-id="'+n.id+'" onclick="nudgeDismiss(this)">Dismiss</button>'+
+                '</div>'+
+            '</div>'+
+        '</div>';
+    }).join('');
+}
+
+function nudgeDismiss(btn) {
+    const id = btn.dataset.id;
+    const member = window.currentMember;
+    if (member) {
+        const n = (SESS.nudges[member.id]||[]).find(function(x){return x.id===id;});
+        if (n) {
+            n.dismissed = true;
+            // Save audit trace to member's chat history without hijacking active session
+            const dateStr = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
+            const prevActive = SESS.active[member.id];
+            if (!SESS.byMember[member.id]) SESS.byMember[member.id] = [];
+            SESS.byMember[member.id].unshift({
+                id: 's_trace_'+Date.now(),
+                title: 'Alert acknowledged — ' + dateStr,
+                preview: 'No action taken',
+                date: new Date(),
+                messages: [{ role: 'assistant', content: '**Alert:** ' + n.text + '\n\n*Acknowledged ' + dateStr + '. No action taken.*' }]
+            });
+            SESS.active[member.id] = prevActive;
+            updateHeaderState();
+        }
+    }
+    const el = document.getElementById('nudge_'+id);
+    if (el) { el.style.opacity='0'; setTimeout(function(){el.remove(); const s=document.getElementById('aiNudgeStack'); if(s&&!s.querySelector('.ai-nudge'))s.style.display='none';},200); }
+}
+
+function nudgeAsk(btn) {
+    nudgeDismiss(btn);
+    const text = btn.dataset.text;
+    const input = document.getElementById('aiInputField');
+    if (input) { input.value = text; sendAIMessage(); }
+}
+
+// ── Global AI Context ────────────────────────────────────────────────────────
+
+// Pre-built alert toggle states
+var PREBUILT_ALERTS = { ADT: true, CONTACT: true, CONSENT: true, OVERDUE: true };
+
+function togglePrebuiltAlert(key, on) {
+    PREBUILT_ALERTS[key] = on;
+    var row = document.getElementById('ctxToggle'+key.charAt(0)+key.slice(1).toLowerCase());
+    if (row) row.classList.toggle('on', on);
+    // Re-render nudges immediately so toggle has visible effect
+    if (window.currentMember) renderNudges(window.currentMember);
+}
+
+function openCtxPanel() {
+    renderCtxRules();
+    // Restore toggle states
+    Object.keys(PREBUILT_ALERTS).forEach(function(key) {
+        var chk = document.getElementById('ctxChk'+key.charAt(0)+key.slice(1).toLowerCase());
+        var row = document.getElementById('ctxToggle'+key.charAt(0)+key.slice(1).toLowerCase());
+        if (chk) chk.checked = PREBUILT_ALERTS[key];
+        if (row) row.classList.toggle('on', PREBUILT_ALERTS[key]);
+    });
+    var p = document.getElementById('aiCtxPanel');
+    if (p) p.classList.add('open');
+}
+
+function closeCtxPanel() {
+    var p = document.getElementById('aiCtxPanel');
+    if (p) p.classList.remove('open');
+}
+
+function renderCtxRules() {
+    var c = document.getElementById('aiCtxRules');
+    if (!c) return;
+    if (!SESS.ctxRules.length) {
+        c.innerHTML = '<div style="font-size:12px;color:#94a3b8;padding:4px 2px 8px;">No custom alerts yet. Add one below.</div>';
+        return;
+    }
+    c.innerHTML = SESS.ctxRules.map(function(r) {
+        return '<div class="ai-alert-custom-item" id="ctxr_'+r.id+'">' +
+            '<div class="ai-alert-custom-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>' +
+            '<div class="ai-alert-custom-text">'+escapeHtml(r.text)+'</div>' +
+            '<button class="ai-alert-custom-del" data-id="'+r.id+'" onclick="deleteCtxRule(this)" title="Remove">×</button>' +
+        '</div>';
+    }).join('');
+}
+
+function saveCtxRule() {
+    var input = document.getElementById('aiCtxInput');
+    if (!input) return;
+    var text = input.value.trim();
+    if (!text) return;
+    SESS.ctxRules.push({id:'r_'+Date.now(), text:text});
+    input.value = '';
+    renderCtxRules();
+    var conf = document.getElementById('aiCtxConfirm');
+    if (conf) { conf.style.display='block'; setTimeout(function(){conf.style.display='none';},3000); }
+}
+
+function deleteCtxRule(btn) {
+    var id = btn.dataset.id;
+    SESS.ctxRules = SESS.ctxRules.filter(function(r){return r.id!==id;});
+    renderCtxRules();
+}
+
+
+
 // ─────────────────────────────────────────────────────────────────────────────
 // QUESTION DEFINITIONS (from mind map)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -30278,36 +31539,102 @@ function renderWelcomeScreen() {
 
     // ── MEMBER DETAIL CONTEXT ──
     if (member) {
-        const activeSubTab = getActiveMemberSubTab();
-        const memberQuestions = getMemberContextQuestions(member, activeSubTab);
-        const qCount = memberQuestions.length;
+        seedSessions && seedSessions();
+        const sessions = (SESS.byMember[member.id]||[]).slice(0,4);
+        const activeId = SESS.active[member.id];
+
+        // ── Context tags from member data ──
+        const riskTag = member.riskCategory === 'High'
+            ? '<span class="ai-member-ctx-tag ai-ctx-tag-risk-high">High Risk</span>'
+            : member.riskCategory === 'Medium'
+            ? '<span class="ai-member-ctx-tag ai-ctx-tag-risk-med">Medium Risk</span>'
+            : '<span class="ai-member-ctx-tag ai-ctx-tag-risk-low">Low Risk</span>';
+
+        const dd = member.dashboardData||{};
+        const hh = member.healthHistory||{};
+        const allADTs = (dd.adts||[]).concat(hh.adts||[]);
+        const unackedADTs = allADTs.filter(a=>a.acknowledged==='No');
+        const adtTag = unackedADTs.length
+            ? '<span class="ai-member-ctx-tag ai-ctx-tag-adt">ADT Event</span>' : '';
+        const consentTag = ['To Obtain Consent','Re-consent Required'].includes(member.consentStatus)
+            ? '<span class="ai-member-ctx-tag ai-ctx-tag-consent">Consent Needed</span>' : '';
+        const allTasks = (dd.tasks||[]).concat(member.tasks||[]);
+        const today = new Date(); today.setHours(0,0,0,0);
+        const overdue = allTasks.filter(t=>{ const d=parseAnyDate(t.dueDate); return d&&d<today&&(t.status||'').toLowerCase()!=='closed'; });
+        const overdueTag = overdue.length
+            ? '<span class="ai-member-ctx-tag ai-ctx-tag-consent">'+overdue.length+' Overdue Task'+(overdue.length>1?'s':'')+'</span>' : '';
+
+        // Build recent chats HTML inline
+        const memberSessions = (SESS.byMember[member.id]||[]);
+        const recentChatsHTML = memberSessions.length ? `
+            <div style="padding:0 18px 14px;">
+                <button onclick="toggleWelcomeChats(this)" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;padding:0;font-family:inherit;font-size:12px;color:#94a3b8;transition:color 0.15s;" onmouseover="this.style.color='#282460'" onmouseout="this.style.color='#94a3b8'">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;transition:transform 0.2s;" class="welcome-chats-chevron"><path d="M9 18l6-6-6-6"/></svg>
+                    See recent chats (${memberSessions.length})
+                </button>
+                <div class="welcome-chats-list" style="display:none;margin-top:10px;display:none;">
+                    ${memberSessions.map(s => {
+                        const relTime = (function() {
+                            const d = Math.floor((Date.now()-s.date.getTime())/86400000);
+                            return d===0?'Today':d===1?'Yesterday':d<7?d+' days ago':d<14?'1 week ago':Math.floor(d/7)+' weeks ago';
+                        })();
+                        return `<div onclick="loadSession('${s.id}','${member.id}')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
+                            <div style="width:28px;height:28px;background:#f3f4f6;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            </div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:12.5px;font-weight:500;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(s.title)}</div>
+                                <div style="font-size:11px;color:#9ca3af;margin-top:1px;">${relTime}</div>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>` : '';
 
         container.innerHTML = `
-            <div class="ai-welcome-screen" style="padding:24px 20px 8px;">
-                <div class="ai-welcome-heading" style="font-size:17px;margin-top:0;">${member.name}</div>
+            <div style="padding:20px 18px 8px;">
+                <div style="font-size:15px;font-weight:600;color:#0f172a;margin-bottom:4px;">Hi — you're viewing ${escapeHtml(member.name.split(' ')[0])}'s profile.</div>
+                <div style="font-size:12.5px;color:#94a3b8;line-height:1.5;">Select an action below or type a question to get started.</div>
             </div>
-            <div style="padding:0 14px 8px;">
-                <button onclick="toggleAISuggestions()" id="aiSuggestionsToggle"
-                    style="display:flex;align-items:center;gap:5px;background:none;border:none;
-                    padding:5px 8px;border-radius:6px;font-size:11.5px;color:#6366f1;
-                    cursor:pointer;transition:background .15s;width:100%;"
-                    onmouseover="this.style.background='#f0f0ff'"
-                    onmouseout="this.style.background='none'">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;transition:transform .2s;" id="aiSuggestionsChevron">
-                        <path d="M9 18l6-6-6-6"/>
-                    </svg>
-                    <span>✦ ${qCount} suggested questions</span>
-                </button>
-            </div>
-            <div class="ai-questions-panel" id="aiQuestionsPanel" style="display:none;">
-                ${memberQuestions.map(q =>
-                    `<button class="ai-question-item${q.text.startsWith('✦') ? ' smart' : ''}" onclick="handleAIQuestion('${q.id}')">${q.text}</button>`
-                ).join('')}
+            ${recentChatsHTML}
+            <div class="ai-actions-section" id="aiActionsSection">
+                <div id="aiSmartSuggestionsHere" style="display:none;"></div>
+                <div id="aiQuestionsPanel" style="display:none;"></div>
             </div>
         `;
-        document.getElementById('aiPanelTitle').textContent = member.name;
-        const apptBtn = document.getElementById('aiHeaderApptBtn');
-        if (apptBtn) apptBtn.classList.add('visible');
+
+        // Populate smart suggestions
+        const smartQs = typeof generateSmartQuestions === 'function' ? generateSmartQuestions(member) : [];
+        const smartContainer = document.getElementById('aiSmartSuggestionsHere');
+        if (smartContainer) {
+            if (smartQs.length) {
+                smartContainer.innerHTML = smartQs.map(q =>
+                    '<button class="ai-smart-q urgency-'+q.urgency+'" onclick="'+q.action+'">' +
+                    '<span class="ai-smart-q-dot"></span>' +
+                    '<div class="ai-smart-q-body">' +
+                        '<div class="ai-smart-q-text">'+q.text+'</div>' +
+                        '<div class="ai-smart-q-reason">'+q.reason+'</div>' +
+                    '</div>' +
+                    '<span class="ai-smart-q-arrow">›</span>' +
+                    '</button>'
+                ).join('');
+            } else {
+                smartContainer.innerHTML = '<div style="font-size:12px;color:#94a3b8;padding:4px 8px 8px;">Type a question below or choose from more questions above.</div>';
+            }
+        }
+
+        // Populate full questions panel (hidden, revealed by More questions)
+        const activeSubTab = getActiveMemberSubTab();
+        const memberQuestions = getMemberContextQuestions(member, activeSubTab);
+        const qPanel = document.getElementById('aiQuestionsPanel');
+        if (qPanel) {
+            qPanel.innerHTML = memberQuestions.map(q =>
+                '<button class="ai-question-item'+(q.text.startsWith('\u2726')?' smart':'')+'" onclick="handleAIQuestion(\''+q.id+'\')">' + q.text + '</button>'
+            ).join('');
+        }
+
+        // Appt button now in hamburger menu
+        updateHeaderState && updateHeaderState();
         return;
     }
 
@@ -30357,12 +31684,35 @@ function renderWelcomeScreen() {
         `<button class="ai-question-item" onclick="handleAIQuestion('${q.id}')">${q.text}</button>`
     ).join('');
 
+    // Build recent conversations HTML
+    const _all = [];
+    if (typeof membersDB !== 'undefined') {
+        membersDB.forEach(function(m){(SESS.byMember[m.id]||[]).forEach(function(s){_all.push({s:s,m:m});});});
+    }
+    _all.sort(function(a,b){return b.s.date-a.s.date;});
+    const _cutoff = new Date(Date.now()-30*86400000);
+    const _recent = _all.filter(function(x){return x.s.date>=_cutoff;}).slice(0,8);
+    const recentHTML = _recent.length ? `
+        <div class="ai-recent-section">
+            <div class="ai-recent-header">Recent Conversations <span style="font-size:10px;font-weight:400;color:#cbd5e1;text-transform:none;letter-spacing:0;">· last 30 days</span></div>
+            <input type="text" class="ai-recent-search" placeholder="Search by member name…" oninput="filterRecentWelcome(this.value)" />
+            <div id="recentWelcomeList">
+            ${_recent.map(x=>`
+                <div class="ai-recent-item" onclick="navigateToDetails('${x.m.id}')">
+                    <div class="ai-recent-item-member">${escapeHtml(x.m.name)}</div>
+                    <div class="ai-recent-item-preview">${escapeHtml(x.s.title)}</div>
+                    <div class="ai-recent-item-date">${x.s.date.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+                </div>`).join('')}
+            </div>
+        </div>` : '';
+
     container.innerHTML = `
-        <div class="ai-welcome-screen" style="padding:24px 20px 8px;">
-            <div class="ai-welcome-heading" style="font-size:17px;margin-top:0;">How can I help?</div>
+        <div class="ai-welcome-screen" style="padding:20px 20px 6px;">
+            <div class="ai-welcome-heading" style="font-size:16px;margin-top:0;">How can I help?</div>
+            <div style="font-size:12px;color:#64748b;margin-top:3px;">Open a member profile to start a member-specific chat.</div>
         </div>
         <div class="ai-tabs-container">${tabsHTML}</div>
-        <div style="padding:0 14px 8px;">
+        <div style="padding:0 14px 4px;">
             <button onclick="toggleAISuggestions()" id="aiSuggestionsToggle"
                 style="display:flex;align-items:center;gap:5px;background:none;border:none;
                 padding:5px 8px;border-radius:6px;font-size:11.5px;color:#6366f1;
@@ -30376,8 +31726,19 @@ function renderWelcomeScreen() {
             </button>
         </div>
         <div class="ai-questions-panel" id="aiQuestionsPanel" style="display:none;">${questionsHTML}</div>
+        ${recentHTML}
     `;
-    document.getElementById('aiPanelTitle').textContent = 'New chat';
+    document.getElementById('aiPanelTitle').textContent = 'Sevida CoPilot';
+    updateHeaderState && updateHeaderState();
+}
+
+function filterRecentWelcome(q) {
+    const list = document.getElementById('recentWelcomeList');
+    if (!list) return;
+    list.querySelectorAll('.ai-recent-item').forEach(function(item){
+        const name=(item.querySelector('.ai-recent-item-member')||{}).textContent||'';
+        item.style.display=name.toLowerCase().includes(q.toLowerCase())?'':'none';
+    });
 }
 
 function toggleAISuggestions() {
@@ -30643,6 +32004,14 @@ function handleAIQuestion(questionId) {
         } else {
             container.innerHTML += `<div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-response-summary">Unable to process this query.</div></div></div>`;
         }
+        // ── Save to session store ──
+        if (window.currentMember && typeof sessSave === 'function') {
+            sessSave(window.currentMember.id, 'user', question.text);
+            const lastAssistant = container.querySelector('.ai-conv-assistant:last-child');
+            const rawText = lastAssistant ? (lastAssistant.textContent||'').trim() : question.text;
+            sessSave(window.currentMember.id, 'assistant', stripMdPreview(rawText));
+            updateHeaderState && updateHeaderState();
+        }
         container.scrollTop = 0;
     }, 800);
 }
@@ -30826,6 +32195,8 @@ function toggleAICopilot() {
     if (aiCopilotState.isOpen) {
         panel.classList.add('open'); panel.classList.remove('closed');
         document.body.classList.add('ai-panel-open');
+        if (typeof renderQuestionChips === 'function') renderQuestionChips(window.currentMember);
+        if (!window.currentMember) { var ns = document.getElementById('aiNudgeStack'); if(ns){ns.innerHTML='';ns.style.display='none';} }
         if (!aiCopilotState.isInConversation) renderWelcomeScreen();
     } else {
         panel.classList.remove('open','expanded'); panel.classList.add('closed');
@@ -30843,6 +32214,8 @@ function resetAICopilot() {
     aiCopilotState.isInConversation = false;
     aiCopilotState.activeTab = 'tasks';
     currentAIQuestion = null;
+    if (window.currentMember) SESS.active[window.currentMember.id] = null;
+    updateHeaderState && updateHeaderState();
     renderWelcomeScreen();
 }
 
@@ -30850,6 +32223,7 @@ function clearAIChat() { resetAICopilot(); }
 function handleAIInputChange() {} // placeholder
 
 function initAICopilot() {
+    if (typeof seedSessions === 'function') seedSessions();
     // Keyboard shortcut
     document.addEventListener('keydown', function(e) {
         if ((e.metaKey || e.ctrlKey) && e.key === 'j') { e.preventDefault(); toggleAICopilot(); }
@@ -38825,27 +40199,10 @@ async function improveNoteWithAI() {
 // FEATURE 2: SMART CONTEXTUAL QUESTIONS ON MEMBER OPEN
 // ─────────────────────────────────────────────────────────────────────────────
 
-(function() {
-    const _origRender = renderWelcomeScreen;
-    renderWelcomeScreen = function() {
-        _origRender.apply(this, arguments);
-        const member = window.currentMember; if (!member) return;
-        const panel = document.getElementById('aiQuestionsPanel'); if (!panel) return;
-        const smartQs = generateSmartQuestions(member); if (!smartQs.length) return;
-        const itemsHTML = smartQs.map(q => `
-            <button class="ai-smart-q urgency-${q.urgency}" onclick="${q.action}">
-                <span class="ai-smart-q-dot"></span>
-                <div class="ai-smart-q-body">
-                    <div class="ai-smart-q-text">${q.text}</div>
-                    <div class="ai-smart-q-reason">${q.reason}</div>
-                </div>
-                <span class="ai-smart-q-arrow">›</span>
-            </button>`).join('');
-        panel.insertAdjacentHTML('afterbegin', `<div class="ai-smart-section" id="aiSmartSection"><div class="ai-smart-section-heading">✦ Suggested for ${member.name.split(' ')[0]}</div>${itemsHTML}</div>`);
-    };
-})();
+// Smart suggestions now handled directly in renderWelcomeScreen
 
 function generateSmartQuestions(m) {
+    return []; // Removed — suggestions shown via chips only
     const questions = [];
     const dd = m.dashboardData||{}; const hh = m.healthHistory||{}; const cpd = m.carePlanData||{}; const safety = m.safetyConcern||{};
     const today = new Date(); today.setHours(0,0,0,0);
@@ -38865,9 +40222,12 @@ function generateSmartQuestions(m) {
     const daysSince = lastNote ? Math.floor((Date.now()-(parseAnyDate(lastNote.date)||0))/86400000) : null;
 
     if (safety.hasConcern) questions.push({ urgency:'critical', text:'⚠ Safety concern is active — review now', reason:`${safety.details||safety.type||'Safety flag'} · Requires immediate attention`, action:`handleAIQuestion('mx_attention')` });
-    if (unackedADTs.length>0) { const evt=unackedADTs[0]; questions.push({ urgency:'critical', text:`Post-discharge follow-up needed — ${evt.type||'ADT event'}`, reason:`${evt.facility||'Facility'} · ${evt.date||'Recent'} · Not yet acknowledged`, action:`handleSmartDraftNote('adt')` }); }
+    // Only show ADT suggestion if no nudge is already showing for this member
+    const _hasADTNudge = typeof SESS !== 'undefined' && SESS.nudges && m.id && (SESS.nudges[m.id]||[]).some(function(n){return !n.dismissed;});
+    if (unackedADTs.length>0 && !_hasADTNudge) { const evt=unackedADTs[0]; questions.push({ urgency:'critical', text:`Post-discharge follow-up needed — ${evt.type||'ADT event'}`, reason:`${evt.facility||'Facility'} · ${evt.date||'Recent'} · Not yet acknowledged`, action:`handleSmartDraftNote('adt')` }); }
     if (overdueTasks.length>0) questions.push({ urgency:'high', text:`${overdueTasks.length} overdue task${overdueTasks.length>1?'s':''} need action`, reason:`${hpTasks.length>0?hpTasks.length+' high priority · ':''}Longest overdue: ${overdueTasks[0].title||overdueTasks[0].name||'Task'}`, action:`handleAIQuestion('mx_open_tasks')` });
-    if (needsConsent) questions.push({ urgency:'high', text:isReconsent?'Annual re-consent is due — draft outreach note':'Consent not yet obtained — log a contact attempt', reason:`Current status: ${m.consentStatus} · ${isReconsent?'Care management on hold until re-consented':'Member cannot be fully enrolled until consented'}`, action:`handleSmartDraftNote('consent')` });
+    // Only show consent suggestion if not already visible in header tags
+    if (needsConsent && !safety.hasConcern) questions.push({ urgency:'high', text:isReconsent?'Annual re-consent is due — draft outreach note':'Consent not yet obtained — log a contact attempt', reason:`Current status: ${m.consentStatus} · ${isReconsent?'Care management on hold until re-consented':'Member cannot be fully enrolled until consented'}`, action:`handleSmartDraftNote('consent')` });
     if (inProgress.length>0) { const ip=inProgress[0]; questions.push({ urgency:'normal', text:`${ip.title||'Assessment'} is in progress — draft continuation note`, reason:`Started ${fmtDate(ip.date)||'recently'} · Document progress so far`, action:`handleSmartDraftNote('task')` }); }
     if (needsCP&&!safety.hasConcern&&!needsConsent) questions.push({ urgency:'normal', text:'Assessment complete — what are the care plan next steps?', reason:`${completed.length} assessment${completed.length>1?'s':''} done · Care plan not yet started`, action:`handleAIQuestion('mx_care_gaps')` });
     if (daysSince!==null&&daysSince>=14&&questions.length<3) questions.push({ urgency:'normal', text:`Last contact was ${daysSince} days ago — time to check in?`, reason:`Last note: ${lastNote.activity||lastNote.type||'Contact'} on ${fmtDate(lastNote.date)}`, action:`handleAIQuestion('mx_draft_note')` });
@@ -38905,6 +40265,7 @@ async function sendLLMMessage(userText) {
     const history = (aiCopilotState.conversationHistory||[]).slice(-10);
     aiCopilotState.conversationHistory = aiCopilotState.conversationHistory||[];
     aiCopilotState.conversationHistory.push({ role:'user', content:userText });
+    if (window.currentMember && typeof sessSave==='function') sessSave(window.currentMember.id,'user',userText);
     try {
         const response = await fetch('/.netlify/functions/claude', {
             method:'POST',
@@ -38915,8 +40276,10 @@ async function sendLLMMessage(userText) {
         const replyText = data?.content?.[0]?.text?.trim();
         if (!replyText) throw new Error('Empty response');
         aiCopilotState.conversationHistory.push({ role:'assistant', content:replyText });
+        if (window.currentMember && typeof sessSave==='function') sessSave(window.currentMember.id,'assistant',stripMdPreview(replyText));
+        updateHeaderState && updateHeaderState();
         document.getElementById(thinkId)?.remove();
-        container.innerHTML += `<div class="ai-chat-turn"><div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-llm-response">${renderMarkdown(replyText)}</div><div class="ai-feedback-row" style="margin-top:10px;"><button class="ai-feedback-btn" onclick="this.style.color='#2d2d52'" title="Helpful"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/></svg></button><button class="ai-feedback-btn" onclick="this.style.color='#ef4444'" title="Not helpful"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/></svg></button><button class="ai-back-btn" style="margin-left:auto;" onclick="resetAICopilot()">← New question</button></div></div></div></div>`;
+        container.innerHTML += `<div class="ai-chat-turn"><div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-llm-response">${renderMarkdown(replyText)}</div><div class="ai-feedback-row" style="margin-top:10px;"><button class="ai-feedback-btn" onclick="this.style.color='#2d2d52'" title="Helpful"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/></svg></button><button class="ai-feedback-btn" onclick="this.style.color='#ef4444'" title="Not helpful"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/></svg></button><button class="ai-back-btn" style="margin-left:auto;" onclick="resetAICopilot()">Ask another question</button></div></div></div></div>`;
         container.scrollTop = container.scrollHeight;
     } catch(err) {
         document.getElementById(thinkId)?.remove();
@@ -47699,6 +49062,13 @@ window.runAgentFromChat = function(agentId, agentName, query) {
         var runId = window.logRunToStudio(agentId, agentName, agent&&agent.skill, 'success', durationMs, tokens, member);
         aiCopilotState.conversationHistory.push({ role:'assistant', agentId:agentId, text:respText });
 
+        // ── Save to session store ──
+        if (member && typeof sessSave === 'function') {
+            sessSave(member.id, 'user', query||agentName);
+            sessSave(member.id, 'assistant', stripMdPreview(respText));
+            updateHeaderState && updateHeaderState();
+        }
+
         // Push to Human Review if agent requires approval before delivery
         // Inbox Triage (a2) and Prior Auth Helper (a3) need human review
         var NEEDS_REVIEW_AGENTS = ['a2', 'a3'];
@@ -47748,6 +49118,13 @@ window.runAgentFromChat = function(agentId, agentName, query) {
 
         var runId = window.logRunToStudio(agentId, agentName, agent&&agent.skill, 'success', durationMs, 1200, member);
         aiCopilotState.conversationHistory.push({ role:'assistant', agentId:agentId, text:mockText });
+
+        // ── Save to session store ──
+        if (member && typeof sessSave === 'function') {
+            sessSave(member.id, 'user', query||agentName);
+            sessSave(member.id, 'assistant', stripMdPreview(mockText));
+            updateHeaderState && updateHeaderState();
+        }
 
         // Still push to Human Review so the demo loop works
         var NEEDS_REVIEW_AGENTS = ['a2', 'a3'];
@@ -47956,8 +49333,10 @@ window.renderAgentChips = function() {
     if(!canRunAgents) { chipsRow.style.display='none'; return; }
 
     // Filter agents by surface (no surfaces field = show everywhere)
+    var HIDDEN_AGENTS = ['a2']; // Inbox Triage hidden from member-level chips
     var agents = (window.AGENTS||[]).filter(function(a) {
-        if(a.status === 'inactive') return false; // respect the active toggle
+        if(a.status === 'inactive') return false;
+        if(HIDDEN_AGENTS.indexOf(a.id) > -1) return false;
         if(!a.surfaces || !a.surfaces.length) return true;
         return a.surfaces.indexOf(currentSurface) > -1 || a.surfaces.indexOf('all') > -1;
     });
@@ -48010,7 +49389,7 @@ window.renderAgentChips = function() {
         var chipTitle = isDraft ? 'Not yet published' : isReview ? 'Pending approval' : clickQuery;
 
         return '<button class="'+cls+'" data-agent-id="'+a.id+'" data-click-query="'+clickQuery.replace(/"/g,'&quot;')+'" title="'+chipTitle.replace(/"/g,'&quot;')+'">'
-            + icon + a.name + badge + '</button>';
+            + a.name + badge + '</button>';
     }).join('');
 };
 
