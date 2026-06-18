@@ -6,6 +6,23 @@ exports.handler = async function(event) {
     try {
         const body = JSON.parse(event.body);
 
+        // ── Normalize messages ────────────────────────────────────────────────
+        // Some history entries use `text` instead of `content` (from agent runs).
+        // Strip any message with missing/empty content before sending to Anthropic.
+        if (Array.isArray(body.messages)) {
+            body.messages = body.messages
+                .map(m => ({ role: m.role, content: m.content || m.text || '' }))
+                .filter(m => m.content && m.content.trim().length > 0);
+        }
+
+        // Guard: must have at least one message
+        if (!body.messages || body.messages.length === 0) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: { message: 'No valid messages to send.' } })
+            };
+        }
+
         const response = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
