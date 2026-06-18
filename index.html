@@ -31229,6 +31229,8 @@ function startNewSession() {
     if (member) SESS.active[member.id] = null;
     aiCopilotState.conversationHistory = [];
     aiCopilotState.isInConversation    = false;
+    // Reset Referral Agent state so it doesn't intercept regular chat
+    if (window.ReferralAgent && window.ReferralAgent.reset) window.ReferralAgent.reset();
     updateHeaderState();
     renderWelcomeScreen();
 }
@@ -31241,9 +31243,11 @@ function loadSession(sessionId, memberId) {
     if (!s) return;
 
     SESS.active[memberId] = sessionId;
-    aiCopilotState.conversationHistory = s.messages.map(m=>({role:m.role,content:m.content}));
+    aiCopilotState.conversationHistory = s.messages.map(m=>({role:m.role,content:m.content||m.text||''}));
     aiCopilotState.isInConversation    = true;
     closeSessionPanel();
+    // Always reset RA when loading a past session — past session is not an active RA flow
+    if (window.ReferralAgent && window.ReferralAgent.reset) window.ReferralAgent.reset();
     updateHeaderState();
 
     // Render breadcrumb + messages
@@ -40927,14 +40931,10 @@ function sendAIMessage() {
     const text = input.value.trim(); if (!text) return;
     input.value = '';
 
-    // ── Referral Agent: intercept all input when agent messages are visible ──
-    if (window.ReferralAgent && window.ReferralAgent.handle) {
-        var raMsgs = document.getElementById('aiMessages');
-        var hasRaMsg = raMsgs && raMsgs.querySelector('.ra-msg');
-        if (hasRaMsg) {
-            window.ReferralAgent.handle(text);
-            return;
-        }
+    // ── Referral Agent: intercept when agent is active ────────────────────
+    if (window.ReferralAgent && window.ReferralAgent.isActive && window.ReferralAgent.isActive()) {
+        window.ReferralAgent.handle(text);
+        return;
     }
     // ─────────────────────────────────────────────────────────────────────
 
@@ -40972,7 +40972,6 @@ async function sendLLMMessage(userText) {
 
     try {
         const body = JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:800, system:buildChatSystemPrompt(), messages:[...history,{role:'user',content:userText}] });
-        console.log('[sendLLMMessage] messages:', JSON.parse(body).messages);
         const response = await fetch('/.netlify/functions/claude', {
             method:'POST',
             headers:{ 'Content-Type':'application/json' },
@@ -77289,6 +77288,12 @@ window.frClearLineFilter = function() {
 
   // ── Public API ───────────────────────────────────────────────────────────────
   window.ReferralAgent = {
+
+    // Public flag — readable from anywhere
+    isActive: function() { return state.active === true; },
+
+    // Reset — called when user starts new chat or navigates away
+    reset: function() { state.active = false; },
 
     start: function(memberId) {
       injectCSS();
