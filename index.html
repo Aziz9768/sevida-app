@@ -40925,23 +40925,14 @@ function sendAIMessage() {
     const text = input.value.trim(); if (!text) return;
     input.value = '';
 
-    // ── Referral Agent: detect distance filter requests ──────────────────
-    if (window.ReferralAgent && typeof window.ReferralAgent._setDistance === 'function') {
-        var distMatch = text.match(/(?:within|under|less than|show|find|filter|only|search)\s+(\d+)\s*(?:miles?|mi)/i) ||
-                        text.match(/(\d+)\s*(?:miles?|mi)\s*(?:radius|away|from|max|maximum)?/i);
-        if (distMatch) {
-            var miles = parseInt(distMatch[1]);
-            if (miles > 0 && miles <= 200) {
-                window.ReferralAgent._setDistance(miles);
-                // Show acknowledgement
-                var container = document.getElementById('aiMessages');
-                if (container) {
-                    container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-user"><div class="ai-conv-user-bubble">' + escapeHtml(text) + '</div></div></div>';
-                    container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-llm-response">Filtering facilities to within <strong>' + miles + ' miles</strong>. I\'ll remember this for the rest of this referral.</div></div></div></div>';
-                    container.scrollTop = container.scrollHeight;
-                }
-                return;
-            }
+    // ── Referral Agent: intercept all input when agent is active ──────────
+    if (window.ReferralAgent && window.ReferralAgent.handle && typeof aiCopilotState !== 'undefined' && aiCopilotState.isInConversation) {
+        // Check if referral agent is actually running (has a member or awaiting member)
+        var msgs = document.getElementById('aiMessages');
+        var hasRaMsg = msgs && msgs.querySelector('.ra-msg');
+        if (hasRaMsg) {
+            window.ReferralAgent.handle(text);
+            return;
         }
     }
     // ─────────────────────────────────────────────────────────────────────
@@ -76897,745 +76888,516 @@ window.frClearLineFilter = function() {
 
 <script>
 // ============================================================
-// REFERRAL AI AGENT v3 — Single-recommendation, no wizard
-// ============================================================
-// The agent reads member context silently, makes ONE smart
-// recommendation, shows it as a briefing card, then opens
-// the form fully pre-filled. No step-by-step questions.
+// REFERRAL AI AGENT v5 — Open conversational, CM-driven
 // ============================================================
 
 (function() {
+  'use strict';
 
+  // ── State ──────────────────────────────────────────────────────────────────
   var state = {
-    active: false,
-    member: null,
-    ctx: null,
-    recommendation: null,   // the AI's single recommendation
-    maxDistance: null        // remembered distance preference (miles), null = no filter
+    active:      false,
+    member:      null,
+    specialty:   null,   // what CM typed / resolved specialty label
+    slKey:       null,   // normalized key for DB lookup
+    facility:    null,   // selected facility object or null
+    maxDist:     null,   // distance filter (miles), null = any
+    history:     []      // [{role, text}] for context-aware Anthropic replies
   };
 
-  // ─── DATA READERS ─────────────────────────────────────────
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+  function msgs()  { return document.getElementById('aiMessages'); }
+  function esc(t)  { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  function getMember(id) {
-    if (typeof membersDB === 'undefined') return null;
-    return membersDB.find(function(m){ return m.id === id; }) || null;
+  function aiMsg(html) {
+    var m = msgs(); if (!m) return;
+    var d = document.createElement('div');
+    d.className = 'ai-chat-turn ra-msg';
+    d.innerHTML = '<div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-llm-response">' + html + '</div></div></div>';
+    m.appendChild(d);
+    m.scrollTop = m.scrollHeight;
   }
 
-  function readMemberContext(m) {
-    if (!m) return null;
-    var diags = [];
-    if (m.diagnoses) {
-      ['primary','secondary','tertiary','additional'].forEach(function(k){
-        if (m.diagnoses[k]) diags.push(m.diagnoses[k]);
-      });
-    }
-    var adtTasks = [];
-    if (m.dashboardData && m.dashboardData.tasks) {
-      adtTasks = m.dashboardData.tasks.filter(function(t){
-        return t.type === 'ADT' || (t.title && t.title.toLowerCase().includes('adt'));
-      });
-    }
-    var hasRecentADT = adtTasks.length > 0 || m.hasADT === true;
-    var openNeeds = [];
-    if (m.carePlanData && m.carePlanData.needs) {
-      openNeeds = m.carePlanData.needs.filter(function(n){ return n.status !== 'Completed'; });
-    }
-    return {
-      name:            m.name,
-      id:              m.id,
-      diagnoses:       diags.filter(Boolean),
-      hasRecentADT:    hasRecentADT,
-      adtTask:         adtTasks[0] || null,
-      openNeeds:       openNeeds,
-      hasSafetyConcern: m.safetyConcern && m.safetyConcern.hasConcern,
-      riskTier:        m.riskTier || 1,
-      careManager:     m.careManager || 'Care Manager',
-      phone:           m.cellPhone || m.phone || '',
-      email:           m.email || '',
-      city:            m.city || '',
-      zipCode:         m.zipCode || '',
-      county:          m.county || '',
-      state:           m.state || 'NC',
-      address:         m.address || '',
-      medicaidId:      m.medicaidId || '',
-      mrn:             m.mrn || '',
-      ssn:             m.ssn || '',
-      dob:             m.dob || ''
-    };
+  function userMsg(text) {
+    var m = msgs(); if (!m) return;
+    var d = document.createElement('div');
+    d.className = 'ai-chat-turn';
+    d.innerHTML = '<div class="ai-conv-user"><div class="ai-conv-user-bubble">' + esc(text) + '</div></div>';
+    m.appendChild(d);
+    m.scrollTop = m.scrollHeight;
+    state.history.push({ role: 'user', text: text });
   }
 
-  // Diagnosis → service line suggestion
-  var DIAG_MAP = [
-    { re: /heart failure|cardiac|cardio|I50|I25|I21/i,         sl:'Cardiology',        slKey:'cardiology',        svc:'Cardiac Rehabilitation',          rt:'Treatment',          reason:'Post-cardiac follow-up' },
-    { re: /hypertension|I10|blood pressure/i,                   sl:'Cardiology',        slKey:'cardiology',        svc:'General Cardiology',              rt:'Treatment',          reason:'Hypertension management' },
-    { re: /diabetes|E11|E10|hyperglycemia/i,                    sl:'Endocrinology',     slKey:'endocrinology',     svc:'Diabetes Management',             rt:'Treatment',          reason:'Diabetes management' },
-    { re: /hyperlipid|E78|cholesterol/i,                        sl:'Endocrinology',     slKey:'endocrinology',     svc:'General Endocrinology',           rt:'Treatment',          reason:'Lipid management' },
-    { re: /COPD|asthma|pulmon|J44|J45/i,                        sl:'Pulmonology',       slKey:'pulmonology',       svc:'General Pulmonology',             rt:'Treatment',          reason:'Pulmonary evaluation' },
-    { re: /depression|anxiety|mental|behavioral|F32|F41|F33/i,  sl:'Behavioral Health', slKey:'behavioral-health', svc:'Individual Therapy / Counseling', rt:'Treatment',          reason:'Behavioral health support' },
-    { re: /back pain|M54|physical therapy|fracture|joint|knee/i,sl:'Physical Therapy',  slKey:'physical-therapy',  svc:'Physical Therapy',                rt:'Treatment',          reason:'Physical therapy' },
-    { re: /sleep apnea|G47|insomnia|neuro|seizure|G40|headache/i,sl:'Neurology',        slKey:'neurology',         svc:'General Neurology',               rt:'Treatment',          reason:'Neurological evaluation' },
-    { re: /ortho|spine|arthritis|M15|M16|M17/i,                 sl:'Orthopedics',       slKey:'orthopedics',       svc:'General Orthopedics',             rt:'Treatment',          reason:'Orthopedic evaluation' },
+  function typingId() { return 'ra-typ-' + Date.now(); }
+  function showTyping(id) {
+    var m = msgs(); if (!m) return;
+    var d = document.createElement('div');
+    d.id = id; d.className = 'ai-chat-turn ra-msg';
+    d.innerHTML = '<div class="ai-conv-assistant"><div class="ai-response-block"><div class="ra-dots"><span></span><span></span><span></span></div></div></div>';
+    m.appendChild(d);
+    m.scrollTop = m.scrollHeight;
+  }
+  function hideTyping(id) { var el = document.getElementById(id); if (el) el.remove(); }
+
+  function clear() { var m = msgs(); if (m) m.innerHTML = ''; }
+
+  // ── Provider DB helpers ──────────────────────────────────────────────────────
+  // Map free-text specialty to a slKey for DB lookup
+  var SL_MAP = [
+    { keys: ['cardio','cardiac','heart','cardiology'],                     slKey: 'cardiology',        label: 'Cardiology' },
+    { keys: ['endocrin','diabetes','diabetic','endocrinology'],            slKey: 'endocrinology',     label: 'Endocrinology' },
+    { keys: ['pulmon','lung','copd','asthma','pulmonology','respiratory'], slKey: 'pulmonology',       label: 'Pulmonology' },
+    { keys: ['behav','mental','psych','anxiety','depress','counseling','therapy'], slKey: 'behavioral-health', label: 'Behavioral Health' },
+    { keys: ['physical therapy','pt ','ortho','joint','fracture','physical'], slKey: 'physical-therapy', label: 'Physical Therapy' },
+    { keys: ['neuro','seizure','brain','nerve','neurology'],               slKey: 'neurology',         label: 'Neurology' },
+    { keys: ['dental','teeth','tooth','oral'],                             slKey: 'dental',            label: 'Dental' },
+    { keys: ['eye','vision','ophthal'],                                    slKey: 'ophthalmology',     label: 'Ophthalmology' },
+    { keys: ['radiol','imaging','scan','xray','mri'],                      slKey: 'radiology',         label: 'Radiology' }
   ];
 
-  function buildRecommendation(ctx) {
-    var sl = null;
-    // Check ADT first for urgency signal
-    var isUrgent = ctx.hasRecentADT;
-
-    // Match diagnoses to service line
-    for (var i = 0; i < ctx.diagnoses.length; i++) {
-      for (var j = 0; j < DIAG_MAP.length; j++) {
-        if (DIAG_MAP[j].re.test(ctx.diagnoses[i])) {
-          sl = DIAG_MAP[j];
-          break;
-        }
+  function resolveSlKey(text) {
+    var t = text.toLowerCase();
+    for (var i = 0; i < SL_MAP.length; i++) {
+      for (var j = 0; j < SL_MAP[i].keys.length; j++) {
+        if (t.indexOf(SL_MAP[i].keys[j]) > -1) return SL_MAP[i];
       }
-      if (sl) break;
     }
-
-    // Check open needs if no diagnosis match
-    if (!sl && ctx.openNeeds.length > 0) {
-      var need = ctx.openNeeds[0].category || '';
-      if (/chronic|disease/i.test(need)) sl = DIAG_MAP[0]; // default to cardiology
-      else if (/medication/i.test(need))  sl = DIAG_MAP[2]; // endocrinology
-      else if (/social|behavior/i.test(need)) sl = DIAG_MAP[5]; // behavioral
-    }
-
-    // Generic fallback
-    if (!sl) sl = { sl:'Cardiology', slKey:'cardiology', svc:'General Cardiology', rt:'Treatment', reason:'General care coordination' };
-
-    // Priority and seen-by
-    var priority = isUrgent ? 'Urgent' : 'Routine';
-    var daysOut  = isUrgent ? 3 : 14;
-    var seenBy   = new Date();
-    seenBy.setDate(seenBy.getDate() + daysOut);
-
-    // Find top facilities
-    var facilities = findFacilities(sl.slKey, 3);
-
-    return {
-      serviceLine:  sl.sl,
-      slKey:        sl.slKey,
-      service:      sl.svc,
-      requestType:  sl.rt,
-      reason:       sl.reason,
-      priority:     priority,
-      seenBy:       seenBy.toISOString().split('T')[0],
-      seenByLabel:  seenBy.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }),
-      daysOut:      daysOut,
-      facilities:   facilities,
-      isUrgent:     isUrgent,
-      adtNote:      isUrgent && ctx.adtTask ? ctx.adtTask.title : null,
-      topDiag:      ctx.diagnoses[0] ? ctx.diagnoses[0].split(' - ').pop() : null
-    };
+    return null;
   }
 
-  function findFacilities(slKey, limit, maxMiles) {
+  function getFacilities(slKey, maxDist) {
     var db = window._providersDB;
     if (!db || !db.length) return [];
-    var distLimit = maxMiles || state.maxDistance || null;
     var results = [];
     db.forEach(function(prov) {
-      var sl = prov.serviceLines || [];
+      var sl = (prov.serviceLines || []).join(' ').toLowerCase();
       var cat = (prov.category || '').toLowerCase();
-      var matched = sl.some(function(s){ return s.toLowerCase().includes(slKey.split('-')[0]); }) ||
-                    cat.includes(slKey.split('-')[0]);
-      if (!matched) return;
+      var key = slKey.split('-')[0];
+      if (sl.indexOf(key) === -1 && cat.indexOf(key) === -1) return;
       (prov.facilities || []).forEach(function(fac) {
         if (fac.acceptingPatients === false) return;
         var dist = fac.distance || prov.distance || 0;
-        if (distLimit && dist > distLimit) return; // distance filter
+        if (maxDist && dist > maxDist) return;
         results.push({
-          providerName: prov.name,
-          facilityName: fac.name || prov.name,
-          address:      fac.address || prov.address || '',
-          distance:     dist,
-          network:      prov.network || 'Unknown',
-          npi:          prov.npi || '',
-          category:     prov.category || '',
-          services:     prov.services ? prov.services.slice(0,3) : [],
-          _prov: prov, _fac: fac
+          name:     fac.name || prov.name,
+          provider: prov.name,
+          address:  fac.address || prov.address || '',
+          distance: dist,
+          network:  prov.network || 'Unknown',
+          npi:      prov.npi || '',
+          phone:    fac.phone || prov.phone || ''
         });
       });
     });
-    results.sort(function(a,b){ return a.distance - b.distance; });
-    return results.slice(0, limit || 5);
+    results.sort(function(a, b) { return a.distance - b.distance; });
+    return results;
   }
 
-  // ─── CSS ──────────────────────────────────────────────────
+  // ── Facility list HTML ───────────────────────────────────────────────────────
+  function renderFacilityList() {
+    var facs = getFacilities(state.slKey, state.maxDist);
+    var distVal = state.maxDist || '';
 
-  var _cssInjected = false;
+    var filterHtml =
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:7px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;">' +
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 00-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 00-8-8z"/></svg>' +
+        '<span style="font-size:11px;font-weight:600;color:#475569;white-space:nowrap;">Distance</span>' +
+        '<select onchange="window.ReferralAgent._dist(this.value)" style="font-size:11.5px;border:1px solid #e2e8f0;border-radius:5px;padding:3px 8px;color:#1e293b;background:#fff;cursor:pointer;font-family:inherit;flex:1;">' +
+          '<option value=""'  + (!distVal      ? ' selected' : '') + '>Any distance</option>' +
+          '<option value="5"' + (distVal==5    ? ' selected' : '') + '>Within 5 mi</option>' +
+          '<option value="10"'+ (distVal==10   ? ' selected' : '') + '>Within 10 mi</option>' +
+          '<option value="15"'+ (distVal==15   ? ' selected' : '') + '>Within 15 mi</option>' +
+          '<option value="25"'+ (distVal==25   ? ' selected' : '') + '>Within 25 mi</option>' +
+          '<option value="50"'+ (distVal==50   ? ' selected' : '') + '>Within 50 mi</option>' +
+        '</select>' +
+        (distVal ? '<span style="font-size:10px;color:#443fa7;font-weight:600;white-space:nowrap;">📌 remembered</span>' : '') +
+      '</div>';
+
+    var listHtml = '';
+    if (!facs.length) {
+      listHtml = '<div style="padding:12px;text-align:center;font-size:12px;color:#94a3b8;background:#f8fafc;border-radius:7px;">' +
+        'No in-network facilities found' + (state.maxDist ? ' within ' + state.maxDist + ' miles' : '') + '.<br>You can add recipients manually in the form.' +
+      '</div>';
+    } else {
+      listHtml = facs.map(function(f, idx) {
+        var netPill = f.network === 'In Network'
+          ? '<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;background:#dcfce7;color:#166534;margin-left:5px;">In Network</span>'
+          : '<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;background:#fef3c7;color:#92400e;margin-left:5px;">OON</span>';
+        var distPill = f.distance
+          ? '<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;background:#f1f5f9;color:#475569;margin-left:4px;">' + f.distance + ' mi</span>'
+          : '';
+        var facData = JSON.stringify(f).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+        return '<div onclick="window.ReferralAgent._pick(' + facData + ')" ' +
+          'style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;margin-bottom:5px;transition:all .12s;" ' +
+          'onmouseover="this.style.borderColor=\'#443fa7\';this.style.background=\'#fafafe\'" ' +
+          'onmouseout="this.style.borderColor=\'#e2e8f0\';this.style.background=\'#fff\'">' +
+          '<div style="width:28px;height:28px;background:#f1f5f9;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;">🏥</div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:12.5px;font-weight:600;color:#1e293b;">' + esc(f.name) + netPill + distPill + '</div>' +
+            '<div style="font-size:11px;color:#64748b;margin-top:2px;">' + esc(f.provider) + (f.address ? ' · ' + esc(f.address) : '') + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    return filterHtml +
+      '<div style="max-height:240px;overflow-y:auto;">' + listHtml + '</div>' +
+      '<button onclick="window.ReferralAgent._skipFac()" style="width:100%;margin-top:8px;padding:8px;background:#fff;border:1.5px solid #e2e8f0;border-radius:7px;font-size:12.5px;color:#64748b;cursor:pointer;font-family:inherit;transition:all .12s;" onmouseover="this.style.borderColor=\'#443fa7\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">Skip — I\'ll add a facility manually in the form</button>';
+  }
+
+  // ── Open form ────────────────────────────────────────────────────────────────
+  function openForm() {
+    var m = state.member;
+    if (!m) return;
+
+    var opts = {};
+    if (state.specialty) opts.reason = state.specialty;
+    if (state.facility)  opts._facility = state.facility;
+
+    // Use SevAI form-fill if available (it fills member demographics too)
+    if (window.SevAI && typeof window.SevAI.openFormPreFilled === 'function') {
+      window.SevAI.openFormPreFilled(opts);
+      return;
+    }
+
+    // Fallback: navigate to referrals nav + open add form
+    var navRef = document.getElementById('navReferrals');
+    if (!navRef) {
+      var navItems = document.querySelectorAll('.nav-item, [class*="nav"]');
+      navItems.forEach(function(n) { if (/referral/i.test(n.textContent)) navRef = n; });
+    }
+    if (navRef) navRef.click();
+
+    window._referralPrefill = {
+      memberId: m.id, memberName: m.name,
+      medicaidId: m.medicaidId || '', mrn: m.mrn || '',
+      dob: m.dob || '', phone: m.cellPhone || m.phone || '',
+      specialty: state.specialty,
+      facility: state.facility
+    };
+
+    setTimeout(function() {
+      if (typeof resetAddForm === 'function') resetAddForm();
+      if (typeof showScreen === 'function') showScreen('screen-add-referral');
+    }, 350);
+  }
+
+  // ── Show persistent "Open form" bar ─────────────────────────────────────────
+  function showFormBar() {
+    var existing = document.getElementById('ra-form-bar');
+    if (existing) return;
+    var m = msgs(); if (!m) return;
+    var bar = document.createElement('div');
+    bar.id = 'ra-form-bar';
+    bar.className = 'ai-chat-turn ra-msg';
+    var facNote = state.facility
+      ? 'Facility: <strong>' + esc(state.facility.name) + '</strong>'
+      : 'No facility selected yet';
+    bar.innerHTML =
+      '<div class="ai-conv-assistant"><div class="ai-response-block">' +
+        '<div style="background:#f8f7ff;border:1.5px solid #c8c6f0;border-radius:10px;padding:12px 14px;">' +
+          '<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Ready to open form</div>' +
+          '<div style="font-size:12px;color:#475569;margin-bottom:10px;">' +
+            '<div>Member: <strong>' + esc(state.member.name) + '</strong></div>' +
+            '<div style="margin-top:3px;">Specialty: <strong>' + esc(state.specialty || 'Not set') + '</strong></div>' +
+            '<div id="ra-bar-fac" style="margin-top:3px;">' + facNote + '</div>' +
+          '</div>' +
+          '<button onclick="window.ReferralAgent.openForm()" style="width:100%;padding:10px;background:#282460;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;" onmouseover="this.style.background=\'#1e1b4b\'" onmouseout="this.style.background=\'#282460\'">Open &amp; fill referral form →</button>' +
+          '<div style="font-size:11px;color:#94a3b8;text-align:center;margin-top:6px;">You can keep chatting or open the form anytime.</div>' +
+        '</div>' +
+      '</div></div>';
+    m.appendChild(bar);
+    m.scrollTop = m.scrollHeight;
+  }
+
+  function updateFormBar() {
+    var bar = document.getElementById('ra-form-bar');
+    if (!bar) return;
+    var facEl = bar.querySelector('#ra-bar-fac');
+    if (facEl) {
+      facEl.innerHTML = state.facility
+        ? 'Facility: <strong>' + esc(state.facility.name) + '</strong>'
+        : 'No facility selected yet';
+    }
+  }
+
+  // ── CSS injection ────────────────────────────────────────────────────────────
+  var _css = false;
   function injectCSS() {
-    if (_cssInjected) return;
-    _cssInjected = true;
+    if (_css) return; _css = true;
     var s = document.createElement('style');
-    s.textContent = [
-      '.ra-card{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;transition:border-color .12s,background .12s;}',
-      '.ra-card:hover:not(.ra-disabled){border-color:#443fa7;background:#fafafe;}',
-      '.ra-card.ra-selected{border-color:#282460;background:#f0f0ff;}',
-      '.ra-card.ra-disabled{opacity:.3;pointer-events:none;}',
-      '.ra-dot{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}',
-      '.ra-card-body{flex:1;min-width:0;}',
-      '.ra-card-title{font-size:13px;font-weight:600;color:#1e293b;line-height:1.3;}',
-      '.ra-card.ra-selected .ra-card-title{color:#1e1b4b;}',
-      '.ra-card.ra-disabled .ra-card-title{color:#94a3b8;}',
-      '.ra-card-sub{font-size:11px;color:#94a3b8;margin-top:2px;}',
-      '.ra-card.ra-selected .ra-card-sub{color:#6366f1;}',
-      '.ra-check-icon{font-size:14px;color:#16a34a;flex-shrink:0;display:none;}',
-      '.ra-card.ra-selected .ra-check-icon{display:block;}',
-      '.ra-check-card{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;transition:border-color .12s,background .12s;}',
-      '.ra-check-card:hover{border-color:#443fa7;background:#fafafe;}',
-      '.ra-check-card.ra-selected{border-color:#282460;background:#f0f0ff;}',
-      '.ra-check-card input[type=checkbox]{margin-top:2px;width:15px;height:15px;accent-color:#282460;cursor:pointer;flex-shrink:0;}',
-      '.ra-pill{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;margin-left:5px;vertical-align:middle;}',
-      '.ra-pill-urgent{background:#fee2e2;color:#991b1b;}',
-      '.ra-pill-network{background:#dcfce7;color:#166534;}',
-      '.ra-pill-oon{background:#fef3c7;color:#92400e;}',
-      '.ra-pill-dist{background:#f1f5f9;color:#475569;}',
-      '.ra-briefing-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;}',
-      '.ra-briefing-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#282460;}',
-      '.ra-briefing-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;}',
-      '.ra-briefing-rec{background:#f8f7ff;border:1.5px solid #c8c6f0;border-radius:8px;padding:10px 12px;}',
-      '.ra-briefing-row{display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;margin-bottom:4px;}',
-      '.ra-briefing-row:last-child{margin-bottom:0;}',
-      '.ra-briefing-label{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;width:70px;flex-shrink:0;}',
-      '.ra-briefing-val{font-size:13px;font-weight:600;color:#1e293b;}',
-      '.ra-fac-list{display:flex;flex-direction:column;gap:5px;}',
-      '.ra-fac-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;}',
-      '.ra-chips{display:flex;flex-wrap:wrap;gap:4px;}',
-      '.ra-chip{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;}',
-      '.ra-chip-red{background:#fef2f2;color:#b91c1c;border-color:#fecaca;}',
-      '.ra-chip-need{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;}',
-      '.ra-alert{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;font-size:12px;color:#92400e;}',
-      '.ra-safety{background:#fef2f2;border-color:#fecaca;color:#991b1b;}',
-      '.ra-btn-primary{width:100%;padding:9px 14px;background:#282460;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:background .12s;text-align:center;}',
-      '.ra-btn-primary:hover{background:#1e1b4b;}',
-      '.ra-btn-ghost{width:100%;padding:8px 14px;background:#fff;color:#64748b;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;margin-top:6px;}',
-      '.ra-btn-ghost:hover{border-color:#443fa7;color:#443fa7;}',
-      '.ra-member-row{padding:8px 12px;border-bottom:1px solid #f8fafc;cursor:pointer;font-size:13px;transition:background .1s;}',
-      '.ra-member-row:hover{background:#f0f0ff;}',
-      '.ra-member-row:last-child{border-bottom:none;}'
-    ].join('');
+    s.textContent =
+      '.ra-dots{display:flex;align-items:center;gap:4px;padding:4px 0;}' +
+      '.ra-dots span{width:6px;height:6px;background:#94a3b8;border-radius:50%;animation:ra-b 1.2s infinite;}' +
+      '.ra-dots span:nth-child(2){animation-delay:.2s;}' +
+      '.ra-dots span:nth-child(3){animation-delay:.4s;}' +
+      '@keyframes ra-b{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}';
     document.head.appendChild(s);
   }
 
-  // ─── UI ───────────────────────────────────────────────────
+  // ── Anthropic API ────────────────────────────────────────────────────────────
+  // Used only for free-text replies the local logic can't handle.
+  // Builds a tight system prompt so the model stays on-task.
+  function callLLM(userText, onDone) {
+    var m = state.member;
+    var sys = 'You are Vida CoPilot, an AI assistant for healthcare care managers using Sevida OS. ' +
+      'You help create referrals for members. Keep replies short (1-3 sentences), conversational, and focused on the referral task. ' +
+      (m ? 'Current member: ' + m.name + '. ' : '') +
+      (state.specialty ? 'Specialty discussed: ' + state.specialty + '. ' : '') +
+      (state.facility  ? 'Facility selected: ' + state.facility.name + '. ' : '') +
+      'Never predict clinical decisions (urgency, priority, diagnosis). ' +
+      'If the user asks to show facilities, search by specialty, filter by distance, or select a facility — respond with a very brief acknowledgement; the UI will handle the display. ' +
+      'If the user is ready to open the form, say so briefly.';
 
-  function _msgs() { return document.getElementById('aiMessages'); }
+    var msgs_arr = [{ role: 'user', content: userText }];
 
-  function _bubble(html) {
-    var c = _msgs();
-    if (!c) return;
-    var d = document.createElement('div');
-    d.className = 'ai-message assistant-message ra-msg';
-    d.innerHTML = '<div style="max-width:100%;padding:0;background:transparent;box-shadow:none;border:none;">' + html + '</div>';
-    c.appendChild(d);
-    c.scrollTop = c.scrollHeight;
-    return d;
+    fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 200,
+        system: sys,
+        messages: msgs_arr
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var text = (data.content && data.content[0] && data.content[0].text) || "I'm here to help with the referral.";
+      onDone(text);
+    })
+    .catch(function() {
+      onDone("I'm here to help — what type of referral does " + (m ? m.name.split(' ')[0] : 'this member') + " need?");
+    });
   }
 
-  function _clear() {
-    var c = _msgs();
-    if (c) c.innerHTML = '';
-  }
+  // ── Intent detection ─────────────────────────────────────────────────────────
+  // Returns { intent, value } from user text.
+  // Intent: 'specialty' | 'distance' | 'facility' | 'openform' | 'other'
+  function detectIntent(text) {
+    var t = text.toLowerCase();
 
-  // ─── RENDER SINGLE RECOMMENDATION CARD ────────────────────
+    // Distance intent: "within 10 miles", "10mi", "show me within 25 mi", etc.
+    var distMatch = t.match(/(?:within|under|show.*within|filter.*within|only)\s*(\d+)\s*mi/i) ||
+                    t.match(/(\d+)\s*mi(?:les?)?\s*(?:radius|away|from|max)?/i);
+    if (distMatch) return { intent: 'distance', value: parseInt(distMatch[1]) };
 
-  function renderRecommendation(ctx, rec) {
-
-    // Safety banner
-    if (ctx.hasSafetyConcern) {
-      _bubble('<div class="ra-alert ra-safety">⚠ This member has a documented safety concern. Review before creating a referral.</div>');
+    // Open form intent
+    if (/open.*form|fill.*form|create.*referral|start.*referral|submit|go.*form|open.*(referral)|referral.*form/i.test(t)) {
+      return { intent: 'openform' };
     }
 
-    // ADT alert
-    if (rec.isUrgent) {
-      _bubble('<div class="ra-alert">⚡ Recent ADT event detected — urgent follow-up recommended.</div>');
-    }
+    // Specialty intent: any text that resolves to a slKey
+    var resolved = resolveSlKey(t);
+    if (resolved) return { intent: 'specialty', value: resolved };
 
-    // Diagnosis chips
-    var chipsHtml = '';
-    if (ctx.diagnoses.length) {
-      chipsHtml = '<div class="ra-chips">' +
-        ctx.diagnoses.slice(0,3).map(function(d){
-          return '<span class="ra-chip">' + d.split(' - ').pop() + '</span>';
-        }).join('') +
-        (ctx.hasRecentADT ? '<span class="ra-chip ra-chip-red">Recent ADT</span>' : '') +
-        (ctx.openNeeds.length ? '<span class="ra-chip ra-chip-need">'+ctx.openNeeds.length+' open needs</span>' : '') +
-      '</div>';
-    }
-
-    // Facilities list
-    var facHtml = '';
-    if (rec.facilities.length) {
-      var distLabel = state.maxDistance ? 'Within ' + state.maxDistance + ' mi' : 'All distances';
-      facHtml = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">' +
-          '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Top facilities</div>' +
-          '<div style="display:flex;align-items:center;gap:5px;">' +
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 00-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 00-8-8z"/></svg>' +
-            '<select onchange="window.ReferralAgent._setDistance(this.value)" style="font-size:11px;border:1px solid #e2e8f0;border-radius:5px;padding:2px 6px;color:#475569;background:#fff;cursor:pointer;font-family:inherit;">' +
-              '<option value=""' + (!state.maxDistance ? ' selected' : '') + '>Any distance</option>' +
-              '<option value="5"' + (state.maxDistance === 5 ? ' selected' : '') + '>Within 5 mi</option>' +
-              '<option value="10"' + (state.maxDistance === 10 ? ' selected' : '') + '>Within 10 mi</option>' +
-              '<option value="15"' + (state.maxDistance === 15 ? ' selected' : '') + '>Within 15 mi</option>' +
-              '<option value="25"' + (state.maxDistance === 25 ? ' selected' : '') + '>Within 25 mi</option>' +
-              '<option value="50"' + (state.maxDistance === 50 ? ' selected' : '') + '>Within 50 mi</option>' +
-            '</select>' +
-          '</div>' +
-        '</div>' +
-        '<div class="ra-fac-list">' +
-        rec.facilities.map(function(f){
-          var net = f.network === 'In Network' ?
-            '<span class="ra-pill ra-pill-network">In Network</span>' :
-            '<span class="ra-pill ra-pill-oon">OON</span>';
-          var dist = f.distance ? '<span class="ra-pill ra-pill-dist">' + f.distance + ' mi</span>' : '';
-          return '<div class="ra-fac-item">' +
-            '<div style="flex:1;">' +
-              '<div style="font-weight:600;color:#1e293b;font-size:12px;">' + f.facilityName + net + dist + '</div>' +
-              '<div style="font-size:11px;color:#94a3b8;">' + f.providerName + '</div>' +
-            '</div>' +
-          '</div>';
-        }).join('') +
-      '</div>';
-    } else {
-      facHtml = '<div style="font-size:12px;color:#94a3b8;padding:6px 0;">No in-network facilities found — you can add recipients manually in the form.</div>';
-    }
-
-    // Recommendation card
-    var recHtml = '<div class="ra-briefing-card">' +
-      // Header
-      '<div class="ra-briefing-header">' +
-        '<div style="width:24px;height:24px;background:rgba(255,255,255,.15);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:13px;height:13px;"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>' +
-        '</div>' +
-        '<div style="flex:1;">' +
-          '<div style="font-size:12px;font-weight:700;color:#fff;">Referral recommendation</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,.6);">Based on ' + ctx.name + '\'s records</div>' +
-        '</div>' +
-      '</div>' +
-      // Body
-      '<div class="ra-briefing-body">' +
-        (chipsHtml ? chipsHtml : '') +
-        '<div class="ra-briefing-rec">' +
-          '<div class="ra-briefing-row"><span class="ra-briefing-label">Service</span><span class="ra-briefing-val">' + rec.serviceLine + ' · ' + rec.service + '</span></div>' +
-          '<div class="ra-briefing-row"><span class="ra-briefing-label">Priority</span><span class="ra-briefing-val" style="' + (rec.isUrgent ? 'color:#dc2626;' : '') + '">' + rec.priority + (rec.isUrgent ? ' ⚡' : '') + '</span></div>' +
-          '<div class="ra-briefing-row"><span class="ra-briefing-label">Seen by</span><span class="ra-briefing-val">' + rec.seenByLabel + ' (in ' + rec.daysOut + ' days)</span></div>' +
-          '<div class="ra-briefing-row"><span class="ra-briefing-label">Reason</span><span class="ra-briefing-val" style="font-weight:400;color:#475569;">' + rec.reason + '</span></div>' +
-        '</div>' +
-        facHtml +
-        '<div style="display:flex;flex-direction:column;gap:6px;margin-top:2px;">' +
-          '<button class="ra-btn-primary" onclick="window.ReferralAgent.openForm()">Open &amp; fill referral form</button>' +
-          '<button class="ra-btn-ghost" onclick="window.ReferralAgent.showAdjust()">Change recommendation</button>' +
-        '</div>' +
-        '<div style="font-size:11px;color:#94a3b8;text-align:center;">All fields will be pre-filled. Review and submit in the form.</div>' +
-      '</div>' +
-    '</div>';
-
-    _bubble(recHtml);
+    return { intent: 'other' };
   }
 
-  // Adjustment panel — shown when CM clicks "Change recommendation"
-  function renderAdjustPanel() {
-    var lines = [
-      {key:'Cardiology',        label:'Cardiology',        icon:'❤️'},
-      {key:'Behavioral Health', label:'Behavioral Health', icon:'🧠'},
-      {key:'Physical Therapy',  label:'Physical Therapy',  icon:'🦵'},
-      {key:'Endocrinology',     label:'Endocrinology',     icon:'💉'},
-      {key:'Neurology',         label:'Neurology',         icon:'🔬'},
-      {key:'Pulmonology',       label:'Pulmonology',       icon:'🫁'},
-      {key:'Radiology',         label:'Radiology',         icon:'📷'},
-      {key:'Orthopedics',       label:'Orthopedics',       icon:'🦴'},
-    ];
+  // ── Handle user input ────────────────────────────────────────────────────────
+  // This is the main router. Called from sendAIMessage when agent is active.
+  function handleInput(text) {
+    userMsg(text);
 
-    var priorityHtml = '<div style="margin-bottom:10px;">' +
-      '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Priority</div>' +
-      '<div style="display:flex;gap:6px;">' +
-        '<button onclick="window.ReferralAgent._setPriority(\'Routine\')" style="flex:1;padding:7px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;color:#475569;">Routine</button>' +
-        '<button onclick="window.ReferralAgent._setPriority(\'Urgent\')" style="flex:1;padding:7px;border:1.5px solid #fee2e2;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;background:#fef2f2;color:#991b1b;">Urgent</button>' +
-      '</div>' +
-    '</div>';
+    var intent = detectIntent(text);
 
-    var slHtml = '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Service line</div>' +
-      '<div style="display:flex;flex-direction:column;gap:5px;">' +
-      lines.map(function(l){
-        var isCurrent = state.recommendation && state.recommendation.serviceLine === l.key;
-        return '<div class="ra-card' + (isCurrent ? ' ra-selected' : '') + '" onclick="window.ReferralAgent._changeServiceLine(\'' + l.key.replace(/'/g, "\\'") + '\')">' +
-          '<div style="width:26px;text-align:center;font-size:14px;">' + l.icon + '</div>' +
-          '<div class="ra-card-body"><div class="ra-card-title">' + l.label + '</div></div>' +
-          '<span class="ra-check-icon">✓</span>' +
-        '</div>';
-      }).join('') +
-    '</div>';
+    if (intent.intent === 'distance') {
+      state.maxDist = intent.value;
+      // Re-render facility list if specialty already set
+      var tid = typingId(); showTyping(tid);
+      setTimeout(function() {
+        hideTyping(tid);
+        if (state.slKey) {
+          aiMsg('Filtering to within <strong>' + intent.value + ' miles</strong> — I\'ll remember that for this session.' +
+            '<div style="margin-top:10px;">' + renderFacilityList() + '</div>');
+          updateFormBar();
+        } else {
+          aiMsg('Got it — I\'ll show facilities within ' + intent.value + ' miles. What specialty does ' +
+            (state.member ? state.member.name.split(' ')[0] : 'the member') + ' need?');
+        }
+      }, 500);
+      return;
+    }
 
-    var html = '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
-        '<div style="font-size:13px;font-weight:700;color:#1e293b;">Adjust recommendation</div>' +
-        '<button onclick="window.ReferralAgent.showRecommendation()" style="background:none;border:none;font-size:13px;color:#94a3b8;cursor:pointer;">✕</button>' +
-      '</div>' +
-      priorityHtml +
-      slHtml +
-    '</div>';
+    if (intent.intent === 'specialty') {
+      var sl = intent.value;
+      state.specialty = sl.label;
+      state.slKey = sl.slKey;
+      var tid2 = typingId(); showTyping(tid2);
+      setTimeout(function() {
+        hideTyping(tid2);
+        var facs = getFacilities(state.slKey, state.maxDist);
+        var intro = facs.length > 0
+          ? 'Found <strong>' + facs.length + '</strong> in-network ' + sl.label + ' facilit' + (facs.length === 1 ? 'y' : 'ies') +
+            (state.maxDist ? ' within ' + state.maxDist + ' miles' : '') + '. Select one below or keep asking questions.'
+          : 'No in-network ' + sl.label + ' facilities found' + (state.maxDist ? ' within ' + state.maxDist + ' miles' : '') + '. You can skip and add manually in the form.';
+        aiMsg(intro + '<div style="margin-top:10px;">' + renderFacilityList() + '</div>');
+        showFormBar();
+      }, 700);
+      return;
+    }
 
-    _bubble(html);
+    if (intent.intent === 'openform') {
+      var tid3 = typingId(); showTyping(tid3);
+      setTimeout(function() {
+        hideTyping(tid3);
+        aiMsg('Opening the referral form now — I\'ll pre-fill everything we\'ve discussed.');
+        setTimeout(openForm, 400);
+      }, 400);
+      return;
+    }
+
+    // Free-text: call Anthropic API
+    var tid4 = typingId(); showTyping(tid4);
+    callLLM(text, function(reply) {
+      hideTyping(tid4);
+      // Check if the reply mentions a specialty we can extract
+      var resolved2 = resolveSlKey(reply);
+      if (resolved2 && !state.slKey) {
+        state.specialty = resolved2.label;
+        state.slKey = resolved2.slKey;
+        aiMsg(reply + '<div style="margin-top:10px;">' + renderFacilityList() + '</div>');
+        showFormBar();
+      } else {
+        aiMsg(reply);
+      }
+      state.history.push({ role: 'assistant', text: reply });
+    });
   }
 
-  // Member search
-  function renderMemberSearch() {
-    _bubble(
-      '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;">' +
-        '<div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:8px;">Which member?</div>' +
-        '<input id="ra-member-search" type="text" placeholder="Search by name..." ' +
-          'style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:13px;outline:none;box-sizing:border-box;" ' +
-          'oninput="window.ReferralAgent._searchMember(this.value)">' +
-        '<div id="ra-member-results" style="margin-top:8px;max-height:200px;overflow-y:auto;border-radius:7px;border:1px solid #e2e8f0;display:none;"></div>' +
-      '</div>'
-    );
-    setTimeout(function(){
-      var inp = document.getElementById('ra-member-search');
-      if (inp) inp.focus();
-    }, 100);
-  }
-
-  // ─── PUBLIC API ────────────────────────────────────────────
-
+  // ── Public API ───────────────────────────────────────────────────────────────
   window.ReferralAgent = {
 
     start: function(memberId) {
       injectCSS();
-      state.active = true;
-      state.recommendation = null;
-      state.maxDistance = null; // reset distance preference for new session
+      state.active   = true;
+      state.specialty = null;
+      state.slKey    = null;
+      state.facility = null;
+      state.maxDist  = null;
+      state.history  = [];
 
-      if (typeof aiCopilotState !== 'undefined') {
-        aiCopilotState.isInConversation = true;
-      }
+      if (typeof aiCopilotState !== 'undefined') aiCopilotState.isInConversation = true;
 
-      // Open panel
       var panel = document.querySelector('.ai-copilot-panel');
       if (panel && !panel.classList.contains('open')) {
         if (typeof toggleAICopilot === 'function') toggleAICopilot();
       }
 
-      _clear();
+      clear();
 
-      // Resolve member — check all possible sources in priority order
+      // Resolve member
       var m = null;
       if (memberId && typeof membersDB !== 'undefined') {
-        m = membersDB.find(function(x){ return x.id === memberId; }) || null;
+        m = membersDB.find(function(x) { return x.id === memberId; }) || null;
       }
-      if (!m && window.currentMember) {
-        m = window.currentMember;
-      }
-      // Also check if form is already open with a member selected
+      if (!m) m = window.currentMember || null;
+
       if (!m) {
-        var mnEl = document.getElementById('memberName');
-        if (mnEl && mnEl.value && mnEl.dataset.memberType === 'system' && typeof membersDB !== 'undefined') {
-          m = membersDB.find(function(x){ return x.name === mnEl.value; }) || null;
+        // No member — ask
+        aiMsg('Which member is this referral for?<br><div style="margin-top:8px;">' +
+          '<input oninput="window.ReferralAgent._searchMember(this.value)" placeholder="Search by name or ID…" ' +
+          'style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box;"/>' +
+          '<div id="ra_mbres" style="margin-top:6px;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;max-height:200px;overflow-y:auto;"></div>' +
+        '</div>');
+        return;
+      }
+
+      state.member = m;
+      var name = m.name.split(' ')[0];
+      aiMsg('What type of referral does <strong>' + esc(name) + '</strong> need?');
+    },
+
+    // Called from input interception in sendAIMessage
+    handle: function(text) {
+      handleInput(text);
+    },
+
+    // Distance dropdown change
+    _dist: function(val) {
+      state.maxDist = val ? parseInt(val) : null;
+      if (!state.slKey) return;
+      // Refresh the last facility list in place
+      var allMsgs = msgs();
+      if (!allMsgs) return;
+      var lastAi = allMsgs.querySelector('.ra-msg:last-child .ai-llm-response');
+      if (lastAi) {
+        var listsDiv = lastAi.querySelector('div[style*="margin-top:10px"]');
+        if (listsDiv) {
+          listsDiv.innerHTML = renderFacilityList();
         }
       }
-
-      if (!m) {
-        renderMemberSearch();
-        return;
-      }
-
-      state.member = m;
-      state.ctx = readMemberContext(m);
-
-      // Header
-      _bubble(
-        '<div style="font-size:14px;font-weight:600;color:#1e293b;margin-bottom:2px;">Creating referral for <span style="color:#443fa7;">' + m.name + '</span></div>' +
-        '<div style="font-size:12px;color:#94a3b8;">Checked their records — here\'s what I recommend.</div>'
-      );
-
-      // Build recommendation silently and show it
-      state.recommendation = buildRecommendation(state.ctx);
-      renderRecommendation(state.ctx, state.recommendation);
     },
 
-    showRecommendation: function() {
-      // Remove adjust panel and re-show recommendation
-      var msgs = _msgs();
-      if (!msgs) return;
-      // Remove last bubble (adjust panel)
-      var bubbles = msgs.querySelectorAll('.ra-msg');
-      if (bubbles.length) bubbles[bubbles.length - 1].remove();
-    },
-
-    showAdjust: function() {
-      renderAdjustPanel();
-    },
-
-    _setDistance: function(val) {
-      // Remember the distance preference for this session
-      state.maxDistance = val ? parseInt(val) : null;
-      if (!state.recommendation) return;
-      // Re-find facilities with new distance filter
-      var newFacilities = findFacilities(state.recommendation.slKey, 5);
-      state.recommendation.facilities = newFacilities;
-      // Re-render recommendation
-      var msgs = _msgs();
-      if (msgs) {
-        var last = msgs.querySelector('.ra-msg:last-child');
-        if (last) last.remove();
-      }
-      renderRecommendation(state.ctx, state.recommendation);
-      // Show feedback if no results
-      if (!newFacilities.length && state.maxDistance) {
-        _bubble('<div style="font-size:12px;color:#94a3b8;padding:4px 0;">No in-network facilities found within ' + state.maxDistance + ' miles. Try a wider radius or add recipients manually.</div>');
-      }
-    },
-
-    _changeServiceLine: function(slName) {
-      if (!state.recommendation) return;
-      // Find matching DIAG_MAP entry or create custom
-      var match = DIAG_MAP.find(function(d){ return d.sl === slName; });
-      if (match) {
-        state.recommendation.serviceLine = match.sl;
-        state.recommendation.slKey = match.slKey;
-        state.recommendation.service = match.svc;
-        state.recommendation.requestType = match.rt;
-        state.recommendation.reason = match.reason;
-      } else {
-        state.recommendation.serviceLine = slName;
-        state.recommendation.service = 'General ' + slName;
-        state.recommendation.requestType = 'Treatment';
-        state.recommendation.reason = slName + ' referral';
-      }
-      // Re-find facilities for new service line
-      var slKeyMap = {
-        'Cardiology':'cardiology','Behavioral Health':'behavioral-health',
-        'Physical Therapy':'physical-therapy','Endocrinology':'endocrinology',
-        'Neurology':'neurology','Pulmonology':'pulmonology',
-        'Radiology':'radiology','Orthopedics':'orthopedics'
-      };
-      var key = slKeyMap[slName] || slName.toLowerCase().replace(/\s+/g,'-');
-      state.recommendation.facilities = findFacilities(key, 3);
-
-      // Clear and re-render
-      _clear();
-      _bubble(
-        '<div style="font-size:14px;font-weight:600;color:#1e293b;margin-bottom:2px;">Referral for <span style="color:#443fa7;">' + state.member.name + '</span></div>' +
-        '<div style="font-size:12px;color:#94a3b8;">Updated to ' + slName + '.</div>'
-      );
-      renderRecommendation(state.ctx, state.recommendation);
-    },
-
-    _setPriority: function(p) {
-      if (!state.recommendation) return;
-      state.recommendation.priority = p;
-      state.recommendation.isUrgent = (p === 'Urgent');
-      var daysOut = p === 'Urgent' ? 3 : 14;
-      state.recommendation.daysOut = daysOut;
-      var d = new Date();
-      d.setDate(d.getDate() + daysOut);
-      state.recommendation.seenBy = d.toISOString().split('T')[0];
-      state.recommendation.seenByLabel = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
-      _clear();
-      _bubble('<div style="font-size:12px;color:#94a3b8;">Priority changed to ' + p + '.</div>');
-      renderRecommendation(state.ctx, state.recommendation);
-    },
-
-    openForm: function() {
-      var m = state.member;
-      var ctx = state.ctx;
-      var rec = state.recommendation;
-      if (!m || !rec) return;
-
-      // Navigate to referrals
-      var navRef = document.getElementById('navReferrals');
-      if (navRef) navRef.click();
-
+    // Facility selected
+    _pick: function(facObj) {
+      if (typeof facObj === 'string') { try { facObj = JSON.parse(facObj); } catch(e) { return; } }
+      state.facility = facObj;
+      userMsg('Selected: ' + facObj.name);
+      var tid = typingId(); showTyping(tid);
       setTimeout(function() {
-        if (typeof resetAddForm === 'function') resetAddForm();
-        if (typeof showScreen === 'function') showScreen('screen-add-referral');
-
-        setTimeout(function() {
-          var _sv = function(id, val) { var el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; };
-
-          // ── Member chip ──
-          var addState = document.getElementById('mb-add-state');
-          var selState = document.getElementById('mb-selected-state');
-          var selName  = document.getElementById('mb-selected-name-display');
-          var hint     = document.getElementById('memberSelectHint');
-          var mn       = document.getElementById('memberName');
-          if (mn)       { mn.value = m.name; mn.dataset.memberType = 'system'; }
-          if (addState) addState.style.display = 'none';
-          if (selState) selState.style.display = '';
-          if (selName)  selName.textContent = m.name;
-          if (hint)     hint.style.display = 'none';
-          var badge = document.getElementById('mb-selected-type-badge');
-          if (badge) badge.innerHTML = '<span style="font-size:11px;font-weight:600;background:#dcfce7;color:#166534;border:1px solid #86efac;border-radius:4px;padding:2px 7px;">System Member</span>';
-
-          // ── System member fields (first set only) ──
-          var sysFields = document.getElementById('mb-system-fields');
-          if (sysFields) sysFields.style.display = '';
-          _sv('mb-medicaidId1', m.medicaidId || '');
-          _sv('mb-mrn1',        m.mrn        || '');
-          _sv('mb-ssn1',        '***-**-' + (m.ssn || '****').toString().slice(-4));
-          _sv('mb-dob1',        m.dob        || '');
-
-          // Hide the second (official) ID set to avoid duplicate fields showing
-          ['mb-medicaidId2','mb-mrn2','mb-ssn2','mb-dob2'].forEach(function(id) {
-            var el = document.getElementById(id);
-            if (el) { el.value = ''; var row = el.closest('.form-row'); if (row) row.style.display = 'none'; }
-          });
-
-          // Last Known info
-          _sv('mb-lkPhone',   m.cellPhone || m.phone || '');
-          _sv('mb-lkEmail',   m.email     || '');
-          _sv('mb-lkAddress', [m.address, m.city, m.state].filter(Boolean).join(', '));
-
-          // Unlock sections
-          if (typeof unlockMemberSections === 'function') unlockMemberSections();
-
-          // ── Guardian — set to "No Guardian" state ──
-          var gdEmpty = document.getElementById('gd-empty-state');
-          var gdSys   = document.getElementById('gd-system-fields');
-          var gdNo    = document.getElementById('gd-no-guardian');
-          if (gdEmpty) gdEmpty.style.display = 'none';
-          if (gdSys)   gdSys.style.display = '';
-          if (gdNo)    gdNo.style.display = '';
-
-          // ── Requestor ──
-          var cmName = (ctx && ctx.careManager) || m.careManager || 'Care Manager';
-          _sv('rriName',  cmName);
-          _sv('rriPhone', '(704) 555-0001');
-          _sv('rriEmail', cmName.toLowerCase().replace(/\s+/g, '.') + '@riversideinc.org');
-
-          // ── Request info ──
-          _sv('requestType',      rec.requestType || 'Treatment');
-          _sv('referralPriority', rec.priority    || 'Routine');
-          _sv('seenByDate',       rec.seenBy      || '');
-          _sv('referralReason',   rec.reason      || '');
-
-          // ── Recipients — use window-scoped setter ──
-          if (rec.facilities && rec.facilities.length > 0 && typeof window._setSrCartItems === 'function') {
-            var items = rec.facilities.slice(0, 2).map(function(f) {
-              return {
-                id:           'ai-' + Date.now() + Math.random(),
-                services:     [{ lineLabel: rec.serviceLine || 'General', serviceLabel: rec.service || 'General' }],
-                provider:     { name: f.providerName, npi: f.npi || '', network: f.network || 'Unknown', distance: f.distance || 0 },
-                facility:     { name: f.facilityName, type: f.category || '', address: f.address || '', distance: f.distance || 0 },
-                practitioner: { name: '-' },
-                preferred:    false,
-                note:         'I am referring ' + m.name + ' to ' + f.facilityName + ' for ' + (rec.service || rec.serviceLine) + '. ' + (rec.reason || '') + '.'
-              };
-            });
-            window._setSrCartItems(items);
-            // Render notes
-            setTimeout(function() {
-              if (typeof window._srRenderRecipientNotes === 'function') window._srRenderRecipientNotes();
-            }, 200);
-          }
-
-          // ── Consent ──
-          var ccb = document.getElementById('memberConsentCheckbox');
-          if (ccb) ccb.checked = true;
-
-          // ── AI banner at top of form ──
-          setTimeout(function() {
-            var header = document.querySelector('#screen-add-referral .page-header, #screen-add-referral h1');
-            if (header) {
-              var existing = document.getElementById('sevai-form-banner');
-              if (existing) existing.remove();
-              var banner = document.createElement('div');
-              banner.id = 'sevai-form-banner';
-              banner.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:#f0f0ff;border:1px solid #c8c6f0;border-radius:8px;margin-bottom:16px;font-size:12px;';
-              banner.innerHTML =
-                '<div style="width:20px;height:20px;background:#282460;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">' +
-                  '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:11px;height:11px;"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>' +
-                '</div>' +
-                '<div style="flex:1;">' +
-                  '<div style="font-weight:700;color:#282460;margin-bottom:2px;">Referral Creator pre-filled this form</div>' +
-                  '<div style="color:#443fa7;line-height:1.5;">' +
-                    'Member info, requestor, priority (' + rec.priority + '), seen-by date, and consent filled. ' +
-                    (rec.facilities.length ? rec.facilities.length + ' facility added to recipients. ' : '') +
-                    'Review all fields before submitting.' +
-                  '</div>' +
-                '</div>' +
-                '<button onclick="document.getElementById(\'sevai-form-banner\').remove()" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;line-height:1;padding:0;">&times;</button>';
-              header.insertAdjacentElement('afterend', banner);
-            }
-            var pc = document.getElementById('pageContainer');
-            if (pc) pc.scrollTop = 0;
-          }, 400);
-
-        }, 400);
-      }, 300);
+        hideTyping(tid);
+        aiMsg('<strong>' + esc(facObj.name) + '</strong> selected.' +
+          (facObj.distance ? ' (' + facObj.distance + ' mi away)' : '') +
+          ' Open the referral form whenever you\'re ready — or keep asking questions.');
+        showFormBar();
+        updateFormBar();
+      }, 400);
     },
 
-    _searchMember: function(query) {
-      var resultsEl = document.getElementById('ra-member-results');
-      if (!resultsEl) return;
-      if (!query || query.length < 2) { resultsEl.style.display = 'none'; return; }
-      if (typeof membersDB === 'undefined') return;
-      var q = query.toLowerCase();
-      var matches = membersDB.filter(function(m){ return m.name.toLowerCase().includes(q); }).slice(0, 6);
-      if (!matches.length) {
-        resultsEl.style.display = 'block';
-        resultsEl.innerHTML = '<div style="padding:10px 12px;font-size:12px;color:#94a3b8;">No members found</div>';
-        return;
-      }
-      resultsEl.style.display = 'block';
-      resultsEl.innerHTML = matches.map(function(m){
-        return '<div class="ra-member-row" onclick="window.ReferralAgent._selectMember(\'' + m.id.replace(/'/g, "\\'") + '\')">' +
-          '<strong style="color:#1e293b;">' + m.name + '</strong>' +
-          '<span style="font-size:11px;color:#94a3b8;margin-left:8px;">' + m.id + ' · ' + (m.riskCategory || '') + '</span>' +
-        '</div>';
-      }).join('');
+    // Skip facility
+    _skipFac: function() {
+      state.facility = null;
+      userMsg('Skip — add manually');
+      var tid = typingId(); showTyping(tid);
+      setTimeout(function() {
+        hideTyping(tid);
+        aiMsg('No problem — you can search for facilities inside the referral form. Open it whenever you\'re ready.');
+        showFormBar();
+      }, 400);
     },
 
-    _selectMember: function(memberId) {
-      var m = getMember(memberId);
+    // Open form (called from form bar button)
+    openForm: openForm,
+
+    // Member search
+    _searchMember: function(q) {
+      var res = document.getElementById('ra_mbres');
+      if (!res) return;
+      if (!q || q.length < 2) { res.innerHTML = ''; return; }
+      var matches = (typeof membersDB !== 'undefined' ? membersDB : [])
+        .filter(function(m) {
+          return m.name.toLowerCase().indexOf(q.toLowerCase()) > -1 ||
+                 (m.medicaidId || '').indexOf(q) > -1;
+        }).slice(0, 8);
+      res.innerHTML = matches.length
+        ? matches.map(function(m) {
+            return '<div onclick="window.ReferralAgent._pickMember(\'' + m.id + '\')" ' +
+              'style="padding:8px 12px;border-bottom:1px solid #f8fafc;cursor:pointer;font-size:13px;" ' +
+              'onmouseover="this.style.background=\'#f0f0ff\'" onmouseout="this.style.background=\'\'">' +
+              '<strong>' + esc(m.name) + '</strong> <span style="color:#94a3b8;font-size:11px;">' + (m.medicaidId || m.id) + '</span>' +
+            '</div>';
+          }).join('')
+        : '<div style="padding:10px;font-size:12px;color:#94a3b8;">No members found.</div>';
+    },
+
+    _pickMember: function(id) {
+      var m = typeof membersDB !== 'undefined' ? membersDB.find(function(x) { return x.id === id; }) : null;
       if (!m) return;
       state.member = m;
-      state.ctx = readMemberContext(m);
-      _clear();
-      _bubble(
-        '<div style="font-size:14px;font-weight:600;color:#1e293b;margin-bottom:2px;">Creating referral for <span style="color:#443fa7;">' + m.name + '</span></div>' +
-        '<div style="font-size:12px;color:#94a3b8;">Checked their records — here\'s what I recommend.</div>'
-      );
-      state.recommendation = buildRecommendation(state.ctx);
-      renderRecommendation(state.ctx, state.recommendation);
+      clear();
+      aiMsg('What type of referral does <strong>' + esc(m.name.split(' ')[0]) + '</strong> need?');
     },
 
-    reset: function() {
-      state.active = false;
-      state.member = null;
-      state.ctx = null;
-      state.recommendation = null;
-      if (typeof aiCopilotState !== 'undefined') aiCopilotState.isInConversation = false;
-      if (typeof renderWelcomeScreen === 'function') renderWelcomeScreen();
-    },
-
-    isActive: function() { return state.active; },
-    _getCollected: function() { return state.recommendation || {}; }
-  };
-
-  // ── Text trigger ──────────────────────────────────────────
-  var _origSend = window.sendAIMessage;
-  window.sendAIMessage = function() {
-    var input = document.getElementById('aiInputField');
-    if (!input) return;
-    var text = (input.value || '').trim().toLowerCase();
-    if (!text) return;
-    if (text.includes('create referral') || text.includes('add referral') ||
-        text.includes('new referral')    || text.includes('make referral')) {
-      input.value = '';
-      var memberId = window.currentMember && window.currentMember.id;
-      window.ReferralAgent.start(memberId);
-      return;
-    }
-    if (typeof aiCopilotState !== 'undefined' && aiCopilotState.currentContext === 'referrals') {
-      return;
-    }
-    if (_origSend) _origSend();
+    // For backward compat with old distance interception in sendAIMessage
+    _setDistance: function(val) { this._dist(val); }
   };
 
 })();
 
-console.log('[ReferralAgent v3] Loaded — single recommendation, no wizard.');
+console.log('[ReferralAgent v5] Loaded — open conversational, CM-driven flow.');
+
+
 
 </script>
 
