@@ -40971,11 +40971,13 @@ async function sendLLMMessage(userText) {
     window.aiSetStreaming && window.aiSetStreaming(true);
 
     try {
+        const body = JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:800, system:buildChatSystemPrompt(), messages:[...history,{role:'user',content:userText}] });
+        console.log('[sendLLMMessage] messages:', JSON.parse(body).messages);
         const response = await fetch('/.netlify/functions/claude', {
             method:'POST',
             headers:{ 'Content-Type':'application/json' },
             signal: window._aiAbortController ? window._aiAbortController.signal : undefined,
-            body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:800, system:buildChatSystemPrompt(), messages:[...history,{role:'user',content:userText}] })
+            body: body
         });
         const data = await response.json();
         const replyText = data?.content?.[0]?.text?.trim();
