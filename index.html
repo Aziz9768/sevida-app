@@ -40927,11 +40927,10 @@ function sendAIMessage() {
     const text = input.value.trim(); if (!text) return;
     input.value = '';
 
-    // ── Referral Agent: intercept all input when agent is active ──────────
-    if (window.ReferralAgent && window.ReferralAgent.handle && typeof aiCopilotState !== 'undefined' && aiCopilotState.isInConversation) {
-        // Check if referral agent is actually running (has a member or awaiting member)
-        var msgs = document.getElementById('aiMessages');
-        var hasRaMsg = msgs && msgs.querySelector('.ra-msg');
+    // ── Referral Agent: intercept all input when agent messages are visible ──
+    if (window.ReferralAgent && window.ReferralAgent.handle) {
+        var raMsgs = document.getElementById('aiMessages');
+        var hasRaMsg = raMsgs && raMsgs.querySelector('.ra-msg');
         if (hasRaMsg) {
             window.ReferralAgent.handle(text);
             return;
@@ -40951,6 +40950,7 @@ function sendAIMessage() {
 }
 
 async function sendLLMMessage(userText) {
+    if (!userText || !userText.trim()) return; // Never send empty content
     const container = document.getElementById('aiMessages'); if (!container) return;
     if (typeof aiCopilotState !== "undefined") aiCopilotState.isInConversation = true;
     const userBubbleId = 'chat_user_' + Date.now();
@@ -40958,7 +40958,9 @@ async function sendLLMMessage(userText) {
     const thinkId = 'chat_think_' + Date.now();
     container.innerHTML += `<div id="${thinkId}" class="ai-thinking-container"><div class="ai-thinking-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div><div class="ai-thinking-text">Thinking...</div></div>`;
     container.scrollTop = container.scrollHeight;
-    const history = (aiCopilotState.conversationHistory||[]).slice(-10);
+    const history = (aiCopilotState.conversationHistory||[]).slice(-10)
+        .map(function(m) { return { role: m.role, content: m.content || m.text || '' }; })
+        .filter(function(m) { return m.content && m.content.trim(); });
     aiCopilotState.conversationHistory = aiCopilotState.conversationHistory||[];
     aiCopilotState.conversationHistory.push({ role:'user', content:userText });
     if (window.currentMember && typeof sessSave==='function') sessSave(window.currentMember.id,'user',userText);
