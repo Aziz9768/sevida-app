@@ -6473,6 +6473,38 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 }
 .ai-q-chip:hover { background: #f0f0ff; border-color: #484581; color: #484581; }
 
+/* ── Hide legacy chip rows permanently ── */
+#aiChipsRow, .ai-chips-row, #aiQuestionChips, .ai-chips-questions { display: none !important; }
+
+#aiSmartSuggestionsHere { padding: 4px 12px 0; }
+#aiSmartSuggestionsHere .ai-smart-q {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 11px; border-radius: 20px; margin-bottom: 5px;
+    width: auto; border: 1px solid #e8e4f8;
+    background: #faf9ff;
+    font-size: 12px; font-weight: 500;
+    white-space: nowrap; flex-shrink: 0;
+}
+#aiSmartSuggestionsHere .ai-smart-q.urgency-critical {
+    border-color: #fecaca; background: #fff5f5;
+}
+#aiSmartSuggestionsHere .ai-smart-q.urgency-high {
+    border-color: #fed7aa; background: #fffbf5;
+}
+#aiSmartSuggestionsHere .ai-smart-q-body { min-width: 0; }
+#aiSmartSuggestionsHere .ai-smart-q-text {
+    font-size: 12px; font-weight: 500; margin-bottom: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
+}
+#aiSmartSuggestionsHere .ai-smart-q-reason { display: none; }
+#aiSmartSuggestionsHere .ai-smart-q-arrow { display: none; }
+#aiSmartSuggestionsHere .ai-smart-q-dot { margin-top: 0; width: 6px; height: 6px; }
+
+/* Wrap the smart suggestions container as flex-wrap */
+#aiSmartSuggestionsHere > div,
+#aiSmartSuggestionsHere {
+    display: flex !important; flex-wrap: wrap; gap: 6px;
+}
 
 /* ── CASELOAD ALERTS PANEL ── */
 .ai-alert-toggle-row {
@@ -6631,7 +6663,7 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 .ai-ctx-tag-neutral     { background: #f1f5f9; color: #475569; }
 
 /* Suggested actions section */
-.ai-actions-section { padding: 10px 12px 6px; }
+.ai-actions-section { padding: 6px 12px 6px; }
 .ai-actions-label {
     font-size: 10.5px; font-weight: 600; color: #94a3b8;
     text-transform: uppercase; letter-spacing: 0.07em;
@@ -6713,6 +6745,21 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 
 /* ── Session list ── */
 .ai-session-list { flex: 1; overflow-y: auto; padding: 8px 10px 12px; }
+/* ── History search ── */
+.ai-history-search {
+    width: 100%; padding: 7px 10px 7px 30px; border: 1px solid #e2e8f0;
+    border-radius: 7px; font-size: 12px; color: #1e293b; background: #f8fafc;
+    outline: none; box-sizing: border-box; font-family: inherit; margin-bottom: 8px;
+}
+.ai-history-search:focus { border-color: #c8c6f0; background: #fff; }
+.ai-history-search-wrap { position: relative; margin: 6px 2px 6px; }
+.ai-history-search-wrap svg { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+/* ── Date group label ── */
+.ai-session-group-label {
+    font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase;
+    letter-spacing: 0.07em; padding: 10px 2px 5px; margin-top: 2px;
+}
+/* ── Session item ── */
 .ai-session-new-btn {
     margin: 8px 10px 4px; padding: 9px 14px; background: #f8f7ff;
     border: 1.5px dashed #c8c6f0; border-radius: 8px; color: #282460;
@@ -6722,15 +6769,63 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 }
 .ai-session-new-btn:hover { background: #ebe9ff; border-color: #a09be0; }
 .ai-session-item {
-    padding: 10px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 5px;
+    padding: 9px 10px; border-radius: 8px; cursor: pointer; margin-bottom: 4px;
     border: 1.5px solid #f1f5f9; transition: background 0.15s, border-color 0.15s;
+    position: relative;
 }
 .ai-session-item:hover  { background: #f8f7ff; border-color: #c8c6f0; }
 .ai-session-item.active { background: #f0f0ff; border-color: #282460; }
-.ai-session-item-title   { font-size: 12.5px; font-weight: 500; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-session-item.pinned-item { border-left: 3px solid #f59e0b; }
+.ai-session-item-title   { font-size: 12.5px; font-weight: 500; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 28px); }
 .ai-session-item-preview { font-size: 11.5px; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ai-session-item-meta    { font-size: 11px; color: #cbd5e1; margin-top: 3px; display: flex; align-items: center; gap: 6px; }
 .ai-session-item-active-tag { font-size: 10px; font-weight: 600; color: #282460; background: #e6e3ff; padding: 1px 6px; border-radius: 10px; }
+/* ── Kebab menu on session item ── */
+.ai-session-kebab {
+    position: absolute; top: 8px; right: 8px; width: 22px; height: 22px;
+    display: none; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer; border-radius: 4px;
+    color: #94a3b8; font-size: 16px; line-height: 1; padding: 0;
+}
+.ai-session-item:hover .ai-session-kebab { display: flex; }
+.ai-session-kebab:hover { background: #e2e8f0; color: #475569; }
+/* ── Kebab dropdown ── */
+.ai-session-menu {
+    position: fixed; z-index: 99999; background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); min-width: 160px;
+    padding: 4px;
+}
+.ai-session-menu-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+    font-size: 12.5px; color: #374151; cursor: pointer; border-radius: 5px;
+    font-family: inherit; border: none; background: none; width: 100%; text-align: left;
+}
+.ai-session-menu-item:hover { background: #f1f5f9; }
+.ai-session-menu-item.danger { color: #dc2626; }
+.ai-session-menu-item.danger:hover { background: #fef2f2; }
+/* ── Confirm popup ── */
+.ai-confirm-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100000;
+    display: flex; align-items: center; justify-content: center;
+}
+.ai-confirm-box {
+    background: #fff; border-radius: 12px; padding: 24px 24px 20px;
+    width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.ai-confirm-title { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+.ai-confirm-body  { font-size: 13px; color: #64748b; margin-bottom: 20px; line-height: 1.5; }
+.ai-confirm-btns  { display: flex; gap: 8px; justify-content: flex-end; }
+.ai-confirm-btns button { padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; border: 1px solid #e2e8f0; }
+.ai-confirm-cancel { background: #fff; color: #374151; }
+.ai-confirm-cancel:hover { background: #f8fafc; }
+.ai-confirm-danger { background: #dc2626; color: #fff; border-color: #dc2626; }
+.ai-confirm-danger:hover { background: #b91c1c; }
+/* ── Rename input inline ── */
+.ai-session-rename-input {
+    width: 100%; border: 1px solid #c8c6f0; border-radius: 5px; padding: 3px 7px;
+    font-size: 12.5px; font-weight: 500; color: #1e293b; outline: none;
+    font-family: inherit; background: #fff;
+}
 
 /* ── Session breadcrumb (shown in messages when viewing a past session) ── */
 .ai-session-breadcrumb {
@@ -10185,17 +10280,17 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 
 /* Agent chip row — horizontal scroll at bottom above input */
 .ai-chips-row {
-    display: flex; gap: 7px; padding: 8px 14px 4px;
-    overflow-x: auto; flex-shrink: 0;
+    display: flex; gap: 6px; padding: 6px 12px 2px;
+    overflow-x: auto; flex-shrink: 0; flex-wrap: wrap;
     scrollbar-width: none;
 }
 .ai-chips-row::-webkit-scrollbar { display: none; }
 
 .ai-chip {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 12px; border-radius: 20px;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 11px; border-radius: 20px;
     border: 1px solid #e2e8f0; background: #fff;
-    font-size: 12px; font-weight: 400; color: #374151;
+    font-size: 11.5px; font-weight: 400; color: #374151;
     white-space: nowrap; cursor: pointer; flex-shrink: 0;
     transition: all .15s; user-select: none;
 }
@@ -20511,6 +20606,9 @@ function doLogin() {
         <!-- Right side: toast + expand + close only -->
         <div class="ai-copilot-header-actions">
             <span class="ai-new-toast" id="aiNewToast">Chat saved ✓</span>
+            <button class="ai-copilot-header-btn" onclick="confirmNewSession()" title="New chat" id="aiHeaderNewChatBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
             <button class="ai-copilot-header-btn" onclick="toggleAICopilotExpand()" title="Expand / Collapse" id="aiExpandBtn">
                 <svg class="ai-expand-icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                 <svg class="ai-expand-icon-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h6v6M20 10h-6V4M10 14l-7 7M14 10l7-7"/></svg>
@@ -20527,21 +20625,29 @@ function doLogin() {
     <!-- Messages area -->
     <div class="ai-copilot-messages" id="aiMessages"></div>
 
-    <!-- Agent chips -->
-    <div class="ai-chips-row" id="aiChipsRow" style="display:none;"></div>
-
-    <!-- Quick question chips — shown on member pages -->
-    <div class="ai-chips-questions" id="aiQuestionChips" style="display:none;"></div>
-
     <!-- Input -->
     <div class="ai-copilot-input">
+        <!-- Suggestions drawer — hidden by default, toggled by button -->
+        <div id="aiSuggestionsDrawer" style="display:none;padding:0 0 8px;">
+            <div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Suggestions</div>
+            <div id="aiChipsRowInline" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px;"></div>
+            <div id="aiSmartQsInline" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+            <div id="aiQuickChipsInline" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:2px;"></div>
+        </div>
         <div class="ai-input-wrapper">
+            <button id="aiSuggestionsToggleBtn" onclick="window.toggleAISuggestionsDrawer()" title="Show suggestions"
+                style="background:none;border:none;cursor:pointer;padding:4px 6px;color:#94a3b8;display:none;flex-shrink:0;border-radius:5px;transition:all 0.15s;"
+                onmouseover="this.style.color='#2d2d52';this.style.background='#f1f5f9'"
+                onmouseout="this.style.color='#94a3b8';this.style.background='none'">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </button>
             <input type="text" class="ai-input-field" id="aiInputField"
                 placeholder="What do you need for this member?"
                 onkeypress="if(event.key==='Enter')sendAIMessage()"
                 autocomplete="off" />
-            <button class="ai-send-btn" id="aiSendBtn" onclick="sendAIMessage()">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            <button class="ai-send-btn" id="aiSendBtn" onclick="window.aiSendOrStop()">
+                <svg id="aiSendIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                <svg id="aiStopIcon" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
             </button>
         </div>
     </div>
@@ -20847,6 +20953,35 @@ function updateBreadcrumbs(crumbs) {
     
     // Safety check
     if (!Array.isArray(crumbs)) return;
+
+    // ── Update CoPilot context chip for detail pages ──
+    if (crumbs.length >= 3 && typeof aiCopilotState !== 'undefined') {
+        var lastCrumb = crumbs[crumbs.length - 1];
+        var parentCrumb = crumbs[crumbs.length - 2];
+        var detailContextMap = {
+            'Tasks': 'tasks', 'Service Notes': 'service-notes',
+            'Referrals': 'referrals', 'Members': 'members'
+        };
+        // e.g. ['Home','Tasks','Task #123'] or ['Home','Service Notes','Note 8000']
+        if (detailContextMap[parentCrumb]) {
+            aiCopilotState.currentContext = detailContextMap[parentCrumb] + '-detail';
+            // Update chip directly
+            var textEl = document.getElementById('aiContextChipText');
+            var chip = document.getElementById('aiContextChip');
+            if (textEl && chip) {
+                textEl.textContent = lastCrumb;
+                chip.style.background = '#f8fafc';
+                chip.style.borderColor = '#e2e8f0';
+                chip.style.color = '#475569';
+                chip.style.display = 'inline-flex';
+                var svg = chip.querySelector('svg');
+                if (svg) svg.setAttribute('stroke', '#94a3b8');
+            }
+            // Update placeholder
+            var inp = document.getElementById('aiInputField');
+            if (inp) inp.placeholder = 'Ask about this ' + parentCrumb.toLowerCase().replace(' notes','note').replace('s','') + '…';
+        }
+    }
 
     let html = '';
     crumbs.forEach((crumb, index) => {
@@ -24637,20 +24772,30 @@ document.addEventListener('DOMContentLoaded', () => {
             switch (navId) {
                 case 'navMembers':
                     initializeMemberList();
+                    if (typeof aiCopilotState !== 'undefined') {
+                        aiCopilotState.currentContext = 'members';
+                        if (aiCopilotState.isOpen && typeof renderWelcomeScreen === 'function') renderWelcomeScreen();
+                    }
                     break;
                 case 'navServiceNotes':
                     toggleQuickLinksButton(false);
-                    // Use the new service notes page generator function
                     document.getElementById('pageContainer').innerHTML = generateServiceNotesPageHTML();
                     setTimeout(initializeServiceNotesPage, 0);
                     updateBreadcrumbs(["Home", "Service Notes"]);
+                    if (typeof aiCopilotState !== 'undefined') {
+                        aiCopilotState.currentContext = 'service-notes';
+                        if (aiCopilotState.isOpen && typeof renderWelcomeScreen === 'function') renderWelcomeScreen();
+                    }
                     break;
                 case 'navTask':
                     toggleQuickLinksButton(false);
-                    // Use the new task page generator function
                     document.getElementById('pageContainer').innerHTML = generateTaskPageHTML();
                     setTimeout(initializeTaskPage, 0);
                     updateBreadcrumbs(["Home", "Tasks"]);
+                    if (typeof aiCopilotState !== 'undefined') {
+                        aiCopilotState.currentContext = 'tasks';
+                        if (aiCopilotState.isOpen && typeof renderWelcomeScreen === 'function') renderWelcomeScreen();
+                    }
                     break;
                 case 'navRecentActivity':
                     toggleQuickLinksButton(false);
@@ -29797,7 +29942,7 @@ function navigateToList() {
     window.currentMember = null;
     if (typeof aiCopilotState !== 'undefined') {
         aiCopilotState.currentMember = null;
-        aiCopilotState.currentContext = 'dashboard';
+        aiCopilotState.currentContext = 'members';
         aiCopilotState.isInConversation = false;
         if (typeof renderWelcomeScreen === 'function') {
             renderWelcomeScreen();
@@ -30648,6 +30793,10 @@ const SESS = {
     byMember: {},
     // { [memberId]: sessionId | null }  null = welcome screen
     active: {},
+    // { [context]: [{ id, title, preview, date, messages[] }] }
+    byContext: {},
+    // Pinned session ids: Set stored as array for serialization
+    pinned: [],
     // Global AI Context rules
     ctxRules: [],
     // Nudges { [memberId]: [{id,text,dismissed}] }
@@ -30669,7 +30818,7 @@ function seedSessions() {
             date: new Date(Date.now() - 14*86400000),
             messages: [
                 { role:'user', content:'Tell me about the last three months of claims for this member' },
-                { role:'assistant', content: mA.name+' has had 4 claims totaling $2,340 over the last three months. The majority were for primary care visits and one specialist referral to cardiology. No denied claims during this period.' }
+                { role:'assistant', content: mA.name+' has had 4 claims totaling $2,340 over the last three months. The majority were for primary care visits and one specialist referral to cardiology. No denied claims during this period.', contentType:'text' }
             ]
         },
         {
@@ -30678,7 +30827,7 @@ function seedSessions() {
             date: new Date(Date.now() - 7*86400000),
             messages: [
                 { role:'user', content:'Tell me about any care gaps for this member' },
-                { role:'assistant', content: mA.name+' has 2 open care gaps: a HbA1c screening that is 3 months overdue, and an annual wellness visit not yet completed this calendar year. Both are flagged as high priority.' }
+                { role:'assistant', content: mA.name+' has 2 open care gaps: a HbA1c screening that is 3 months overdue, and an annual wellness visit not yet completed this calendar year. Both are flagged as high priority.', contentType:'text' }
             ]
         }
     ];
@@ -30805,9 +30954,19 @@ function sessCreate(memberId) {
 function sessSave(memberId, role, text) {
     let s = sessGet(memberId);
     if (!s) s = sessCreate(memberId);
-    s.messages.push({role, content:text});
+    s.messages.push({role, content: text, contentType: 'text'});
     if (s.title==='New chat' && role==='user') s.title = text.length>45 ? text.slice(0,45)+'…' : text;
     if (role==='assistant') s.preview = text.length>70 ? text.slice(0,70)+'…' : text;
+    s.date = new Date();
+    updateHeaderState();
+}
+
+function sessSaveHTML(memberId, role, html, labelText) {
+    let s = sessGet(memberId);
+    if (!s) s = sessCreate(memberId);
+    const previewText = labelText || (html.replace(/<[^>]+>/g,'').slice(0,70)+'…');
+    s.messages.push({role, content: html, contentType: 'html'});
+    if (role==='assistant') s.preview = previewText.length>70 ? previewText.slice(0,70)+'…' : previewText;
     s.date = new Date();
     updateHeaderState();
 }
@@ -30899,41 +31058,130 @@ function toggleAIMenu() {
     menu.classList.add('open');
 }
 
-function renderMenuChatList() {
-    const listEl = document.getElementById('aiMenuChatList');
+function renderMenuChatList(searchQuery) {
+    var listEl = document.getElementById('aiMenuChatList');
     if (!listEl) return;
-    const member = window.currentMember;
-    if (!member) {
-        listEl.innerHTML = '<div style="font-size:12.5px;color:#9ca3af;padding:6px 16px 12px;">Open a member profile to see chat history.</div>';
-        return;
+    var member = window.currentMember;
+    var q = (searchQuery || '').toLowerCase().trim();
+
+    function dateGroup(date) {
+        var now = new Date(); now.setHours(0,0,0,0);
+        var d = new Date(date); d.setHours(0,0,0,0);
+        var diff = Math.floor((now - d) / 86400000);
+        if (diff === 0) return 'Today';
+        if (diff === 1) return 'Yesterday';
+        if (diff <= 7) return 'This Week';
+        if (diff <= 30) return 'This Month';
+        return 'Earlier';
     }
-    const sessions = (SESS.byMember[member.id] || []);
-    const activeId = SESS.active[member.id];
-    if (!sessions.length) {
-        listEl.innerHTML = '<div style="font-size:12.5px;color:#9ca3af;padding:6px 16px 12px;">No past chats for this member yet.</div>';
-        return;
+
+    function getTitle(s) {
+        if (s.customTitle) return s.customTitle;
+        var firstUserMsg = (s.messages||[]).find(function(m){ return m.role==='user'; });
+        return firstUserMsg
+            ? (firstUserMsg.content.length > 45 ? firstUserMsg.content.slice(0,45)+'…' : firstUserMsg.content)
+            : s.date.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     }
-    listEl.innerHTML = sessions.map(function(s) {
-        const isActive = s.id === activeId;
-        // Relative time like Jira
-        const diffMs = Date.now() - s.date.getTime();
-        const diffDays = Math.floor(diffMs / 86400000);
-        const relTime = diffDays === 0 ? 'Today' :
-                        diffDays === 1 ? 'Yesterday' :
-                        diffDays < 7  ? diffDays + ' days ago' :
-                        diffDays < 14 ? '1 week ago' :
-                        diffDays < 30 ? Math.floor(diffDays/7) + ' weeks ago' :
-                        s.date.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-        return '<div class="ai-menu-chat-item'+(isActive?' active':'')+'" onclick="closeAIMenu();loadSession(\'' + s.id + '\',\'' + member.id + '\')">'+
-            '<div class="ai-menu-chat-icon">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+
+    function renderItem(s, memberId, ctxLabel, isActive) {
+        var isPinned = SESS.pinned.indexOf(s.id) > -1;
+        var pinBorder = isPinned ? 'border-left:3px solid #f59e0b;' : '';
+        var activeBg = isActive ? 'background:#f0f0ff;' : '';
+        var title = getTitle(s);
+        var meta = dateGroup(s.date);
+        var loadFn = memberId
+            ? 'closeAIMenu();loadSession(\'' + s.id + '\',\'' + memberId + '\')'
+            : 'closeAIMenu();window.loadContextSession&&window.loadContextSession(\'' + s.id + '\',\'' + (ctxLabel||'members') + '\')';
+        return '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 12px;border-radius:7px;cursor:pointer;' + pinBorder + activeBg + '" ' +
+            'onmouseover="this.style.background=\'#f8f7ff\';this.querySelector(\'.mchat-kbtn\').style.display=\'flex\'" ' +
+            'onmouseout="this.style.background=\'' + (isActive?'#f0f0ff':'') + '\';this.querySelector(\'.mchat-kbtn\').style.display=\'none\'">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" style="width:13px;height:13px;flex-shrink:0;margin-top:3px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+            '<div style="flex:1;min-width:0;" onclick="' + loadFn + '">' +
+                '<div style="font-size:12.5px;font-weight:500;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(title) +
+                    (isActive ? ' <span style="font-size:10px;font-weight:600;color:#282460;background:#e6e3ff;padding:1px 5px;border-radius:8px;">Current</span>' : '') +
+                '</div>' +
+                '<div style="font-size:11px;color:#94a3b8;margin-top:2px;display:flex;gap:5px;align-items:center;">' +
+                    '<span>' + meta + '</span>' +
+                    (ctxLabel ? '<span style="background:#f1f5f9;border-radius:3px;padding:1px 5px;font-size:10px;">' + escapeHtml(ctxLabel) + '</span>' : '') +
+                    (isPinned ? '<span>📌</span>' : '') +
+                '</div>' +
             '</div>' +
-            '<div class="ai-menu-chat-body">' +
-                '<div class="ai-menu-chat-title">'+escapeHtml(s.title)+'</div>' +
-                '<div class="ai-menu-chat-meta">Sevida AI · '+relTime+(s.preview ? ' · '+escapeHtml(s.preview.slice(0,50)) : '')+'</div>' +
-            '</div>' +
+            '<button class="mchat-kbtn" onclick="event.stopPropagation();openSessionMenu(event,\'' + s.id + '\',\'' + (memberId||'') + '\',\'' + (ctxLabel||'') + '\')" ' +
+            'style="display:none;align-items:center;justify-content:center;width:22px;height:22px;background:none;border:none;cursor:pointer;border-radius:4px;color:#94a3b8;font-size:16px;flex-shrink:0;padding:0;">⋮</button>' +
         '</div>';
-    }).join('');
+    }
+
+    var searchBar = '<div style="position:relative;margin:4px 10px 8px;">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);pointer-events:none;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>' +
+        '<input style="width:100%;padding:7px 10px 7px 28px;border:1px solid #e2e8f0;border-radius:7px;font-size:12px;color:#1e293b;background:#f8fafc;outline:none;box-sizing:border-box;font-family:inherit;" ' +
+        'placeholder="Search conversations…" oninput="renderMenuChatList(this.value)" value="' + escapeHtml(searchQuery||'') + '" />' +
+    '</div>';
+
+    function buildGroups(items, getS, getMemberId, getLabel) {
+        var groups = {}, order = ['Pinned','Today','Yesterday','This Week','This Month','Earlier'];
+        items.forEach(function(x) {
+            var s = getS(x);
+            var g = SESS.pinned.indexOf(s.id) > -1 ? 'Pinned' : dateGroup(s.date);
+            if (!groups[g]) groups[g] = [];
+            groups[g].push(x);
+        });
+        var html = '';
+        order.forEach(function(g) {
+            if (!groups[g] || !groups[g].length) return;
+            html += '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;padding:8px 14px 4px;">' + (g==='Pinned'?'📌 ':'') + g + '</div>';
+            groups[g].forEach(function(x) {
+                var s = getS(x); html += renderItem(s, getMemberId(x), getLabel(x), false);
+            });
+        });
+        return html;
+    }
+
+    if (!member) {
+        var all = [];
+        if (typeof membersDB !== 'undefined') {
+            membersDB.forEach(function(m) {
+                (SESS.byMember[m.id]||[]).forEach(function(s) {
+                    if (s.id.indexOf('s_trace_') === 0) return;
+                    all.push({ s:s, memberId:m.id, label:m.name.split(' ')[0] });
+                });
+            });
+        }
+        var ctxNames = { members:'All Members', tasks:'All Tasks', 'service-notes':'Service Notes', referrals:'Referrals' };
+        Object.keys(SESS.byContext||{}).forEach(function(ctx) {
+            (SESS.byContext[ctx]||[]).forEach(function(s) { all.push({ s:s, memberId:null, label:ctxNames[ctx]||ctx }); });
+        });
+        all.sort(function(a,b){ return b.s.date - a.s.date; });
+        if (q) all = all.filter(function(x) {
+            return getTitle(x.s).toLowerCase().includes(q) || (x.label||'').toLowerCase().includes(q);
+        });
+        if (!all.length) {
+            listEl.innerHTML = searchBar + '<div style="font-size:12px;color:#9ca3af;padding:6px 14px;">' + (q ? 'No results.' : 'No recent conversations.') + '</div>';
+            return;
+        }
+        listEl.innerHTML = searchBar + buildGroups(all, function(x){return x.s;}, function(x){return x.memberId;}, function(x){return x.label;});
+        return;
+    }
+
+    var sessions = (SESS.byMember[member.id]||[]).filter(function(s){ return s.id.indexOf('s_trace_') !== 0; });
+    var activeId = SESS.active[member.id];
+    if (q) sessions = sessions.filter(function(s){ return getTitle(s).toLowerCase().includes(q) || (s.preview||'').toLowerCase().includes(q); });
+    if (!sessions.length) {
+        listEl.innerHTML = searchBar + '<div style="font-size:12px;color:#9ca3af;padding:6px 14px;">' + (q ? 'No results.' : 'No past chats yet.') + '</div>';
+        return;
+    }
+    var groups2 = {}, order2 = ['Pinned','Today','Yesterday','This Week','This Month','Earlier'];
+    sessions.forEach(function(s) {
+        var g = SESS.pinned.indexOf(s.id) > -1 ? 'Pinned' : dateGroup(s.date);
+        if (!groups2[g]) groups2[g] = [];
+        groups2[g].push(s);
+    });
+    var html2 = searchBar;
+    order2.forEach(function(g) {
+        if (!groups2[g] || !groups2[g].length) return;
+        html2 += '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;padding:8px 14px 4px;">' + (g==='Pinned'?'📌 ':'') + g + '</div>';
+        groups2[g].forEach(function(s) { html2 += renderItem(s, member.id, null, s.id===activeId); });
+    });
+    listEl.innerHTML = html2;
 }
 
 function closeAIMenu() {
@@ -30952,13 +31200,9 @@ const QUICK_CHIPS = [
 ];
 
 function renderQuestionChips(member) {
+    // Quick chips now live in the suggestions drawer — suppress inline rendering
     const row = document.getElementById('aiQuestionChips');
-    if (!row) return;
-    if (!member) { row.style.display = 'none'; row.innerHTML = ''; return; }
-    row.style.display = 'flex';
-    row.innerHTML = QUICK_CHIPS.map(function(chip) {
-        return '<button class="ai-q-chip" onclick="handleAIQuestion(\'' + chip.id + '\')">' + chip.text + '</button>';
-    }).join('');
+    if (row) { row.style.display = 'none'; row.innerHTML = ''; }
 }
 
 function toggleWelcomeChats(btn) {
@@ -31051,7 +31295,10 @@ function loadSession(sessionId, memberId) {
         if (msg.role==='user') {
             container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-user"><div class="ai-conv-user-bubble">'+escapeHtml(msg.content)+'</div></div></div>';
         } else {
-            container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-llm-response">'+(typeof renderMarkdown==='function'?renderMarkdown(msg.content):msg.content)+'</div></div></div></div>';
+            var responseContent = (msg.contentType === 'html')
+                ? msg.content
+                : '<div class="ai-response-block"><div class="ai-llm-response">'+(typeof renderMarkdown==='function'?renderMarkdown(msg.content):msg.content)+'</div></div>';
+            container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-assistant">'+responseContent+'</div></div>';
         }
     });
 
@@ -31107,34 +31354,114 @@ function closeSessionPanel() {
     if (panel) panel.classList.remove('open');
 }
 
-function renderSessionList() {
-    const member = window.currentMember;
-    const titleEl = document.getElementById('aiSessionPanelTitle');
-    const listEl  = document.getElementById('aiSessionList');
+function renderSessionList(searchQuery) {
+    var member = window.currentMember;
+    var titleEl = document.getElementById('aiSessionPanelTitle');
+    var listEl  = document.getElementById('aiSessionList');
     if (!listEl) return;
+    var q = (searchQuery || '').toLowerCase().trim();
+
+    function dateGroup(date) {
+        var now = new Date(); now.setHours(0,0,0,0);
+        var d = new Date(date); d.setHours(0,0,0,0);
+        var diff = Math.floor((now - d) / 86400000);
+        if (diff === 0) return 'Today';
+        if (diff === 1) return 'Yesterday';
+        if (diff <= 7) return 'This Week';
+        if (diff <= 30) return 'This Month';
+        return 'Earlier';
+    }
+
+    function renderItem(s, memberId, displayTitle, meta, isActive, ctxLabel) {
+        var isPinned = SESS.pinned.indexOf(s.id) > -1;
+        var pinCls = isPinned ? ' pinned-item' : '';
+        var actCls = isActive ? ' active' : '';
+        var loadFn = memberId
+            ? 'loadSession(\'' + s.id + '\',\'' + memberId + '\')'
+            : 'window.loadContextSession && window.loadContextSession(\'' + s.id + '\',\'' + (ctxLabel||'members') + '\')';
+        return '<div class="ai-session-item' + pinCls + actCls + '" id="sess-item-' + s.id + '" onclick="' + loadFn + '">' +
+            '<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px;">' +
+                '<div class="ai-session-item-title">' + escapeHtml(displayTitle) + '</div>' +
+                (isActive ? '<span class="ai-session-item-active-tag">Current</span>' : '') +
+            '</div>' +
+            (s.preview ? '<div class="ai-session-item-preview">' + escapeHtml(s.preview) + '</div>' : '') +
+            '<div class="ai-session-item-meta">' +
+                '<span>' + meta + '</span>' +
+                (ctxLabel ? '<span style="background:#f1f5f9;border-radius:4px;padding:1px 5px;font-size:10px;color:#64748b;">' + escapeHtml(ctxLabel) + '</span>' : '') +
+            '</div>' +
+            '<button class="ai-session-kebab" onclick="event.stopPropagation();openSessionMenu(event,\'' + s.id + '\',\'' + (memberId||'') + '\',\'' + (ctxLabel||'') + '\')" title="Options">⋮</button>' +
+        '</div>';
+    }
+
+    function buildGroupedHTML(items) {
+        var groups = {}, order = ['Pinned','Today','Yesterday','This Week','This Month','Earlier'];
+        items.forEach(function(x) {
+            var g = SESS.pinned.indexOf(x.s.id) > -1 ? 'Pinned' : dateGroup(x.s.date);
+            if (!groups[g]) groups[g] = [];
+            groups[g].push(x);
+        });
+        var html = '';
+        order.forEach(function(g) {
+            if (!groups[g] || !groups[g].length) return;
+            html += '<div class="ai-session-group-label">' + (g==='Pinned'?'📌 ':'') + g + '</div>';
+            groups[g].forEach(function(x) {
+                var firstUserMsg = (x.s.messages||[]).find(function(m){ return m.role==='user'; });
+                var title = x.s.customTitle || (firstUserMsg
+                    ? (firstUserMsg.content.length > 42 ? firstUserMsg.content.slice(0,42)+'…' : firstUserMsg.content)
+                    : x.s.date.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+                var meta = x.s.date.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+                html += renderItem(x.s, x.memberId, title, meta, x.isActive||false, x.label||null);
+            });
+        });
+        return html;
+    }
+
+    var searchBar = '<div class="ai-history-search-wrap">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>' +
+        '<input class="ai-history-search" placeholder="Search conversations…" oninput="renderSessionList(this.value)" value="' + escapeHtml(searchQuery||'') + '" />' +
+    '</div>';
 
     if (member) {
-        if (titleEl) titleEl.textContent = member.name.split(' ')[0]+"'s Chat History";
-        const sessions = (SESS.byMember[member.id]||[]).slice(0,6);
-        const activeId = SESS.active[member.id];
+        if (titleEl) titleEl.textContent = member.name.split(' ')[0] + "'s History";
+        var sessions = (SESS.byMember[member.id]||[]).filter(function(s){ return s.id.indexOf('s_trace_') !== 0; });
+        if (q) sessions = sessions.filter(function(s) {
+            var t = s.customTitle || ((s.messages||[]).find(function(m){return m.role==='user';})||{}).content || '';
+            return t.toLowerCase().includes(q) || (s.preview||'').toLowerCase().includes(q);
+        });
         if (!sessions.length) {
-            listEl.innerHTML = '<div style="padding:24px 14px;font-size:12px;color:#94a3b8;text-align:center;">No previous chats yet.<br>Start a conversation below.</div>';
+            listEl.innerHTML = searchBar + '<div style="padding:24px 14px;font-size:12px;color:#94a3b8;text-align:center;">' + (q ? 'No results for "'+escapeHtml(q)+'"' : 'No previous chats yet.') + '</div>';
             return;
         }
-        listEl.innerHTML = sessions.map(function(s) {
-            const isActive = s.id === activeId;
-            return '<div class="ai-session-item'+(isActive?' active':'')+'" onclick="loadSession(\'' + s.id + '\',\'' + member.id + '\')">'+
-                '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">' +
-                    '<div class="ai-session-item-title">'+escapeHtml(s.title)+'</div>' +
-                    (isActive ? '<span class="ai-session-item-active-tag">Current</span>' : '') +
-                '</div>' +
-                (s.preview ? '<div class="ai-session-item-preview">'+escapeHtml(s.preview)+'</div>' : '') +
-                '<div class="ai-session-item-meta">'+s.date.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'</div>' +
-            '</div>';
-        }).join('');
+        var items = sessions.map(function(s){ return { s:s, memberId:member.id, isActive: s.id===SESS.active[member.id] }; });
+        listEl.innerHTML = searchBar + buildGroupedHTML(items);
+
     } else {
-        if (titleEl) titleEl.textContent = 'Recent Conversations';
-        renderRecentInPanel(listEl);
+        if (titleEl) titleEl.textContent = 'All Conversations';
+        var all = [];
+        if (typeof membersDB !== 'undefined') {
+            membersDB.forEach(function(m) {
+                (SESS.byMember[m.id]||[]).forEach(function(s) {
+                    if (s.id.indexOf('s_trace_') === 0) return;
+                    all.push({ s:s, memberId:m.id, label:m.name.split(' ')[0] });
+                });
+            });
+        }
+        var ctxNames = { members:'All Members', tasks:'All Tasks', 'service-notes':'Service Notes', referrals:'Referrals' };
+        Object.keys(SESS.byContext||{}).forEach(function(ctx) {
+            (SESS.byContext[ctx]||[]).forEach(function(s) {
+                all.push({ s:s, memberId:null, label:ctxNames[ctx]||ctx });
+            });
+        });
+        all.sort(function(a,b){ return b.s.date - a.s.date; });
+        if (q) all = all.filter(function(x) {
+            var t = x.s.customTitle || ((x.s.messages||[]).find(function(m){return m.role==='user';})||{}).content || '';
+            return t.toLowerCase().includes(q) || (x.s.preview||'').toLowerCase().includes(q) || (x.label||'').toLowerCase().includes(q);
+        });
+        if (!all.length) {
+            listEl.innerHTML = searchBar + '<div style="padding:24px 14px;font-size:12px;color:#94a3b8;text-align:center;">' + (q ? 'No results.' : 'No recent conversations.') + '</div>';
+            return;
+        }
+        listEl.innerHTML = searchBar + buildGroupedHTML(all);
     }
 }
 
@@ -31565,7 +31892,7 @@ function renderWelcomeScreen() {
             ? '<span class="ai-member-ctx-tag ai-ctx-tag-consent">'+overdue.length+' Overdue Task'+(overdue.length>1?'s':'')+'</span>' : '';
 
         // Build recent chats HTML inline
-        const memberSessions = (SESS.byMember[member.id]||[]);
+        const memberSessions = (SESS.byMember[member.id]||[]).filter(function(s){ return s.id.indexOf('s_trace_') !== 0; });
         const recentChatsHTML = memberSessions.length ? `
             <div style="padding:0 18px 14px;">
                 <button onclick="toggleWelcomeChats(this)" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;padding:0;font-family:inherit;font-size:12px;color:#94a3b8;transition:color 0.15s;" onmouseover="this.style.color='#282460'" onmouseout="this.style.color='#94a3b8'">
@@ -31578,12 +31905,16 @@ function renderWelcomeScreen() {
                             const d = Math.floor((Date.now()-s.date.getTime())/86400000);
                             return d===0?'Today':d===1?'Yesterday':d<7?d+' days ago':d<14?'1 week ago':Math.floor(d/7)+' weeks ago';
                         })();
+                        const firstUserMsg = (s.messages||[]).find(m => m.role==='user');
+                        const displayTitle = firstUserMsg ? 
+                            (firstUserMsg.content.length > 40 ? firstUserMsg.content.slice(0,40)+'…' : firstUserMsg.content) :
+                            s.date.toLocaleDateString('en-US',{month:'short',day:'numeric'});
                         return `<div onclick="loadSession('${s.id}','${member.id}')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'">
                             <div style="width:28px;height:28px;background:#f3f4f6;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="width:13px;height:13px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                             </div>
                             <div style="flex:1;min-width:0;">
-                                <div style="font-size:12.5px;font-weight:500;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(s.title)}</div>
+                                <div style="font-size:12.5px;font-weight:500;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(displayTitle)}</div>
                                 <div style="font-size:11px;color:#9ca3af;margin-top:1px;">${relTime}</div>
                             </div>
                         </div>`;
@@ -31592,154 +31923,257 @@ function renderWelcomeScreen() {
             </div>` : '';
 
         container.innerHTML = `
-            <div style="padding:20px 18px 8px;">
+            <div style="padding:20px 18px 10px;">
                 <div style="font-size:15px;font-weight:600;color:#0f172a;margin-bottom:4px;">Hi — you're viewing ${escapeHtml(member.name.split(' ')[0])}'s profile.</div>
-                <div style="font-size:12.5px;color:#94a3b8;line-height:1.5;">Select an action below or type a question to get started.</div>
+                <div style="font-size:12.5px;color:#94a3b8;line-height:1.5;" id="memberWelcomeSubtitle">What do you need for ${escapeHtml(member.name.split(' ')[0])}?</div>
             </div>
             ${recentChatsHTML}
-            <div class="ai-actions-section" id="aiActionsSection">
-                <div id="aiSmartSuggestionsHere" style="display:none;"></div>
-                <div id="aiQuestionsPanel" style="display:none;"></div>
+            <div style="padding:0 16px 10px;" id="memberSuggestedPrompts">
+                <div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px;">Suggested</div>
             </div>
         `;
 
-        // Populate smart suggestions
-        const smartQs = typeof generateSmartQuestions === 'function' ? generateSmartQuestions(member) : [];
-        const smartContainer = document.getElementById('aiSmartSuggestionsHere');
-        if (smartContainer) {
-            if (smartQs.length) {
-                smartContainer.innerHTML = smartQs.map(q =>
-                    '<button class="ai-smart-q urgency-'+q.urgency+'" onclick="'+q.action+'">' +
-                    '<span class="ai-smart-q-dot"></span>' +
-                    '<div class="ai-smart-q-body">' +
-                        '<div class="ai-smart-q-text">'+q.text+'</div>' +
-                        '<div class="ai-smart-q-reason">'+q.reason+'</div>' +
-                    '</div>' +
-                    '<span class="ai-smart-q-arrow">›</span>' +
-                    '</button>'
-                ).join('');
+        // Populate suggested prompts after DOM is set
+        (function() {
+            var promptsEl = document.getElementById('memberSuggestedPrompts');
+            if (!promptsEl) return;
+            var dd = member.dashboardData || {};
+            var hasADT = ((dd.adts||[]).concat((member.healthHistory||{}).adts||[])).some(function(a){return a.acknowledged==='No';});
+            var consentPending = ['To Obtain Consent','Re-consent Required'].indexOf(member.consentStatus) > -1;
+            var prompts = [
+                { text: 'Summarize chart before my visit', fn: function(){ window.runAgentFromChat('a1','Pre-Visit Summarizer','Summarize chart before my visit'); } }
+            ];
+            if (hasADT) prompts.push({ text: 'Summarize the recent ADT event', fn: function(){ window.runAgentFromChat('a1','Pre-Visit Summarizer','Summarize the recent ADT event'); } });
+            prompts.push({ text: 'What are the open care gaps?', fn: function(){ window.runAgentFromChat('a4','Care Gap Finder','What are the open care gaps?'); } });
+            if (consentPending) {
+                prompts.push({ text: 'Draft a consent contact attempt note', fn: function(){ var inp=document.getElementById('aiInputField'); if(inp){inp.value='Draft a consent contact attempt note';inp.focus();} } });
             } else {
-                smartContainer.innerHTML = '<div style="font-size:12px;color:#94a3b8;padding:4px 8px 8px;">Type a question below or choose from more questions above.</div>';
+                prompts.push({ text: 'Show open tasks for this member', fn: function(){ handleAIQuestion('mx_open_tasks'); } });
             }
-        }
+            prompts.slice(0,4).forEach(function(p, i) {
+                var btn = document.createElement('button');
+                btn.textContent = p.text;
+                btn.style.cssText = 'display:block;width:100%;text-align:left;padding:8px 11px;margin-bottom:5px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;color:#1e293b;cursor:pointer;font-family:inherit;transition:all 0.15s;line-height:1.4;';
+                btn.onmouseover = function(){ this.style.background='#f0f0ff'; this.style.borderColor='#c8c6f0'; };
+                btn.onmouseout = function(){ this.style.background='#fff'; this.style.borderColor='#e2e8f0'; };
+                btn.onclick = p.fn;
+                promptsEl.appendChild(btn);
+            });
+        })();
 
-        // Populate full questions panel (hidden, revealed by More questions)
-        const activeSubTab = getActiveMemberSubTab();
-        const memberQuestions = getMemberContextQuestions(member, activeSubTab);
-        const qPanel = document.getElementById('aiQuestionsPanel');
-        if (qPanel) {
-            qPanel.innerHTML = memberQuestions.map(q =>
-                '<button class="ai-question-item'+(q.text.startsWith('\u2726')?' smart':'')+'" onclick="handleAIQuestion(\''+q.id+'\')">' + q.text + '</button>'
-            ).join('');
-        }
+        // Show suggestions toggle button
+        const sugBtn = document.getElementById('aiSuggestionsToggleBtn');
+        if (sugBtn) sugBtn.style.display = 'flex';
 
-        // Appt button now in hamburger menu
         updateHeaderState && updateHeaderState();
         return;
     }
 
-    // ── REFERRALS CONTEXT ──
-    if (aiCopilotState.currentContext === 'referrals') {
-        const apptBtnRef = document.getElementById('aiHeaderApptBtn');
-        if (apptBtnRef) apptBtnRef.classList.remove('visible');
-        container.innerHTML = `
-            <div class="ai-welcome-screen" style="padding:20px 16px 12px;">
-                <div class="ai-welcome-heading" style="font-size:15px;margin-top:0;">Referrals</div>
-            </div>
-            <div style="padding:0 14px 14px;">
-                <div style="background:#f8f7ff;border:1.5px solid #c8c6f0;border-radius:10px;padding:12px 14px;margin-bottom:10px;">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                        <div style="width:28px;height:28px;background:#282460;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:14px;height:14px;"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                        </div>
-                        <div>
-                            <div style="font-size:13px;font-weight:700;color:#1e293b;">Referral Creator</div>
-                            <div style="font-size:10px;color:#64748b;margin-top:1px;">Application Agent &middot; Skill: referral_create</div>
-                        </div>
-                        <span style="margin-left:auto;background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;">Active</span>
-                    </div>
-                    <div style="font-size:12px;color:#475569;line-height:1.5;margin-bottom:10px;">Reads member diagnoses, ADT events, and care plan needs to guide a clinically-informed outbound referral.</div>
-                    <button onclick="window.runAgentFromChat('a6','Referral Creator','Create new referral')"
-                        style="width:100%;padding:9px 14px;background:#282460;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-align:center;">
-                        + Create New Referral
-                    </button>
-                </div>
-                <div style="font-size:11px;color:#94a3b8;line-height:1.6;padding:0 2px;">
-                    Or open any member's profile and click <strong style="color:#282460;">Add Referral</strong> — the agent pre-fills based on their diagnoses and recent ADT events.
-                </div>
-            </div>
-        `;
-        document.getElementById('aiPanelTitle').textContent = 'Referrals';
-        return;
+    // ── LIST-LEVEL CONTEXTS ──────────────────────────────────────────────────
+    // Each list view gets: heading + stats + context-specific suggested prompts
+    // + scoped recent conversations (from that context only)
+    // No page-level action buttons in the chat panel
+
+    var ctx = aiCopilotState.currentContext || 'dashboard';
+
+    // ── Context config ──
+    var ctxConfig = {
+        'members': {
+            title: 'All Members',
+            icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>',
+            statsKey: 'members',
+            prompts: [
+                { text: 'Which members haven\'t been contacted in 30 days?', id: 'cx_no_contact' },
+                { text: 'Show me all high risk members', id: 'cx_high_risk' },
+                { text: 'Who has consent still pending?', id: 'cx_consent_pending' },
+                { text: 'Which members have open ADT events?', id: 'cx_adt_events' }
+            ]
+        },
+        'tasks': {
+            title: 'All Tasks',
+            icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+            statsKey: 'tasks',
+            prompts: [
+                { text: 'Show me all overdue tasks', id: 'cx_overdue_tasks' },
+                { text: 'Which high priority tasks are unassigned?', id: 'cx_unassigned_tasks' },
+                { text: 'Tasks due today', id: 'cx_tasks_today' },
+                { text: 'Which members have the most open tasks?', id: 'cx_tasks_by_member' }
+            ]
+        },
+        'service-notes': {
+            title: 'All Service Notes',
+            icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+            statsKey: 'notes',
+            prompts: [
+                { text: 'Show me all draft service notes', id: 'cx_draft_notes' },
+                { text: 'Which members have no service note this month?', id: 'cx_no_notes_month' },
+                { text: 'Notes created this week', id: 'cx_notes_week' },
+                { text: 'Show me notes pending review', id: 'cx_notes_review' }
+            ]
+        },
+        'referrals': {
+            title: 'All Referrals',
+            icon: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>',
+            statsKey: 'referrals',
+            prompts: [
+                { text: 'Which referrals are pending response?', id: 'cx_pending_referrals' },
+                { text: 'Show me overdue outbound referrals', id: 'cx_overdue_referrals' },
+                { text: 'Which members have no referral submitted?', id: 'cx_no_referral' },
+                { text: 'Referrals created this week', id: 'cx_referrals_week' }
+            ]
+        }
+    };
+
+    // Default to members if unknown context
+    var cfg = ctxConfig[ctx] || ctxConfig['members'];
+
+    // ── Build stats ──
+    var stats = '';
+    if (ctx === 'members' && typeof membersDB !== 'undefined') {
+        var total = membersDB.length;
+        var highRisk = membersDB.filter(function(m){ return m.riskCategory === 'High'; }).length;
+        var consentNeeded = membersDB.filter(function(m){ return ['To Obtain Consent','Re-consent Required'].indexOf(m.consentStatus) > -1; }).length;
+        stats = total + ' members' + (highRisk > 0 ? ' · <span style="color:#991b1b;font-weight:500;">' + highRisk + ' high risk</span>' : '') + (consentNeeded > 0 ? ' · <span style="color:#9a3412;">' + consentNeeded + ' consent pending</span>' : '');
+    } else if (ctx === 'tasks') {
+        var allTasks = [];
+        if (typeof membersDB !== 'undefined') membersDB.forEach(function(m){ allTasks = allTasks.concat((m.dashboardData && m.dashboardData.tasks) || []); });
+        var openTasks = allTasks.filter(function(t){ return t.status !== 'Completed'; }).length;
+        var highPriority = allTasks.filter(function(t){ return t.priority === 'High' && t.status !== 'Completed'; }).length;
+        stats = openTasks + ' open tasks' + (highPriority > 0 ? ' · <span style="color:#991b1b;font-weight:500;">' + highPriority + ' high priority</span>' : '');
+    } else if (ctx === 'service-notes') {
+        stats = 'Notes across your caseload';
+    } else if (ctx === 'referrals') {
+        stats = 'Inbound &amp; outbound referrals';
     }
 
-    // ── DEFAULT DASHBOARD CONTEXT ──
-    const apptBtnDash = document.getElementById('aiHeaderApptBtn');
-    if (apptBtnDash) apptBtnDash.classList.remove('visible');
-    const activeTab = aiCopilotState.activeTab;
-    const tabsHTML = Object.entries(AI_TABS).map(([key, tab]) =>
-        `<button class="ai-tab-btn ${key === activeTab ? 'active' : ''}" onclick="switchAITab('${key}')">${tab.label}</button>`
-    ).join('');
-    const questionsHTML = AI_TABS[activeTab].questions.map(q =>
-        `<button class="ai-question-item" onclick="handleAIQuestion('${q.id}')">${q.text}</button>`
-    ).join('');
-
-    // Build recent conversations HTML
-    const _all = [];
-    if (typeof membersDB !== 'undefined') {
-        membersDB.forEach(function(m){(SESS.byMember[m.id]||[]).forEach(function(s){_all.push({s:s,m:m});});});
+    // ── Build scoped recent conversations ──
+    // Sessions scoped to this context (stored with a context tag)
+    var scopedRecent = (SESS.byContext && SESS.byContext[ctx]) || [];
+    var recentHTML = '';
+    if (scopedRecent.length > 0) {
+        recentHTML = '<div style="padding:0 14px 8px;">' +
+            '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Recent conversations</div>' +
+            scopedRecent.slice(0,5).map(function(s) {
+                var daysAgo = Math.floor((Date.now() - s.date.getTime()) / 86400000);
+                var timeLabel = daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : daysAgo + 'd ago';
+                var firstMsg = (s.messages||[]).find(function(m){ return m.role==='user'; });
+                var title = firstMsg ? (firstMsg.content.length > 45 ? firstMsg.content.slice(0,45)+'…' : firstMsg.content) : s.title;
+                return '<div onclick="window.loadContextSession(\'' + s.id + '\',\'' + ctx + '\')" style="display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'none\'">' +
+                    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' +
+                    '<div style="flex:1;min-width:0;">' +
+                        '<div style="font-size:12px;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(title) + '</div>' +
+                        '<div style="font-size:11px;color:#94a3b8;margin-top:1px;">' + timeLabel + '</div>' +
+                    '</div>' +
+                '</div>';
+            }).join('') +
+        '</div>';
     }
-    _all.sort(function(a,b){return b.s.date-a.s.date;});
-    const _cutoff = new Date(Date.now()-30*86400000);
-    const _recent = _all.filter(function(x){return x.s.date>=_cutoff;}).slice(0,8);
-    const recentHTML = _recent.length ? `
-        <div class="ai-recent-section">
-            <div class="ai-recent-header">Recent Conversations <span style="font-size:10px;font-weight:400;color:#cbd5e1;text-transform:none;letter-spacing:0;">· last 30 days</span></div>
-            <input type="text" class="ai-recent-search" placeholder="Search by member name…" oninput="filterRecentWelcome(this.value)" />
-            <div id="recentWelcomeList">
-            ${_recent.map(x=>`
-                <div class="ai-recent-item" onclick="navigateToDetails('${x.m.id}')">
-                    <div class="ai-recent-item-member">${escapeHtml(x.m.name)}</div>
-                    <div class="ai-recent-item-preview">${escapeHtml(x.s.title)}</div>
-                    <div class="ai-recent-item-date">${x.s.date.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
-                </div>`).join('')}
-            </div>
-        </div>` : '';
 
-    container.innerHTML = `
-        <div class="ai-welcome-screen" style="padding:20px 20px 6px;">
-            <div class="ai-welcome-heading" style="font-size:16px;margin-top:0;">How can I help?</div>
-            <div style="font-size:12px;color:#64748b;margin-top:3px;">Open a member profile to start a member-specific chat.</div>
-        </div>
-        <div class="ai-tabs-container">${tabsHTML}</div>
-        <div style="padding:0 14px 4px;">
-            <button onclick="toggleAISuggestions()" id="aiSuggestionsToggle"
-                style="display:flex;align-items:center;gap:5px;background:none;border:none;
-                padding:5px 8px;border-radius:6px;font-size:11.5px;color:#6366f1;
-                cursor:pointer;transition:background .15s;width:100%;"
-                onmouseover="this.style.background='#f0f0ff'"
-                onmouseout="this.style.background='none'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;transition:transform .2s;" id="aiSuggestionsChevron">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-                <span>✦ Suggested questions</span>
-            </button>
-        </div>
-        <div class="ai-questions-panel" id="aiQuestionsPanel" style="display:none;">${questionsHTML}</div>
-        ${recentHTML}
-    `;
-    document.getElementById('aiPanelTitle').textContent = 'Sevida CoPilot';
+    // ── Referral Creator agent card (informational, no action button) ──
+    var agentCardHTML = '';
+    if (ctx === 'referrals') {
+        agentCardHTML = '<div style="margin:0 14px 10px;padding:10px 12px;background:#f8f7ff;border:1px solid #e0deff;border-radius:8px;">' +
+            '<div style="display:flex;align-items:center;gap:8px;">' +
+                '<div style="width:24px;height:24px;background:#282460;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:12px;height:12px;"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>' +
+                '</div>' +
+                '<div style="flex:1;">' +
+                    '<div style="font-size:12px;font-weight:600;color:#1e293b;">Referral Creator</div>' +
+                    '<div style="font-size:10px;color:#64748b;">Open a member profile to create a referral</div>' +
+                '</div>' +
+                '<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;">Active</span>' +
+            '</div>' +
+        '</div>';
+    }
+
+    // ── Render ──
+    container.innerHTML =
+        '<div style="padding:18px 16px 10px;">' +
+            '<div style="font-size:16px;font-weight:600;color:#0f172a;margin-bottom:4px;">How can I help?</div>' +
+            '<div style="font-size:12px;color:#64748b;line-height:1.5;">' + stats + '</div>' +
+        '</div>' +
+        agentCardHTML +
+        '<div style="padding:0 14px 10px;">' +
+            '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px;">Suggested</div>' +
+            cfg.prompts.map(function(p) {
+                return '<button onclick="window.handleContextPrompt(\'' + p.id + '\',\'' + escapeHtml(p.text).replace(/'/g,"\\'") + '\')" ' +
+                    'style="display:block;width:100%;text-align:left;padding:8px 11px;margin-bottom:5px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;color:#1e293b;cursor:pointer;font-family:inherit;transition:all 0.15s;line-height:1.4;" ' +
+                    'onmouseover="this.style.background=\'#f0f0ff\';this.style.borderColor=\'#c8c6f0\'" ' +
+                    'onmouseout="this.style.background=\'#fff\';this.style.borderColor=\'#e2e8f0\'">' +
+                    escapeHtml(p.text) +
+                    '</button>';
+            }).join('') +
+        '</div>' +
+        recentHTML;
+
+    document.getElementById('aiPanelTitle').textContent = cfg.title;
+
+    // Update input placeholder
+    var inp = document.getElementById('aiInputField');
+    if (inp) {
+        var placeholders = {
+            'members': 'Ask about your caseload…',
+            'tasks': 'Ask about tasks…',
+            'service-notes': 'Ask about service notes…',
+            'referrals': 'Ask about referrals…'
+        };
+        inp.placeholder = placeholders[ctx] || 'Ask about your caseload…';
+    }
+
     updateHeaderState && updateHeaderState();
+    setTimeout(function() { window.enrichEmptyStateGlobal && window.enrichEmptyStateGlobal(); }, 100);
 }
 
-function filterRecentWelcome(q) {
-    const list = document.getElementById('recentWelcomeList');
-    if (!list) return;
-    list.querySelectorAll('.ai-recent-item').forEach(function(item){
-        const name=(item.querySelector('.ai-recent-item-member')||{}).textContent||'';
-        item.style.display=name.toLowerCase().includes(q.toLowerCase())?'':'none';
+// ── Load context-level session ────────────────────────────────────────────────
+window.loadContextSession = function(sessionId, ctx) {
+    if (!SESS.byContext || !SESS.byContext[ctx]) return;
+    var session = SESS.byContext[ctx].find(function(s){ return s.id === sessionId; });
+    if (!session) return;
+    var container = document.getElementById('aiMessages');
+    if (!container) return;
+    aiCopilotState.isInConversation = true;
+    aiCopilotState.conversationHistory = session.messages.map(function(m){ return { role: m.role, content: m.content }; });
+    container.innerHTML =
+        '<div style="padding:8px 14px 6px;">' +
+            '<div style="font-size:11px;color:#94a3b8;">' + escapeHtml(session.title) + '</div>' +
+        '</div>' +
+        '<div style="height:1px;background:#f1f5f9;margin:0 14px 4px;"></div>';
+    session.messages.forEach(function(msg) {
+        if (msg.role === 'user') {
+            container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-user"><div class="ai-conv-user-bubble">' + escapeHtml(msg.content) + '</div></div></div>';
+        } else {
+            var content = (msg.contentType === 'html') ? msg.content : '<div class="ai-response-block"><div class="ai-llm-response">' + (typeof renderMarkdown === 'function' ? renderMarkdown(msg.content) : msg.content) + '</div></div>';
+            container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-assistant">' + content + '</div></div>';
+        }
     });
-}
+    container.scrollTop = container.scrollHeight;
+};
+
+// ── Handle context-level prompt clicks ───────────────────────────────────────
+window.handleContextPrompt = function(id, text) {
+    var inp = document.getElementById('aiInputField');
+    if (inp) {
+        inp.value = text;
+        inp.focus();
+    }
+};
+
+// ── Save context-level sessions ───────────────────────────────────────────────
+window.sessContextSave = function(ctx, role, text) {
+    if (!SESS.byContext) SESS.byContext = {};
+    if (!SESS.byContext[ctx]) SESS.byContext[ctx] = [];
+    var sessions = SESS.byContext[ctx];
+    var active = sessions[0];
+    if (!active || active.closed) {
+        active = { id: 'ctx_' + ctx + '_' + Date.now(), title: text.slice(0,45), preview: '', date: new Date(), messages: [], closed: false };
+        sessions.unshift(active);
+    }
+    active.messages.push({ role: role, content: text, contentType: 'text' });
+    if (role === 'assistant') active.preview = text.slice(0,70);
+    active.date = new Date();
+};
+
+function filterRecentWelcome_DISABLED() {}
 
 function toggleAISuggestions() {
     const panel = document.getElementById('aiQuestionsPanel');
@@ -31911,17 +32345,253 @@ document.addEventListener('click', function(e) {
 
 function switchAITab(tabKey) {
     aiCopilotState.activeTab = tabKey;
-    // Re-render just the tabs and questions
     const tabBtns = document.querySelectorAll('.ai-tab-btn');
     tabBtns.forEach(btn => btn.classList.toggle('active', btn.textContent === AI_TABS[tabKey].label));
 
     const panel = document.getElementById('aiQuestionsPanel');
     if (panel) {
+        panel.style.display = '';
         panel.innerHTML = AI_TABS[tabKey].questions.map(q =>
             `<button class="ai-question-item" onclick="handleAIQuestion('${q.id}')">${q.text}</button>`
         ).join('');
     }
 }
+
+// ── Member chat: auto-load last session, new chat button ─────────────────────
+window.loadMemberChat = function(member) {
+    if (!member) return;
+    seedSessions && seedSessions();
+
+    var last = (SESS.byMember[member.id] || []).slice().sort(function(a,b){
+        return b.date - a.date;
+    })[0];
+
+    var container = document.getElementById('aiMessages');
+    if (!container) return;
+
+    if (!last) {
+        // No history — fresh chat
+        aiCopilotState.isInConversation = false;
+        aiCopilotState.conversationHistory = [];
+        SESS.active[member.id] = null;
+        if (typeof renderWelcomeScreen === 'function') renderWelcomeScreen();
+        return;
+    }
+
+    // Load last session
+    SESS.active[member.id] = last.id;
+    aiCopilotState.conversationHistory = last.messages.map(function(m) {
+        return { role: m.role, content: m.content };
+    });
+    aiCopilotState.isInConversation = true;
+
+    // Hide suggested prompts — conversation is active
+    var sugPrompts = document.getElementById('memberSuggestedPrompts');
+    if (sugPrompts) sugPrompts.style.display = 'none';
+
+    var daysAgo = Math.floor((Date.now() - last.date.getTime()) / 86400000);
+    var timeLabel = daysAgo === 0 ? 'Earlier today' :
+                    daysAgo === 1 ? 'Yesterday' :
+                    daysAgo + ' days ago';
+
+    container.innerHTML =
+        '<div style="padding:8px 16px 6px;flex-shrink:0;">' +
+            '<div style="font-size:11px;color:#94a3b8;">' + escapeHtml(last.title) + ' · ' + timeLabel + '</div>' +
+        '</div>' +
+        '<div style="height:1px;background:#f1f5f9;margin:0 14px 4px;flex-shrink:0;"></div>';
+
+    last.messages.forEach(function(msg) {
+        if (msg.role === 'user') {
+            container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-user"><div class="ai-conv-user-bubble">' + escapeHtml(msg.content) + '</div></div></div>';
+        } else {
+            // Render full HTML if saved as HTML, otherwise use renderMarkdown
+            var responseContent = (msg.contentType === 'html')
+                ? msg.content
+                : '<div class="ai-response-block"><div class="ai-llm-response">' + (typeof renderMarkdown === 'function' ? renderMarkdown(msg.content) : msg.content) + '</div></div>';
+            container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-assistant">' + responseContent + '</div></div>';
+        }
+    });
+
+    container.scrollTop = container.scrollHeight;
+};
+
+
+// ── Hook into member navigation ───────────────────────────────────────────────
+var _origOnMemberSwitch = window.onMemberSwitch; // captures the function defined at line 31220
+window.onMemberSwitch = function(member) {
+    _origOnMemberSwitch(member); // call original exactly once
+    if (member) {
+        setTimeout(function() {
+            window.loadMemberChat(member);
+            var btn = document.getElementById('aiSuggestionsToggleBtn');
+            if (btn) btn.style.display = 'flex';
+            window.populateSuggestionsDrawer && window.populateSuggestionsDrawer();
+        }, 80);
+    }
+};
+
+// ── Suggestions drawer ────────────────────────────────────────────────────────
+window._suggestionsOpen = false;
+
+window.toggleAISuggestionsDrawer = function() {
+    var drawer = document.getElementById('aiSuggestionsDrawer');
+    var btn = document.getElementById('aiSuggestionsToggleBtn');
+    if (!drawer) return;
+    window._suggestionsOpen = !window._suggestionsOpen;
+    drawer.style.display = window._suggestionsOpen ? 'block' : 'none';
+    if (btn) {
+        btn.style.color = window._suggestionsOpen ? '#2d2d52' : '#94a3b8';
+        btn.style.background = window._suggestionsOpen ? '#f0f0ff' : 'none';
+    }
+    if (window._suggestionsOpen) window.populateSuggestionsDrawer && window.populateSuggestionsDrawer();
+};
+
+window.populateSuggestionsDrawer = function() {
+    var member = window.currentMember;
+    var agentInline = document.getElementById('aiChipsRowInline');
+    if (agentInline && window.AGENTS) {
+        var agents = window.AGENTS.filter(function(a) {
+            return a.status !== 'inactive' && a.status !== 'draft';
+        }).slice(0, 6);
+        agentInline.innerHTML = agents.map(function(a) {
+            var q = (window.getAgentClickQuery && member) ? window.getAgentClickQuery(a, 'member-dashboard', 'member-tab__dashboard') : ('Run ' + a.name);
+            return '<button onclick="window.runAgentFromChat(\'' + a.id + '\',\'' + a.name.replace(/'/g,"\\'") + '\',\'' + q.replace(/'/g,"\\'") + '\')" style="padding:5px 11px;border:1px solid #e2e8f0;border-radius:20px;background:#fff;font-size:11.5px;color:#374151;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s;" onmouseover="this.style.background=\'#f0f0ff\';this.style.borderColor=\'#484581\'" onmouseout="this.style.background=\'#fff\';this.style.borderColor=\'#e2e8f0\'">' + escapeHtml(a.name) + '</button>';
+        }).join('');
+    }
+    var quickInline = document.getElementById('aiQuickChipsInline');
+    if (quickInline && typeof QUICK_CHIPS !== 'undefined') {
+        quickInline.innerHTML = QUICK_CHIPS.map(function(chip) {
+            return '<button onclick="handleAIQuestion(\'' + chip.id + '\')" style="padding:5px 11px;border:1px solid #e2e8f0;border-radius:20px;background:#fff;font-size:11.5px;color:#374151;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s;" onmouseover="this.style.background=\'#f0f0ff\';this.style.borderColor=\'#484581\'" onmouseout="this.style.background=\'#fff\';this.style.borderColor=\'#e2e8f0\'">' + escapeHtml(chip.text) + '</button>';
+        }).join('');
+    }
+};
+
+// ── Send / Stop toggle ────────────────────────────────────────────────────────
+window._aiAbortController = null;
+window._aiIsStreaming = false;
+
+window.aiSetStreaming = function(on) {
+    window._aiIsStreaming = on;
+    var si = document.getElementById('aiSendIcon');
+    var st = document.getElementById('aiStopIcon');
+    var btn = document.getElementById('aiSendBtn');
+    if (si) si.style.display = on ? 'none' : 'block';
+    if (st) st.style.display = on ? 'block' : 'none';
+    if (btn) { btn.style.background = on ? '#ef4444' : ''; btn.title = on ? 'Stop' : 'Send'; }
+};
+
+window.aiSendOrStop = function() {
+    if (window._aiIsStreaming) {
+        if (window._aiAbortController) { window._aiAbortController.abort(); window._aiAbortController = null; }
+        window.aiSetStreaming(false);
+        var c = document.getElementById('aiMessages');
+        if (c) {
+            var t = c.querySelector('.ai-thinking-container');
+            if (t) t.remove();
+            c.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-response-summary" style="color:#94a3b8;font-style:italic;">Response stopped.</div></div></div></div>';
+            c.scrollTop = c.scrollHeight;
+        }
+    } else {
+        sendAIMessage();
+    }
+};
+
+// ── Suggestions drawer ────────────────────────────────────────────────────────
+window._suggestionsOpen = false;
+
+window.toggleAISuggestionsDrawer = function() {
+    var drawer = document.getElementById('aiSuggestionsDrawer');
+    var btn = document.getElementById('aiSuggestionsToggleBtn');
+    if (!drawer) return;
+    window._suggestionsOpen = !window._suggestionsOpen;
+    drawer.style.display = window._suggestionsOpen ? 'block' : 'none';
+    if (btn) {
+        btn.style.color = window._suggestionsOpen ? '#2d2d52' : '#94a3b8';
+        btn.style.background = window._suggestionsOpen ? '#f0f0ff' : 'none';
+    }
+    if (window._suggestionsOpen) window.populateSuggestionsDrawer();
+};
+
+window.populateSuggestionsDrawer = function() {
+    var member = window.currentMember;
+
+    // Agent chips
+    var agentInline = document.getElementById('aiChipsRowInline');
+    if (agentInline && window.AGENTS) {
+        var agents = (window.AGENTS || []).filter(function(a) {
+            return a.status !== 'inactive' && a.status !== 'draft' &&
+                   ['a2'].indexOf(a.id) === -1 &&
+                   (!a.surfaces || a.surfaces.length === 0 || a.surfaces.indexOf('member-dashboard') > -1 || a.surfaces.indexOf('all') > -1);
+        }).slice(0, 6);
+        agentInline.innerHTML = agents.map(function(a) {
+            var clickQuery = (window.getAgentClickQuery && member) ? window.getAgentClickQuery(a, 'member-dashboard', 'member-tab__dashboard') : ('Run ' + a.name);
+            return '<button onclick="window.runAgentFromChat(\'' + a.id + '\',\'' + a.name.replace(/'/g,"\\'") + '\',\'' + clickQuery.replace(/'/g,"\\'") + '\')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:1px solid #e2e8f0;border-radius:20px;background:#fff;font-size:11.5px;color:#374151;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s;" onmouseover="this.style.background=\'#f0f0ff\';this.style.borderColor=\'#484581\';this.style.color=\'#484581\'" onmouseout="this.style.background=\'#fff\';this.style.borderColor=\'#e2e8f0\';this.style.color=\'#374151\'">' + a.name + '</button>';
+        }).join('');
+    }
+
+    // Smart suggestions
+    var smartInline = document.getElementById('aiSmartQsInline');
+    if (smartInline && member && typeof generateSmartQuestions === 'function') {
+        var smartQs = generateSmartQuestions(member);
+        smartInline.innerHTML = smartQs.slice(0, 4).map(function(q) {
+            var dotColor = q.urgency === 'critical' ? '#ef4444' : q.urgency === 'high' ? '#f97316' : '#8b5cf6';
+            var bgColor = q.urgency === 'critical' ? '#fff5f5' : q.urgency === 'high' ? '#fffbf5' : '#faf9ff';
+            var borderColor = q.urgency === 'critical' ? '#fecaca' : q.urgency === 'high' ? '#fed7aa' : '#e8e4f8';
+            return '<button onclick="' + q.action + '" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:1px solid ' + borderColor + ';border-radius:20px;background:' + bgColor + ';font-size:11.5px;font-weight:500;color:#1e293b;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s;">' +
+                '<span style="width:6px;height:6px;border-radius:50%;background:' + dotColor + ';flex-shrink:0;display:inline-block;"></span>' +
+                q.text.substring(0, 40) +
+            '</button>';
+        }).join('');
+        smartInline.style.display = smartQs.length ? 'flex' : 'none';
+    }
+
+    // Quick chips
+    var quickInline = document.getElementById('aiQuickChipsInline');
+    if (quickInline && member && typeof QUICK_CHIPS !== 'undefined') {
+        quickInline.innerHTML = QUICK_CHIPS.map(function(chip) {
+            return '<button onclick="handleAIQuestion(\'' + chip.id + '\')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:1px solid #e2e8f0;border-radius:20px;background:#fff;font-size:11.5px;color:#374151;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s;" onmouseover="this.style.background=\'#f0f0ff\';this.style.borderColor=\'#484581\';this.style.color=\'#484581\'" onmouseout="this.style.background=\'#fff\';this.style.borderColor=\'#e2e8f0\';this.style.color=\'#374151\'">' + chip.text + '</button>';
+        }).join('');
+    }
+};
+
+// ── Send / Stop toggle ────────────────────────────────────────────────────────
+window._aiAbortController = null;
+window._aiIsStreaming = false;
+
+window.aiSetStreaming = function(isStreaming) {
+    window._aiIsStreaming = isStreaming;
+    var sendIcon = document.getElementById('aiSendIcon');
+    var stopIcon = document.getElementById('aiStopIcon');
+    var btn = document.getElementById('aiSendBtn');
+    if (sendIcon) sendIcon.style.display = isStreaming ? 'none' : 'block';
+    if (stopIcon) stopIcon.style.display = isStreaming ? 'block' : 'none';
+    if (btn) {
+        btn.style.background = isStreaming ? '#ef4444' : '';
+        btn.title = isStreaming ? 'Stop response' : 'Send';
+    }
+};
+
+window.aiSendOrStop = function() {
+    if (window._aiIsStreaming) {
+        // Stop the response
+        if (window._aiAbortController) {
+            window._aiAbortController.abort();
+            window._aiAbortController = null;
+        }
+        window.aiSetStreaming(false);
+        // Add stopped indicator
+        var container = document.getElementById('aiMessages');
+        if (container) {
+            // Remove thinking indicator if present
+            var thinking = container.querySelector('.ai-thinking-container');
+            if (thinking) thinking.remove();
+            container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-response-summary" style="color:#94a3b8;font-style:italic;">Response stopped.</div></div></div></div>';
+            container.scrollTop = container.scrollHeight;
+        }
+    } else {
+        sendAIMessage();
+    }
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QUESTION HANDLING
@@ -31976,8 +32646,8 @@ function handleAIQuestion(questionId) {
     if (!container) return;
 
     // Show user message + thinking
-    container.innerHTML = `
-        <div class="ai-conv-user"><div class="ai-conv-user-bubble">${question.text}</div></div>
+    container.innerHTML += `
+        <div class="ai-chat-turn"><div class="ai-conv-user"><div class="ai-conv-user-bubble">${question.text}</div></div></div>
         <div class="ai-thinking-container" id="aiThinking">
             <div class="ai-thinking-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>
             <div class="ai-thinking-text">Thinking...</div>
@@ -31985,12 +32655,18 @@ function handleAIQuestion(questionId) {
         <div class="ai-thinking-shimmer" id="aiThinkingShimmer"></div>
     `;
 
+    // Show stop button while thinking
+    window.aiSetStreaming && window.aiSetStreaming(true);
+
     // Process after delay for UX
     setTimeout(() => {
         const thinkEl = document.getElementById('aiThinking');
         if (thinkEl) thinkEl.remove();
         const shimmerEl = document.getElementById('aiThinkingShimmer');
         if (shimmerEl) shimmerEl.remove();
+
+        // Reset stop button
+        window.aiSetStreaming && window.aiSetStreaming(false);
 
         const handler = window[question.handler];
         if (typeof handler === 'function') {
@@ -32006,10 +32682,12 @@ function handleAIQuestion(questionId) {
         }
         // ── Save to session store ──
         if (window.currentMember && typeof sessSave === 'function') {
-            sessSave(window.currentMember.id, 'user', question.text);
+            // Use the chip display text as the user message label, not the raw query
+            const displayText = question.text;
+            sessSave(window.currentMember.id, 'user', displayText);
             const lastAssistant = container.querySelector('.ai-conv-assistant:last-child');
-            const rawText = lastAssistant ? (lastAssistant.textContent||'').trim() : question.text;
-            sessSave(window.currentMember.id, 'assistant', stripMdPreview(rawText));
+            const fullHTML = lastAssistant ? lastAssistant.innerHTML : '';
+            sessSaveHTML(window.currentMember.id, 'assistant', fullHTML, displayText);
             updateHeaderState && updateHeaderState();
         }
         container.scrollTop = 0;
@@ -32195,7 +32873,6 @@ function toggleAICopilot() {
     if (aiCopilotState.isOpen) {
         panel.classList.add('open'); panel.classList.remove('closed');
         document.body.classList.add('ai-panel-open');
-        if (typeof renderQuestionChips === 'function') renderQuestionChips(window.currentMember);
         if (!window.currentMember) { var ns = document.getElementById('aiNudgeStack'); if(ns){ns.innerHTML='';ns.style.display='none';} }
         if (!aiCopilotState.isInConversation) renderWelcomeScreen();
     } else {
@@ -35524,9 +36201,13 @@ function updateAICopilotContext() {
     const nowOnMember = !!window.currentMember;
 
     if (wasOnMember && !nowOnMember) {
-        // Left member → back to list/other page: reset everything
+        // Left member → back to list/other page: preserve context set by nav handler
+        // Only reset if context is still memberDetails (wasn't set by a nav click)
         aiCopilotState.currentMember = null;
-        aiCopilotState.currentContext = 'dashboard';
+        if (aiCopilotState.currentContext === 'memberDetails') {
+            aiCopilotState.currentContext = 'members';
+        }
+        // Don't override context if nav handler already set it to tasks/service-notes/referrals/members
         aiCopilotState.isInConversation = false;
         renderWelcomeScreen();
     } else if (!wasOnMember && nowOnMember) {
@@ -40243,6 +40924,28 @@ function sendAIMessage() {
     const input = document.getElementById('aiInputField'); if (!input) return;
     const text = input.value.trim(); if (!text) return;
     input.value = '';
+
+    // ── Referral Agent: detect distance filter requests ──────────────────
+    if (window.ReferralAgent && typeof window.ReferralAgent._setDistance === 'function') {
+        var distMatch = text.match(/(?:within|under|less than|show|find|filter|only|search)\s+(\d+)\s*(?:miles?|mi)/i) ||
+                        text.match(/(\d+)\s*(?:miles?|mi)\s*(?:radius|away|from|max|maximum)?/i);
+        if (distMatch) {
+            var miles = parseInt(distMatch[1]);
+            if (miles > 0 && miles <= 200) {
+                window.ReferralAgent._setDistance(miles);
+                // Show acknowledgement
+                var container = document.getElementById('aiMessages');
+                if (container) {
+                    container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-user"><div class="ai-conv-user-bubble">' + escapeHtml(text) + '</div></div></div>';
+                    container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-llm-response">Filtering facilities to within <strong>' + miles + ' miles</strong>. I\'ll remember this for the rest of this referral.</div></div></div></div>';
+                    container.scrollTop = container.scrollHeight;
+                }
+                return;
+            }
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────────
+
     const allQs = [];
     Object.values(AI_TABS).forEach(tab => allQs.push(...tab.questions));
     Object.entries(FOLLOWUP_QUESTIONS).forEach(([id,q]) => allQs.push({...q,id}));
@@ -40266,23 +40969,36 @@ async function sendLLMMessage(userText) {
     aiCopilotState.conversationHistory = aiCopilotState.conversationHistory||[];
     aiCopilotState.conversationHistory.push({ role:'user', content:userText });
     if (window.currentMember && typeof sessSave==='function') sessSave(window.currentMember.id,'user',userText);
+    else if (window.sessContextSave) { var _ctx = (window.aiCopilotState && window.aiCopilotState.currentContext) || 'members'; window.sessContextSave(_ctx,'user',userText); }
+
+    // Set up abort controller and show stop button
+    window._aiAbortController = new AbortController();
+    window.aiSetStreaming && window.aiSetStreaming(true);
+
     try {
         const response = await fetch('/.netlify/functions/claude', {
             method:'POST',
-            headers:{ 'Content-Type':'application/json', 'Content-Type':'application/json' },
+            headers:{ 'Content-Type':'application/json' },
+            signal: window._aiAbortController ? window._aiAbortController.signal : undefined,
             body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:800, system:buildChatSystemPrompt(), messages:[...history,{role:'user',content:userText}] })
         });
         const data = await response.json();
         const replyText = data?.content?.[0]?.text?.trim();
         if (!replyText) throw new Error('Empty response');
         aiCopilotState.conversationHistory.push({ role:'assistant', content:replyText });
-        if (window.currentMember && typeof sessSave==='function') sessSave(window.currentMember.id,'assistant',stripMdPreview(replyText));
         updateHeaderState && updateHeaderState();
         document.getElementById(thinkId)?.remove();
-        container.innerHTML += `<div class="ai-chat-turn"><div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-llm-response">${renderMarkdown(replyText)}</div><div class="ai-feedback-row" style="margin-top:10px;"><button class="ai-feedback-btn" onclick="this.style.color='#2d2d52'" title="Helpful"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/></svg></button><button class="ai-feedback-btn" onclick="this.style.color='#ef4444'" title="Not helpful"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/></svg></button><button class="ai-back-btn" style="margin-left:auto;" onclick="resetAICopilot()">Ask another question</button></div></div></div></div>`;
+        window.aiSetStreaming && window.aiSetStreaming(false);
+        window._aiAbortController = null;
+        const replyHTML = `<div class="ai-response-block"><div class="ai-llm-response">${renderMarkdown(replyText)}</div><div class="ai-feedback-row" style="margin-top:10px;"><button class="ai-feedback-btn" onclick="this.style.color='#2d2d52'" title="Helpful"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/></svg></button><button class="ai-feedback-btn" onclick="this.style.color='#ef4444'" title="Not helpful"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/></svg></button><button class="ai-back-btn" style="margin-left:auto;" onclick="resetAICopilot()">Ask another question</button></div></div>`;
+        container.innerHTML += `<div class="ai-chat-turn"><div class="ai-conv-assistant">${replyHTML}</div></div>`;
+        if (window.currentMember && typeof sessSaveHTML==='function') sessSaveHTML(window.currentMember.id,'assistant',replyHTML,stripMdPreview(replyText));
         container.scrollTop = container.scrollHeight;
     } catch(err) {
         document.getElementById(thinkId)?.remove();
+        window.aiSetStreaming && window.aiSetStreaming(false);
+        window._aiAbortController = null;
+        if (err && err.name === 'AbortError') return; // Stopped by user — already handled
         container.innerHTML += `<div class="ai-chat-turn"><div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-response-summary" style="color:#ef4444;">⚠ Could not connect to AI — please try again.</div><div class="ai-back-row"><button class="ai-back-btn" onclick="resetAICopilot()">← Back to questions</button></div></div></div></div>`;
         container.scrollTop = container.scrollHeight;
         aiCopilotState.conversationHistory.pop();
@@ -48947,8 +49663,8 @@ window.runAgentFromChat = function(agentId, agentName, query) {
     }
 
     var narrativeContainerId = 'aiNarrative_' + Date.now();
-    container.innerHTML =
-        '<div class="ai-conv-user"><div class="ai-conv-user-bubble">'+esc(query||agentName)+'</div></div>'
+    container.innerHTML +=
+        '<div class="ai-chat-turn"><div class="ai-conv-user"><div class="ai-conv-user-bubble">'+esc(agentName)+'</div></div></div>'
         + '<div id="'+narrativeContainerId+'"></div>';
 
     window._showNarrativeLoading(agentId, narrativeContainerId);
@@ -49055,7 +49771,8 @@ window.runAgentFromChat = function(agentId, agentName, query) {
         var respText = (data.content&&data.content[0]&&data.content[0].text)||'No response.';
         var tokens = (data.usage&&(data.usage.input_tokens+data.usage.output_tokens))||1200;
 
-        container.innerHTML += '<div class="ai-conv-assistant">'+window.renderAgentResponse(respText, agent, agentId)+'</div>';
+        var renderedHTML = window.renderAgentResponse(respText, agent, agentId);
+        container.innerHTML += '<div class="ai-conv-assistant">'+renderedHTML+'</div>';
         container.scrollTop = container.scrollHeight;
 
         // Log to Studio
@@ -49063,9 +49780,9 @@ window.runAgentFromChat = function(agentId, agentName, query) {
         aiCopilotState.conversationHistory.push({ role:'assistant', agentId:agentId, text:respText });
 
         // ── Save to session store ──
-        if (member && typeof sessSave === 'function') {
-            sessSave(member.id, 'user', query||agentName);
-            sessSave(member.id, 'assistant', stripMdPreview(respText));
+        if (member && typeof sessSaveHTML === 'function') {
+            sessSave(member.id, 'user', agentName);
+            sessSaveHTML(member.id, 'assistant', renderedHTML, agentName);
             updateHeaderState && updateHeaderState();
         }
 
@@ -49112,7 +49829,8 @@ window.runAgentFromChat = function(agentId, agentName, query) {
 
         // Use mock response so demo works without live API
         var mockText = window._mockAgentResponse(agentId, member);
-        container.innerHTML += '<div class="ai-conv-assistant">' + window.renderAgentResponse(mockText, agent, agentId) + '</div>';
+        var renderedMockHTML = window.renderAgentResponse(mockText, agent, agentId);
+        container.innerHTML += '<div class="ai-conv-assistant">' + renderedMockHTML + '</div>';
         container.innerHTML += '<div style="font-size:10.5px;color:#94a3b8;padding:4px 12px;">⚠ Live API unavailable — showing demo response</div>';
         container.scrollTop = container.scrollHeight;
 
@@ -49120,9 +49838,9 @@ window.runAgentFromChat = function(agentId, agentName, query) {
         aiCopilotState.conversationHistory.push({ role:'assistant', agentId:agentId, text:mockText });
 
         // ── Save to session store ──
-        if (member && typeof sessSave === 'function') {
-            sessSave(member.id, 'user', query||agentName);
-            sessSave(member.id, 'assistant', stripMdPreview(mockText));
+        if (member && typeof sessSaveHTML === 'function') {
+            sessSave(member.id, 'user', agentName);
+            sessSaveHTML(member.id, 'assistant', renderedMockHTML, agentName);
             updateHeaderState && updateHeaderState();
         }
 
@@ -49316,93 +50034,86 @@ var _agentIcons = {
 };
 
 window.renderAgentChips = function() {
-    var member = window.currentMember;
+    // Agent chips only show on member page when no active conversation
+    // Never on list views — controlled by the welcome screen render
     var chipsRow = document.getElementById('aiChipsRow');
-    if(!chipsRow) return;
-    if(!member) { chipsRow.style.display='none'; return; }
-
-    var currentSurface = window.getCurrentSurface();
-    var currentTab = window.getCurrentTab();
-
-    // ── Policy check: get current user role permissions ──────────────────────
-    var userRole = 'care_manager'; // default — real app would get from session
-    var canRunAgents = true;
-    if(window.STATE && window.STATE.rbac && window.STATE.rbac[userRole]) {
-        canRunAgents = window.STATE.rbac[userRole].runAgents !== false;
-    }
-    if(!canRunAgents) { chipsRow.style.display='none'; return; }
-
-    // Filter agents by surface (no surfaces field = show everywhere)
-    var HIDDEN_AGENTS = ['a2']; // Inbox Triage hidden from member-level chips
-    var agents = (window.AGENTS||[]).filter(function(a) {
-        if(a.status === 'inactive') return false;
-        if(HIDDEN_AGENTS.indexOf(a.id) > -1) return false;
-        if(!a.surfaces || !a.surfaces.length) return true;
-        return a.surfaces.indexOf(currentSurface) > -1 || a.surfaces.indexOf('all') > -1;
-    });
-    // Also filter by tool access — if role lacks tool_access for all of agent's tools, skip
-    if(window.STATE && window.STATE.rbac && window.STATE.rbac[userRole]) {
-        var roleToolAccess = (window.STATE.rbac[userRole].toolAccess || '').toLowerCase();
-        // care_manager has FHIR read + Portal read — block RCM/write tools
-        if(roleToolAccess !== 'all tools') {
-            var blockedTools = ['rcm_query','portal_messaging_write'];
-            agents = agents.filter(function(a) {
-                if(!a.tools || !a.tools.length) return true;
-                // Hide agent if it has ANY blocked tool and no non-blocked tools
-                var hasBlockedTool = a.tools.some(function(t){ return blockedTools.indexOf(t) > -1; });
-                var hasAllowedTool = a.tools.some(function(t){ return blockedTools.indexOf(t) === -1; });
-                // If all tools are blocked → hide. If any blocked + any allowed → hide (requires elevated access).
-                // Only show if zero blocked tools.
-                return !hasBlockedTool;
-            });
-        }
-    }
-    if(!agents.length) { chipsRow.style.display='none'; return; }
-
-    // Sort: primary (tab match) first, then secondary
-    agents.sort(function(a, b) {
-        var pa = window.getAgentTabPriority(a, currentSurface, currentTab);
-        var pb = window.getAgentTabPriority(b, currentSurface, currentTab);
-        if(pa === 'primary' && pb !== 'primary') return -1;
-        if(pa !== 'primary' && pb === 'primary') return 1;
-        return 0;
-    });
-
-    var defaultIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>';
-
-    chipsRow.style.display = 'flex';
-    chipsRow.innerHTML = agents.map(function(a) {
-        var isDraft = a.status==='draft';
-        var isReview = a.status==='review';
-        var priority = window.getAgentTabPriority(a, currentSurface, currentTab);
-        var isPrimary = priority === 'primary';
-        var clickQuery = window.getAgentClickQuery(a, currentSurface, currentTab);
-
-        var cls = 'ai-chip';
-        if(isDraft) cls += ' ai-chip--draft';
-        else if(isReview) cls += ' ai-chip--review';
-        else if(isPrimary) cls += ' ai-chip--primary';
-
-        var badge = isReview ? '<span class="ai-chip-badge">Review</span>'
-                  : isDraft ? '<span class="ai-chip-badge" style="background:#e2e8f0;color:#64748b;">Draft</span>' : '';
-        var icon = _agentIcons[a.id] || defaultIcon;
-        var chipTitle = isDraft ? 'Not yet published' : isReview ? 'Pending approval' : clickQuery;
-
-        return '<button class="'+cls+'" data-agent-id="'+a.id+'" data-click-query="'+clickQuery.replace(/"/g,'&quot;')+'" title="'+chipTitle.replace(/"/g,'&quot;')+'">'
-            + a.name + badge + '</button>';
-    }).join('');
+    if (chipsRow) chipsRow.style.display = 'none';
 };
 
 window.renderWelcomeScreen = function() {
     if(_originalRenderWelcomeScreen) _originalRenderWelcomeScreen();
     var member = window.currentMember;
-    // Update chips row
-    window.renderAgentChips();
-    // Update contextual placeholder
+    var ctx = (typeof aiCopilotState !== 'undefined' && aiCopilotState.currentContext) || 'dashboard';
+    var detailLabel = (typeof aiCopilotState !== 'undefined' && aiCopilotState._detailLabel) || '';
+
+    // Update input placeholder based on context
     var inp = document.getElementById('aiInputField');
-    if(inp) inp.placeholder = member
-        ? 'What do you need for ' + member.name.split(' ')[0] + '?'
-        : 'Ask about your caseload...';
+    if (inp) {
+        var placeholders = {
+            'members':          'Ask about your caseload…',
+            'dashboard':        'Ask about your caseload…',
+            'memberDetails':    'Ask about your caseload…',
+            'tasks':            'Ask about tasks…',
+            'service-notes':    'Ask about service notes…',
+            'referrals':        'Ask about referrals…',
+            'referral-detail':  'Ask about this referral…'
+        };
+        inp.placeholder = member
+            ? 'What do you need for ' + member.name.split(' ')[0] + '?'
+            : (placeholders[ctx] || 'Ask about your caseload…');
+    }
+
+    // For referral-detail: re-render messages area with referral-specific prompts
+    if (!member && ctx === 'referral-detail' && detailLabel) {
+        var container = document.getElementById('aiMessages');
+        if (container) {
+            container.innerHTML =
+                '<div style="padding:18px 16px 10px;">' +
+                    '<div style="font-size:16px;font-weight:600;color:#0f172a;margin-bottom:4px;">How can I help?</div>' +
+                    '<div style="font-size:12px;color:#64748b;">' + detailLabel + '</div>' +
+                '</div>' +
+                '<div style="padding:0 14px 10px;">' +
+                    '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px;">Suggested</div>' +
+                    ['Summarize this referral', 'What is the current status?', 'Which facilities have responded?', 'What are the next steps?'].map(function(t) {
+                        return '<button onclick="var i=document.getElementById(\'aiInputField\');if(i){i.value=\'' + t + '\';i.focus();}" style="display:block;width:100%;text-align:left;padding:8px 11px;margin-bottom:5px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;color:#1e293b;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background=\'#f0f0ff\';this.style.borderColor=\'#c8c6f0\'" onmouseout="this.style.background=\'#fff\';this.style.borderColor=\'#e2e8f0\'">' + t + '</button>';
+                    }).join('') +
+                '</div>';
+        }
+    }
+
+    // Update context chip immediately
+    var chip = document.getElementById('aiContextChip');
+    var textEl = document.getElementById('aiContextChipText');
+    if (chip && textEl) {
+        if (member) {
+            var tab = typeof window.getCurrentTab === 'function' ? window.getCurrentTab() : null;
+            var tabLabels = {
+                'member-tab__dashboard':'Member Dashboard','member-tab__details':'Member Details',
+                'member-tab__timeline':'Timeline','member-tab__insurance':'Insurance',
+                'member-tab__screenings':'Screenings & Assessments','member-tab__bio-psycho':'Bio/Psycho/Social',
+                'member-tab__health-history':'Health History','member-tab__population':'Population Insights',
+                'member-tab__activity':'Activity History','member-tab__careteam':'Care Team','member-tab__careplans':'Care Plans'
+            };
+            var tabLabel = (tab && tabLabels[tab]) ? tabLabels[tab] : 'Member Dashboard';
+            textEl.textContent = member.name.split(' ')[0] + ' · ' + tabLabel;
+            chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 8px 3px 6px;background:#f0f0ff;border:1px solid #e0deff;border-radius:12px;font-size:11px;font-weight:500;color:#2d2d52;white-space:nowrap;flex-shrink:0;max-width:180px;cursor:default;';
+        } else {
+            var ctxLabels = {
+                'dashboard':'Caseload','memberDetails':'Caseload','members':'All Members',
+                'referrals':'All Referrals','tasks':'All Tasks','service-notes':'All Service Notes',
+                'referral-detail': detailLabel || 'Referral Detail'
+            };
+            textEl.textContent = ctxLabels[ctx] || 'Caseload';
+            chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 8px 3px 6px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;font-size:11px;font-weight:500;color:#475569;white-space:nowrap;flex-shrink:0;max-width:180px;cursor:default;';
+        }
+        chip.style.display = 'inline-flex';
+        var svg = chip.querySelector('svg');
+        if (svg) svg.setAttribute('stroke', member ? '#2d2d52' : '#94a3b8');
+    }
+
+    // Show/hide suggestions toggle
+    var sugBtn = document.getElementById('aiSuggestionsToggleBtn');
+    if (sugBtn) sugBtn.style.display = member ? 'flex' : 'none';
 };
 
 // -- DELEGATION ----------------------------------------------------
@@ -51458,6 +52169,46 @@ try{
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
+
+            // Update CoPilot context chip for referral detail screens
+            if (typeof aiCopilotState !== 'undefined') {
+                var textEl = document.getElementById('aiContextChipText');
+                var chip = document.getElementById('aiContextChip');
+                var inp = document.getElementById('aiInputField');
+                if (screenId === 'screen-details' || screenId === 'screen-inbound-details') {
+                    var idEl = document.getElementById('detail-id');
+                    var refLabel = screenId === 'screen-details'
+                        ? (idEl ? 'REF-' + idEl.textContent : 'Referral Detail')
+                        : 'Inbound Referral';
+                    aiCopilotState.currentContext = 'referral-detail';
+                    aiCopilotState._detailLabel = refLabel;
+                    aiCopilotState.isInConversation = false;
+                    if (aiCopilotState.isOpen && typeof renderWelcomeScreen === 'function') {
+                        renderWelcomeScreen();
+                    } else {
+                        // Panel closed — just update chip directly for when it opens
+                        if (textEl && chip) {
+                            textEl.textContent = refLabel;
+                            chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 8px 3px 6px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;font-size:11px;font-weight:500;color:#475569;white-space:nowrap;flex-shrink:0;max-width:180px;cursor:default;';
+                            var svg = chip.querySelector('svg'); if (svg) svg.setAttribute('stroke','#94a3b8');
+                        }
+                    }
+                    if (inp) inp.placeholder = 'Ask about this referral…';
+                } else if (screenId === 'screen-referrals-list' || screenId === 'screen-list') {
+                    aiCopilotState.currentContext = 'referrals';
+                    aiCopilotState._detailLabel = null;
+                    aiCopilotState.isInConversation = false;
+                    if (aiCopilotState.isOpen && typeof renderWelcomeScreen === 'function') {
+                        renderWelcomeScreen();
+                    } else {
+                        if (textEl && chip) {
+                            textEl.textContent = 'All Referrals';
+                            chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 8px 3px 6px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;font-size:11px;font-weight:500;color:#475569;white-space:nowrap;flex-shrink:0;max-width:180px;cursor:default;';
+                        }
+                    }
+                    if (inp) inp.placeholder = 'Ask about referrals…';
+                }
+            }
             
             if (screenId === 'screen-inbound-details') {
                 // Inbound detail - no extra init needed
@@ -74394,6 +75145,37 @@ window.frClearLineFilter = function() {
     if (typeof renderPMFacilityList !== "undefined") window.renderPMFacilityList = renderPMFacilityList;
     if (typeof renderReferralConfig !== "undefined") window.renderReferralConfig = renderReferralConfig;
     if (typeof viewReferralDetails !== "undefined") window.viewReferralDetails = viewReferralDetails;
+
+    // ── CoPilot: wrap viewReferralDetails to update context chip ──
+    (function() {
+        var _orig = window.viewReferralDetails;
+        window.viewReferralDetails = function(id, openTab) {
+            var result = _orig ? _orig.call(this, id, openTab) : undefined;
+            // Update CoPilot after detail page renders
+            setTimeout(function() {
+                if (typeof aiCopilotState === 'undefined') return;
+                var refLabel = 'REF-' + id;
+                aiCopilotState.currentContext = 'referral-detail';
+                aiCopilotState._detailLabel = refLabel;
+                aiCopilotState.isInConversation = false;
+                // Update chip directly
+                var textEl = document.getElementById('aiContextChipText');
+                var chip = document.getElementById('aiContextChip');
+                var inp = document.getElementById('aiInputField');
+                if (textEl) textEl.textContent = refLabel;
+                if (chip) {
+                    chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 8px 3px 6px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;font-size:11px;font-weight:500;color:#475569;white-space:nowrap;flex-shrink:0;max-width:180px;cursor:default;';
+                    var svg = chip.querySelector('svg'); if (svg) svg.setAttribute('stroke','#94a3b8');
+                }
+                if (inp) inp.placeholder = 'Ask about this referral…';
+                // Re-render panel if open
+                if (aiCopilotState.isOpen && typeof renderWelcomeScreen === 'function') {
+                    renderWelcomeScreen();
+                }
+            }, 50);
+            return result;
+        };
+    })();
     if (typeof viewInboundDetail !== "undefined") window.viewInboundDetail = viewInboundDetail;
     if (typeof editReferral !== "undefined") window.editReferral = editReferral;
     if (typeof openReopenReferral !== "undefined") window.openReopenReferral = openReopenReferral;
@@ -76128,7 +76910,8 @@ window.frClearLineFilter = function() {
     active: false,
     member: null,
     ctx: null,
-    recommendation: null   // the AI's single recommendation
+    recommendation: null,   // the AI's single recommendation
+    maxDistance: null        // remembered distance preference (miles), null = no filter
   };
 
   // ─── DATA READERS ─────────────────────────────────────────
@@ -76247,12 +77030,12 @@ window.frClearLineFilter = function() {
     };
   }
 
-  function findFacilities(slKey, limit) {
+  function findFacilities(slKey, limit, maxMiles) {
     var db = window._providersDB;
     if (!db || !db.length) return [];
+    var distLimit = maxMiles || state.maxDistance || null;
     var results = [];
     db.forEach(function(prov) {
-      // Match by serviceLines array (kebab keys) or category text
       var sl = prov.serviceLines || [];
       var cat = (prov.category || '').toLowerCase();
       var matched = sl.some(function(s){ return s.toLowerCase().includes(slKey.split('-')[0]); }) ||
@@ -76260,11 +77043,13 @@ window.frClearLineFilter = function() {
       if (!matched) return;
       (prov.facilities || []).forEach(function(fac) {
         if (fac.acceptingPatients === false) return;
+        var dist = fac.distance || prov.distance || 0;
+        if (distLimit && dist > distLimit) return; // distance filter
         results.push({
           providerName: prov.name,
           facilityName: fac.name || prov.name,
           address:      fac.address || prov.address || '',
-          distance:     fac.distance || prov.distance || 0,
+          distance:     dist,
           network:      prov.network || 'Unknown',
           npi:          prov.npi || '',
           category:     prov.category || '',
@@ -76274,7 +77059,7 @@ window.frClearLineFilter = function() {
       });
     });
     results.sort(function(a,b){ return a.distance - b.distance; });
-    return results.slice(0, limit);
+    return results.slice(0, limit || 5);
   }
 
   // ─── CSS ──────────────────────────────────────────────────
@@ -76383,7 +77168,21 @@ window.frClearLineFilter = function() {
     // Facilities list
     var facHtml = '';
     if (rec.facilities.length) {
-      facHtml = '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Top facilities</div>' +
+      var distLabel = state.maxDistance ? 'Within ' + state.maxDistance + ' mi' : 'All distances';
+      facHtml = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">' +
+          '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Top facilities</div>' +
+          '<div style="display:flex;align-items:center;gap:5px;">' +
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 00-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 00-8-8z"/></svg>' +
+            '<select onchange="window.ReferralAgent._setDistance(this.value)" style="font-size:11px;border:1px solid #e2e8f0;border-radius:5px;padding:2px 6px;color:#475569;background:#fff;cursor:pointer;font-family:inherit;">' +
+              '<option value=""' + (!state.maxDistance ? ' selected' : '') + '>Any distance</option>' +
+              '<option value="5"' + (state.maxDistance === 5 ? ' selected' : '') + '>Within 5 mi</option>' +
+              '<option value="10"' + (state.maxDistance === 10 ? ' selected' : '') + '>Within 10 mi</option>' +
+              '<option value="15"' + (state.maxDistance === 15 ? ' selected' : '') + '>Within 15 mi</option>' +
+              '<option value="25"' + (state.maxDistance === 25 ? ' selected' : '') + '>Within 25 mi</option>' +
+              '<option value="50"' + (state.maxDistance === 50 ? ' selected' : '') + '>Within 50 mi</option>' +
+            '</select>' +
+          '</div>' +
+        '</div>' +
         '<div class="ra-fac-list">' +
         rec.facilities.map(function(f){
           var net = f.network === 'In Network' ?
@@ -76505,6 +77304,7 @@ window.frClearLineFilter = function() {
       injectCSS();
       state.active = true;
       state.recommendation = null;
+      state.maxDistance = null; // reset distance preference for new session
 
       if (typeof aiCopilotState !== 'undefined') {
         aiCopilotState.isInConversation = true;
@@ -76564,6 +77364,26 @@ window.frClearLineFilter = function() {
 
     showAdjust: function() {
       renderAdjustPanel();
+    },
+
+    _setDistance: function(val) {
+      // Remember the distance preference for this session
+      state.maxDistance = val ? parseInt(val) : null;
+      if (!state.recommendation) return;
+      // Re-find facilities with new distance filter
+      var newFacilities = findFacilities(state.recommendation.slKey, 5);
+      state.recommendation.facilities = newFacilities;
+      // Re-render recommendation
+      var msgs = _msgs();
+      if (msgs) {
+        var last = msgs.querySelector('.ra-msg:last-child');
+        if (last) last.remove();
+      }
+      renderRecommendation(state.ctx, state.recommendation);
+      // Show feedback if no results
+      if (!newFacilities.length && state.maxDistance) {
+        _bubble('<div style="font-size:12px;color:#94a3b8;padding:4px 0;">No in-network facilities found within ' + state.maxDistance + ' miles. Try a wider radius or add recipients manually.</div>');
+      }
     },
 
     _changeServiceLine: function(slName) {
@@ -77777,4 +78597,782 @@ console.log('[ReferralAgent v3] Loaded — single recommendation, no wizard.');
   console.log('[SevAI Placements] Runtime injector loaded.');
 
 })();
+</script>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// VIDA COPILOT ENHANCEMENTS
+// 1. Visible context chip  2. Rich empty state  3. Thumbs up/down
+// 4. Copy response  5. Named processing stages  6. History labels
+// ══════════════════════════════════════════════════════════════════════════════
+
+(function() {
+
+// ── TAB LABEL MAP ─────────────────────────────────────────────────────────────
+var TAB_LABELS = {
+    'member-tab__dashboard':    'Member Dashboard',
+    'member-tab__details':      'Member Details',
+    'member-tab__timeline':     'Timeline',
+    'member-tab__insurance':    'Insurance',
+    'member-tab__screenings':   'Screenings & Assessments',
+    'member-tab__bio-psycho':   'Bio/Psycho/Social',
+    'member-tab__health-history': 'Health History',
+    'member-tab__population':   'Population Insights',
+    'member-tab__activity':     'Activity History',
+    'member-tab__careteam':     'Care Team',
+    'member-tab__careplans':    'Care Plans'
+};
+
+// ── 1. CONTEXT CHIP ───────────────────────────────────────────────────────────
+// Shows member name + current tab as a chip in the input area
+// Updates whenever the member or tab changes
+
+function injectContextChip() {
+    var wrapper = document.querySelector('.ai-input-wrapper');
+    if (!wrapper || document.getElementById('aiContextChip')) return;
+
+    var chip = document.createElement('div');
+    chip.id = 'aiContextChip';
+    chip.style.cssText = 'display:none;align-items:center;gap:4px;padding:3px 8px 3px 6px;background:#f0f0ff;border:1px solid #e0deff;border-radius:12px;font-size:11px;font-weight:500;color:#2d2d52;white-space:nowrap;flex-shrink:0;max-width:160px;cursor:default;';
+    chip.innerHTML =
+        '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#2d2d52" stroke-width="2.5" style="flex-shrink:0;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>' +
+        '<span id="aiContextChipText" style="overflow:hidden;text-overflow:ellipsis;"></span>';
+
+    // Insert before the suggestions toggle button or as first child
+    var sugBtn = document.getElementById('aiSuggestionsToggleBtn');
+    if (sugBtn) {
+        wrapper.insertBefore(chip, sugBtn);
+    } else {
+        wrapper.insertBefore(chip, wrapper.firstChild);
+    }
+}
+
+function updateContextChip() {
+    var chip = document.getElementById('aiContextChip');
+    var textEl = document.getElementById('aiContextChipText');
+    if (!chip || !textEl) return;
+
+    var member = window.currentMember;
+
+    if (member) {
+        // Member-level: show name + current tab
+        var tab = typeof window.getCurrentTab === 'function' ? window.getCurrentTab() : null;
+        var tabLabel = (tab && TAB_LABELS[tab]) ? TAB_LABELS[tab] : 'Member Dashboard';
+        var firstName = member.name.split(' ')[0];
+        textEl.textContent = firstName + ' · ' + tabLabel;
+        chip.title = member.name + ' — ' + tabLabel;
+        chip.style.display = 'inline-flex';
+    } else {
+        // List-level: show current page context
+        var context = (typeof aiCopilotState !== 'undefined' && aiCopilotState.currentContext) || 'dashboard';
+        var contextLabels = {
+            'dashboard':     'Caseload',
+            'memberDetails': 'Caseload',
+            'referrals':     'All Referrals',
+            'tasks':         'All Tasks',
+            'service-notes': 'All Service Notes'
+        };
+        var label = contextLabels[context] || 'Caseload';
+        textEl.textContent = label;
+        chip.title = label + ' — no member selected';
+        chip.style.display = 'inline-flex';
+        // Use a neutral grey style for list-level
+        chip.style.background = '#f8fafc';
+        chip.style.borderColor = '#e2e8f0';
+        chip.style.color = '#475569';
+        chip.querySelector('svg').setAttribute('stroke', '#94a3b8');
+    }
+
+    // Reset to purple when on member
+    if (member) {
+        chip.style.background = '#f0f0ff';
+        chip.style.borderColor = '#e0deff';
+        chip.style.color = '#2d2d52';
+        chip.querySelector('svg').setAttribute('stroke', '#2d2d52');
+    }
+}
+
+// ── 2. RICH EMPTY STATE ───────────────────────────────────────────────────────
+// Replaces generic subtitle with member-specific context
+
+function enrichEmptyState() {
+    var member = window.currentMember;
+    var msgContainer = document.getElementById('aiMessages');
+    if (!msgContainer) return;
+
+    if (member) {
+        // Member-level: replace generic subtitle with member-specific cues
+        var paragraphs = msgContainer.querySelectorAll('div');
+        paragraphs.forEach(function(p) {
+            if (p.children.length === 0 && p.textContent && p.textContent.trim() === 'Type a question or tap ? for suggestions.') {
+                var riskBadge = '';
+                if (member.riskCategory === 'High') {
+                    riskBadge = '<span style="display:inline-flex;align-items:center;gap:3px;background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:8px;font-size:10px;font-weight:600;padding:1px 6px;margin-left:4px;">● High Risk</span>';
+                } else if (member.riskCategory === 'Medium') {
+                    riskBadge = '<span style="display:inline-flex;align-items:center;gap:3px;background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;border-radius:8px;font-size:10px;font-weight:600;padding:1px 6px;margin-left:4px;">● Medium Risk</span>';
+                }
+                var dd = member.dashboardData || {};
+                var openTasks = (dd.tasks || []).filter(function(t) { return t.status !== 'Completed'; }).length;
+                var openCareGaps = (dd.careGaps || []).filter(function(g) { return g.status === 'Open'; }).length;
+                var hasADT = ((dd.adts || []).concat((member.healthHistory || {}).adts || [])).some(function(a) { return a.acknowledged === 'No'; });
+                var consentPending = ['To Obtain Consent','Re-consent Required'].indexOf(member.consentStatus) > -1;
+                var cues = [];
+                if (hasADT) cues.push('recent ADT event');
+                if (consentPending) cues.push('consent pending');
+                if (openCareGaps > 0) cues.push(openCareGaps + ' open care gap' + (openCareGaps > 1 ? 's' : ''));
+                if (openTasks > 0) cues.push(openTasks + ' open task' + (openTasks > 1 ? 's' : ''));
+                var subtitleText = cues.length > 0
+                    ? cues.slice(0, 2).join(' · ')
+                    : 'What do you need for ' + member.name.split(' ')[0] + '?';
+                p.innerHTML = '<span style="color:#64748b;font-size:12px;">' + subtitleText + '</span>' + riskBadge;
+            }
+        });
+    } else {
+        // List-level: enrich the caseload welcome heading with live stats
+        var headingEl = msgContainer.querySelector('.ai-welcome-heading');
+        var subtitleEl = headingEl && headingEl.nextElementSibling;
+        if (subtitleEl && subtitleEl.textContent === 'Open a member profile to start a member-specific chat.') {
+            var total = (typeof membersDB !== 'undefined') ? membersDB.length : 0;
+            var highRisk = (typeof membersDB !== 'undefined') ? membersDB.filter(function(m) { return m.riskCategory === 'High'; }).length : 0;
+            var consentNeeded = (typeof membersDB !== 'undefined') ? membersDB.filter(function(m) { return ['To Obtain Consent','Re-consent Required'].indexOf(m.consentStatus) > -1; }).length : 0;
+            var stats = [];
+            if (total > 0) stats.push(total + ' members');
+            if (highRisk > 0) stats.push(highRisk + ' high risk');
+            if (consentNeeded > 0) stats.push(consentNeeded + ' consent pending');
+            if (stats.length > 0) {
+                subtitleEl.innerHTML = stats.map(function(s, i) {
+                    var colors = ['#2d2d52','#991b1b','#9a3412'];
+                    return '<span style="color:' + (colors[i]||'#64748b') + ';font-weight:' + (i===0?'500':'400') + ';">' + s + '</span>';
+                }).join('<span style="color:#e2e8f0;margin:0 4px;">·</span>');
+            }
+        }
+    }
+}
+
+// ── 3 & 4. THUMBS + COPY ON RESPONSES ────────────────────────────────────────
+// Adds copy + thumbs up/down to every AI response block after it renders
+
+function addResponseActions(responseBlock) {
+    if (!responseBlock || responseBlock.querySelector('.vida-response-actions')) return;
+
+    var actions = document.createElement('div');
+    actions.className = 'vida-response-actions';
+    actions.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;flex-wrap:wrap;';
+
+    actions.innerHTML =
+        // Copy
+        '<button class="vida-action-btn" title="Copy response" onclick="window.vidaCopyResponse(this)" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:none;border:1px solid #e2e8f0;border-radius:6px;font-size:11px;color:#64748b;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#2d2d52\';this.style.color=\'#2d2d52\'" onmouseout="this.style.borderColor=\'#e2e8f0\';this.style.color=\'#64748b\'">' +
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+            'Copy' +
+        '</button>' +
+        // Retry/regenerate
+        '<button class="vida-action-btn" title="Regenerate response" onclick="window.vidaRegenerate(this)" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:none;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#2d2d52\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.65"/></svg>' +
+        '</button>' +
+        // Thumbs up
+        '<button class="vida-action-btn vida-thumb" title="Helpful" onclick="window.vidaThumb(this,true)" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:none;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#22c55e\'" onmouseout="if(!this.dataset.active)this.style.borderColor=\'#e2e8f0\'">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/></svg>' +
+        '</button>' +
+        // Thumbs down
+        '<button class="vida-action-btn vida-thumb" title="Not helpful" onclick="window.vidaThumb(this,false)" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:none;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#ef4444\'" onmouseout="if(!this.dataset.active)this.style.borderColor=\'#e2e8f0\'">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/></svg>' +
+        '</button>';
+
+    responseBlock.appendChild(actions);
+
+    // Generate follow-up chips after a short delay (so response is fully rendered)
+    setTimeout(function() { addFollowUpChips(responseBlock); }, 300);
+}
+
+window.vidaCopyResponse = function(btn) {
+    var block = btn.closest('.ai-response-block, .ai-conv-assistant');
+    if (!block) return;
+    var text = block.innerText.replace(/Copy\s*Helpful\s*Not helpful/gi, '').trim();
+    navigator.clipboard.writeText(text).then(function() {
+        var orig = btn.innerHTML;
+        btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied';
+        btn.style.borderColor = '#22c55e';
+        btn.style.color = '#22c55e';
+        setTimeout(function() {
+            btn.innerHTML = orig;
+            btn.style.borderColor = '#e2e8f0';
+            btn.style.color = '#64748b';
+        }, 2000);
+    });
+};
+
+window.vidaThumb = function(btn, isUp) {
+    // Reset sibling
+    var siblings = btn.parentElement.querySelectorAll('.vida-thumb');
+    siblings.forEach(function(s) {
+        delete s.dataset.active;
+        s.style.borderColor = '#e2e8f0';
+        s.style.background = 'none';
+        s.querySelector('svg').setAttribute('stroke', '#64748b');
+    });
+    // Activate
+    btn.dataset.active = '1';
+    if (isUp) {
+        btn.style.borderColor = '#22c55e';
+        btn.style.background = '#f0fdf4';
+        btn.querySelector('svg').setAttribute('stroke', '#22c55e');
+    } else {
+        btn.style.borderColor = '#ef4444';
+        btn.style.background = '#fff5f5';
+        btn.querySelector('svg').setAttribute('stroke', '#ef4444');
+    }
+};
+
+// ── REGENERATE ────────────────────────────────────────────────────────────────
+window.vidaRegenerate = function(btn) {
+    // Find the last user message before this response and re-send it
+    var turn = btn.closest('.ai-chat-turn');
+    if (!turn) return;
+    // Walk backwards to find the previous user turn
+    var prev = turn.previousElementSibling;
+    while (prev && !prev.querySelector('.ai-conv-user-bubble')) {
+        prev = prev.previousElementSibling;
+    }
+    if (!prev) return;
+    var userBubble = prev.querySelector('.ai-conv-user-bubble');
+    if (!userBubble) return;
+    var userText = userBubble.textContent.trim();
+    if (!userText) return;
+
+    // Remove the current response turn
+    turn.remove();
+
+    // Re-inject the user text and re-send
+    var inp = document.getElementById('aiInputField');
+    if (inp) {
+        inp.value = userText;
+        if (typeof sendAIMessage === 'function') sendAIMessage();
+    }
+};
+
+// ── FOLLOW-UP CHIPS ───────────────────────────────────────────────────────────
+// Generate contextual follow-up suggestions after each AI response
+// Uses Anthropic API to generate 3 relevant follow-up questions
+
+function addFollowUpChips(responseBlock) {
+    if (!responseBlock) return;
+    // Don't add to error/stopped responses
+    var responseText = responseBlock.innerText || '';
+    if (responseText.length < 50) return;
+    if (responseBlock.querySelector('.vida-followup-chips')) return;
+
+    var member = window.currentMember;
+    var context = member ? member.name.split(' ')[0] + "'s record" : 'your caseload';
+
+    // Generate follow-ups via Anthropic API
+    var prompt = 'Based on this AI response about ' + context + ', suggest exactly 3 short follow-up questions a Care Manager would naturally ask next. Return ONLY a JSON array of 3 strings, no other text.\n\nResponse:\n' + responseText.slice(0, 500);
+
+    fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 200,
+            system: 'You generate follow-up question suggestions for a healthcare care management AI assistant. Return ONLY a valid JSON array of 3 short question strings (max 8 words each). No markdown, no explanation.',
+            messages: [{ role: 'user', content: prompt }]
+        })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+        var text = (data.content && data.content[0] && data.content[0].text) || '';
+        var clean = text.replace(/```json|```/g, '').trim();
+        var questions;
+        try { questions = JSON.parse(clean); } catch(e) { return; }
+        if (!Array.isArray(questions) || questions.length === 0) return;
+
+        var chipsDiv = document.createElement('div');
+        chipsDiv.className = 'vida-followup-chips';
+        chipsDiv.style.cssText = 'margin-top:10px;padding-top:8px;border-top:1px solid #f8fafc;';
+        chipsDiv.innerHTML = '<div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Follow up</div>' +
+            questions.slice(0,3).map(function(q) {
+                var safe = q.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+                return '<button onclick="var i=document.getElementById(\'aiInputField\');if(i){i.value=\'' + safe + '\';i.focus();}" ' +
+                    'style="display:block;width:100%;text-align:left;padding:6px 10px;margin-bottom:4px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;font-size:11.5px;color:#374151;cursor:pointer;font-family:inherit;transition:all 0.15s;" ' +
+                    'onmouseover="this.style.background=\'#f0f0ff\';this.style.borderColor=\'#c8c6f0\'" ' +
+                    'onmouseout="this.style.background=\'#f8fafc\';this.style.borderColor=\'#e2e8f0\'">' +
+                    q + '</button>';
+            }).join('');
+
+        responseBlock.appendChild(chipsDiv);
+    }).catch(function() { /* silently fail */ });
+}
+
+// ── FILE ATTACHMENT ───────────────────────────────────────────────────────────
+window.vidaOpenAttachment = function() {
+    var inp = document.getElementById('vidaFileInput');
+    if (!inp) {
+        inp = document.createElement('input');
+        inp.type = 'file';
+        inp.id = 'vidaFileInput';
+        inp.accept = '.pdf,.png,.jpg,.jpeg,.csv,.txt,.doc,.docx';
+        inp.style.display = 'none';
+        inp.addEventListener('change', function() {
+            if (inp.files && inp.files[0]) {
+                window.vidaHandleFile(inp.files[0]);
+                inp.value = '';
+            }
+        });
+        document.body.appendChild(inp);
+    }
+    inp.click();
+};
+
+window.vidaHandleFile = function(file) {
+    var MAX_MB = 5;
+    if (file.size > MAX_MB * 1024 * 1024) {
+        alert('File too large. Maximum size is ' + MAX_MB + 'MB.');
+        return;
+    }
+    // Show file chip in input area
+    var wrapper = document.querySelector('.ai-input-wrapper');
+    if (!wrapper) return;
+
+    var existing = document.getElementById('vidaFileChip');
+    if (existing) existing.remove();
+
+    var chip = document.createElement('div');
+    chip.id = 'vidaFileChip';
+    chip.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:3px 8px 3px 7px;background:#f0f0ff;border:1px solid #c8c6f0;border-radius:8px;font-size:11px;color:#2d2d52;flex-shrink:0;max-width:160px;';
+    chip.innerHTML =
+        '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#2d2d52" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+        '<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + file.name.slice(0,22) + (file.name.length > 22 ? '…' : '') + '</span>' +
+        '<button onclick="document.getElementById(\'vidaFileChip\').remove();window._vidaAttachedFile=null;" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:14px;line-height:1;padding:0;margin-left:2px;">×</button>';
+
+    // Store file reference
+    window._vidaAttachedFile = file;
+
+    // Insert before input
+    var inputField = document.getElementById('aiInputField');
+    if (inputField) wrapper.insertBefore(chip, inputField);
+
+    // Pre-fill input with file context hint
+    var inputEl = document.getElementById('aiInputField');
+    if (inputEl && !inputEl.value) {
+        inputEl.placeholder = 'Ask about ' + file.name + '…';
+        inputEl.focus();
+    }
+};
+
+// ── INJECT ATTACHMENT BUTTON INTO INPUT ──────────────────────────────────────
+function injectAttachmentBtn() {
+    var wrapper = document.querySelector('.ai-input-wrapper');
+    if (!wrapper || document.getElementById('vidaAttachBtn')) return;
+
+    var btn = document.createElement('button');
+    btn.id = 'vidaAttachBtn';
+    btn.title = 'Attach file (PDF, image, CSV)';
+    btn.onclick = window.vidaOpenAttachment;
+    btn.style.cssText = 'background:none;border:none;cursor:pointer;padding:4px 5px;color:#94a3b8;flex-shrink:0;border-radius:5px;transition:all 0.15s;display:flex;align-items:center;';
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>';
+    btn.onmouseover = function() { this.style.color = '#2d2d52'; this.style.background = '#f1f5f9'; };
+    btn.onmouseout = function() { this.style.color = '#94a3b8'; this.style.background = 'none'; };
+
+    // Insert as first child of input wrapper (before context chip)
+    wrapper.insertBefore(btn, wrapper.firstChild);
+}
+
+// ── FEEDBACK LINK ─────────────────────────────────────────────────────────────
+function injectFeedbackLink() {
+    var panel = document.getElementById('aiCopilotPanel');
+    if (!panel || document.getElementById('vidaFeedbackBar')) return;
+
+    var bar = document.createElement('div');
+    bar.id = 'vidaFeedbackBar';
+    bar.style.cssText = 'display:flex;align-items:center;justify-content:center;padding:6px 14px;border-top:1px solid #f1f5f9;flex-shrink:0;';
+    bar.innerHTML = '<button onclick="window.vidaSendFeedback()" style="background:none;border:none;cursor:pointer;font-size:11px;color:#94a3b8;font-family:inherit;padding:2px 8px;border-radius:4px;transition:color 0.15s;" onmouseover="this.style.color=\'#475569\'" onmouseout="this.style.color=\'#94a3b8\'">Send feedback</button>';
+
+    // Insert before the input area (last child is input)
+    var inputArea = panel.querySelector('.ai-copilot-input');
+    if (inputArea) panel.insertBefore(bar, inputArea);
+}
+
+window.vidaSendFeedback = function() {
+    var modal = document.createElement('div');
+    modal.id = 'vidaFeedbackModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100000;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML =
+        '<div style="background:#fff;border-radius:12px;padding:24px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">' +
+            '<div style="font-size:14px;font-weight:600;color:#1e293b;margin-bottom:8px;">Send feedback</div>' +
+            '<div style="font-size:12px;color:#64748b;margin-bottom:12px;">Help us improve Vida CoPilot for care managers.</div>' +
+            '<textarea id="vidaFeedbackText" style="width:100%;height:90px;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:12.5px;color:#1e293b;resize:none;outline:none;font-family:inherit;box-sizing:border-box;" placeholder="What could be better? What\'s working well?"></textarea>' +
+            '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">' +
+                '<button id="vidaFeedbackCancel" style="padding:7px 16px;border:1px solid #e2e8f0;border-radius:7px;background:#fff;font-size:12.5px;cursor:pointer;font-family:inherit;">Cancel</button>' +
+                '<button id="vidaFeedbackSend" style="padding:7px 16px;background:#282460;color:#fff;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;">Send</button>' +
+            '</div>' +
+        '</div>';
+    document.body.appendChild(modal);
+
+    function closeModal() {
+        var m = document.getElementById('vidaFeedbackModal');
+        if (m) m.remove();
+    }
+
+    document.getElementById('vidaFeedbackCancel').addEventListener('click', closeModal);
+
+    document.getElementById('vidaFeedbackSend').addEventListener('click', function() {
+        var t = document.getElementById('vidaFeedbackText');
+        if (!t || !t.value.trim()) { if (t) t.focus(); return; }
+        var btn = document.getElementById('vidaFeedbackSend');
+        btn.textContent = 'Sent ✓';
+        btn.style.background = '#22c55e';
+        btn.disabled = true;
+        setTimeout(closeModal, 1200);
+    });
+
+    // Close on backdrop click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
+
+    setTimeout(function() { var t = document.getElementById('vidaFeedbackText'); if (t) t.focus(); }, 100);
+};
+
+// ── 5. NAMED PROCESSING STAGES ────────────────────────────────────────────────
+// Updates the "Thinking..." text with named stages
+
+var _stageIntervals = {};
+
+function startNamedStages(thinkingTextEl) {
+    if (!thinkingTextEl) return;
+    var member = window.currentMember;
+
+    var stages;
+    if (member) {
+        var firstName = member.name.split(' ')[0];
+        stages = [
+            'Reviewing request…',
+            'Reading ' + firstName + '\'s record…',
+            'Analyzing clinical context…',
+            'Preparing response…'
+        ];
+    } else {
+        stages = [
+            'Reviewing request…',
+            'Searching caseload data…',
+            'Analyzing patterns…',
+            'Preparing response…'
+        ];
+    }
+
+    var idx = 0;
+    thinkingTextEl.textContent = stages[0];
+
+    var iv = setInterval(function() {
+        idx++;
+        if (idx < stages.length) {
+            thinkingTextEl.textContent = stages[idx];
+        } else {
+            clearInterval(iv);
+        }
+    }, 1800);
+
+    return iv;
+}
+
+// ── DOM OBSERVER — wires everything together ──────────────────────────────────
+
+var _observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+        m.addedNodes.forEach(function(node) {
+            if (node.nodeType !== 1) return;
+
+            // Thinking state — start named stages
+            var thinkText = node.querySelector && node.querySelector('.ai-thinking-text');
+            if (thinkText && thinkText.textContent === 'Thinking...') {
+                startNamedStages(thinkText);
+            }
+            if (node.classList && node.classList.contains('ai-thinking-text') && node.textContent === 'Thinking...') {
+                startNamedStages(node);
+            }
+
+            // Response blocks — add actions
+            var blocks = node.querySelectorAll ? node.querySelectorAll('.ai-response-block') : [];
+            blocks.forEach(function(b) { addResponseActions(b); });
+            if (node.classList && node.classList.contains('ai-response-block')) {
+                addResponseActions(node);
+            }
+
+            // Messages container updated — enrich empty state only
+            if (node.id === 'aiMessages' || (node.querySelector && node.querySelector('#aiMessages'))) {
+                setTimeout(enrichEmptyState, 100);
+            }
+        });
+    });
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+
+function init() {
+    injectContextChip();
+    injectAttachmentBtn();
+    injectFeedbackLink();
+    enrichEmptyState();
+
+    // Add actions to any existing response blocks
+    document.querySelectorAll('.ai-response-block').forEach(addResponseActions);
+
+    var msgContainer = document.getElementById('aiMessages');
+    if (msgContainer) {
+        _observer.observe(msgContainer, { childList: true, subtree: true });
+    }
+
+    var panel = document.getElementById('aiCopilotPanel');
+    if (panel) {
+        _observer.observe(panel, { childList: true, subtree: true });
+    }
+}
+
+// Hook into member navigation — only enrich empty state, NOT updateContextChip
+// Context chip is now handled entirely inside renderWelcomeScreen
+var _origOnMemberSwitchEnhance = window.onMemberSwitch;
+window.onMemberSwitch = function(member) {
+    if (typeof _origOnMemberSwitchEnhance === 'function') _origOnMemberSwitchEnhance(member);
+    setTimeout(enrichEmptyState, 150);
+};
+
+// Hook into tab switching to update context chip
+document.addEventListener('click', function(e) {
+    var tab = e.target.closest('.tab[data-tab]');
+    if (tab) {
+        // Tab changed — re-render welcome screen so chip updates
+        setTimeout(function() {
+            if (typeof renderWelcomeScreen === 'function' && !window.aiCopilotState.isInConversation) {
+                renderWelcomeScreen();
+            }
+        }, 100);
+    }
+});
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(init, 800); });
+} else {
+    setTimeout(init, 800);
+}
+
+// Expose globally for other code to call
+window.enrichEmptyStateGlobal = function() {
+    enrichEmptyState();
+};
+
+})();
+</script>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// SESSION HISTORY — Pin / Rename / Delete
+// ══════════════════════════════════════════════════════════
+
+// ── Find a session by id across all stores ───────────────
+function findSessionById(sessId) {
+    // Check member sessions
+    if (typeof membersDB !== 'undefined') {
+        for (var i = 0; i < membersDB.length; i++) {
+            var m = membersDB[i];
+            var ss = SESS.byMember[m.id] || [];
+            for (var j = 0; j < ss.length; j++) {
+                if (ss[j].id === sessId) return { session: ss[j], array: ss, memberId: m.id };
+            }
+        }
+    }
+    // Check context sessions
+    var ctxs = Object.keys(SESS.byContext || {});
+    for (var c = 0; c < ctxs.length; c++) {
+        var cs = SESS.byContext[ctxs[c]] || [];
+        for (var d = 0; d < cs.length; d++) {
+            if (cs[d].id === sessId) return { session: cs[d], array: cs, ctx: ctxs[c] };
+        }
+    }
+    return null;
+}
+
+// ── Open kebab menu ───────────────────────────────────────
+window.openSessionMenu = function(e, sessId, memberId, ctxLabel) {
+    // Close any existing menu
+    var existing = document.getElementById('aiSessionMenu');
+    if (existing) existing.remove();
+
+    var isPinned = SESS.pinned.indexOf(sessId) > -1;
+    var menu = document.createElement('div');
+    menu.id = 'aiSessionMenu';
+    menu.className = 'ai-session-menu';
+    menu.innerHTML =
+        '<button class="ai-session-menu-item" onclick="sessionPin(\'' + sessId + '\')">' +
+            (isPinned
+                ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg> Unpin'
+                : '<svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg> Pin conversation') +
+        '</button>' +
+        '<button class="ai-session-menu-item" onclick="sessionRename(\'' + sessId + '\')">' +
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Rename' +
+        '</button>' +
+        '<div style="height:1px;background:#f1f5f9;margin:3px 0;"></div>' +
+        '<button class="ai-session-menu-item danger" onclick="sessionDeleteConfirm(\'' + sessId + '\')">' +
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete' +
+        '</button>';
+
+    // Position near click
+    document.body.appendChild(menu);
+    var rect = e.target.getBoundingClientRect();
+    var top = rect.bottom + 4;
+    var left = rect.right - menu.offsetWidth;
+    if (left < 0) left = 4;
+    menu.style.top = top + 'px';
+    menu.style.left = left + 'px';
+
+    // Close on outside click
+    setTimeout(function() {
+        document.addEventListener('click', function closeMenu(ev) {
+            if (!menu.contains(ev.target)) {
+                menu.remove();
+                document.removeEventListener('click', closeMenu);
+            }
+        });
+    }, 10);
+};
+
+// ── Pin / Unpin ───────────────────────────────────────────
+// ── Helper: re-render whichever panel is visible ─────────
+function refreshSessionPanels() {
+    // Re-render hamburger menu if open
+    var menuDropdown = document.getElementById('aiMenuDropdown');
+    if (menuDropdown && menuDropdown.classList.contains('open')) {
+        renderMenuChatList();
+    }
+    // Re-render session sub-panel if open
+    var sessionPanel = document.getElementById('aiSessionPanel');
+    if (sessionPanel && sessionPanel.classList.contains('open')) {
+        renderSessionList();
+    }
+    // Re-render both to keep them in sync
+    if (!(menuDropdown && menuDropdown.classList.contains('open')) &&
+        !(sessionPanel && sessionPanel.classList.contains('open'))) {
+        // Neither open — still update both for next time they open
+    }
+}
+
+window.sessionPin = function(sessId) {
+    var menu = document.getElementById('aiSessionMenu');
+    if (menu) menu.remove();
+    var idx = SESS.pinned.indexOf(sessId);
+    if (idx > -1) {
+        SESS.pinned.splice(idx, 1);
+    } else {
+        SESS.pinned.push(sessId);
+    }
+    refreshSessionPanels();
+};
+
+// ── Rename ───────────────────────────────────────────────
+window.sessionRename = function(sessId) {
+    var menu = document.getElementById('aiSessionMenu');
+    if (menu) menu.remove();
+
+    // Find title element in either panel
+    // session panel uses id="sess-item-{id}", hamburger has no id — find by kebab button's parent
+    var item = document.getElementById('sess-item-' + sessId);
+    if (!item) {
+        // Search all kebab buttons to find the parent item
+        var allKebabs = document.querySelectorAll('.mchat-kbtn, .ai-session-kebab');
+        allKebabs.forEach(function(kb) {
+            var onclick = kb.getAttribute('onclick') || '';
+            if (onclick.indexOf(sessId) > -1) {
+                item = kb.parentElement;
+            }
+        });
+    }
+    if (!item) {
+        // Fallback: just prompt for name and save
+        var found = findSessionById(sessId);
+        if (!found) return;
+        var currentTitle = found.session.customTitle ||
+            ((found.session.messages||[]).find(function(m){return m.role==='user';})||{}).content || 'Conversation';
+        var newName = window.prompt('Rename conversation:', currentTitle);
+        if (newName && newName.trim()) {
+            found.session.customTitle = newName.trim();
+            refreshSessionPanels();
+        }
+        return;
+    }
+
+    // Find title element - could be .ai-session-item-title or inline style div
+    var titleEl = item.querySelector('.ai-session-item-title') ||
+                  item.querySelector('[style*="font-weight:500"][style*="color:#1e293b"]');
+    if (!titleEl) {
+        // Fallback to prompt
+        var found2 = findSessionById(sessId);
+        if (!found2) return;
+        var cur = found2.session.customTitle || '';
+        var n = window.prompt('Rename conversation:', cur);
+        if (n && n.trim()) { found2.session.customTitle = n.trim(); refreshSessionPanels(); }
+        return;
+    }
+
+    var currentTitle = titleEl.textContent.replace('Current','').trim();
+    var inp = document.createElement('input');
+    inp.style.cssText = 'width:100%;border:1px solid #c8c6f0;border-radius:5px;padding:3px 7px;font-size:12.5px;font-weight:500;color:#1e293b;outline:none;font-family:inherit;background:#fff;';
+    inp.value = currentTitle;
+    titleEl.replaceWith(inp);
+    inp.focus();
+    inp.select();
+
+    function commit() {
+        var newTitle = inp.value.trim() || currentTitle;
+        var found = findSessionById(sessId);
+        if (found) found.session.customTitle = newTitle;
+        refreshSessionPanels();
+    }
+    inp.addEventListener('blur', commit);
+    inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); inp.blur(); }
+        if (e.key === 'Escape') { inp.value = currentTitle; inp.blur(); }
+    });
+};
+
+// ── Delete with confirmation ──────────────────────────────
+window.sessionDeleteConfirm = function(sessId) {
+    var menu = document.getElementById('aiSessionMenu');
+    if (menu) menu.remove();
+
+    var found = findSessionById(sessId);
+    var firstMsg = found ? ((found.session.messages||[]).find(function(m){return m.role==='user';})||{}).content : '';
+    var title = (found && found.session.customTitle) || (firstMsg ? firstMsg.slice(0,40)+'…' : 'this conversation');
+
+    var overlay = document.createElement('div');
+    overlay.className = 'ai-confirm-overlay';
+    overlay.innerHTML =
+        '<div class="ai-confirm-box">' +
+            '<div class="ai-confirm-title">Delete conversation?</div>' +
+            '<div class="ai-confirm-body">This will permanently delete "<strong>' + escapeHtml(title) + '</strong>". This cannot be undone.</div>' +
+            '<div class="ai-confirm-btns">' +
+                '<button class="ai-confirm-cancel" onclick="this.closest(\'.ai-confirm-overlay\').remove()">Cancel</button>' +
+                '<button class="ai-confirm-danger" onclick="sessionDeleteConfirmed(\'' + sessId + '\');this.closest(\'.ai-confirm-overlay\').remove()">Delete</button>' +
+            '</div>' +
+        '</div>';
+    document.body.appendChild(overlay);
+};
+
+window.sessionDeleteConfirmed = function(sessId) {
+    var found = findSessionById(sessId);
+    if (!found) return;
+
+    // Remove from array
+    var idx = found.array.indexOf(found.session);
+    if (idx > -1) found.array.splice(idx, 1);
+
+    // Remove from pinned
+    var pi = SESS.pinned.indexOf(sessId);
+    if (pi > -1) SESS.pinned.splice(pi, 1);
+
+    // If this was the active session, reset
+    if (found.memberId && SESS.active[found.memberId] === sessId) {
+        SESS.active[found.memberId] = null;
+        if (window.currentMember && window.currentMember.id === found.memberId) {
+            if (typeof renderWelcomeScreen === 'function') renderWelcomeScreen();
+        }
+    }
+
+    refreshSessionPanels();
+};
 </script>
