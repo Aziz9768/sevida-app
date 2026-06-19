@@ -1,24 +1,34 @@
 exports.handler = async function(event) {
+    const headers = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+    };
+
+    // Handle preflight OPTIONS request
+    if (event.httpMethod === 'OPTIONS') {
+        return { statusCode: 200, headers, body: '' };
+    }
+
     if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Method Not Allowed' };
+        return { statusCode: 405, headers, body: 'Method Not Allowed' };
     }
 
     try {
         const body = JSON.parse(event.body);
 
-        // ── Normalize messages ────────────────────────────────────────────────
-        // Some history entries use `text` instead of `content` (from agent runs).
-        // Strip any message with missing/empty content before sending to Anthropic.
+        // Normalize messages — strip empty content, map text→content
         if (Array.isArray(body.messages)) {
             body.messages = body.messages
                 .map(m => ({ role: m.role, content: m.content || m.text || '' }))
                 .filter(m => m.content && m.content.trim().length > 0);
         }
 
-        // Guard: must have at least one message
         if (!body.messages || body.messages.length === 0) {
             return {
                 statusCode: 400,
+                headers,
                 body: JSON.stringify({ error: { message: 'No valid messages to send.' } })
             };
         }
@@ -37,15 +47,13 @@ exports.handler = async function(event) {
 
         return {
             statusCode: response.status,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            headers,
             body: JSON.stringify(data)
         };
     } catch (err) {
         return {
             statusCode: 500,
+            headers,
             body: JSON.stringify({ error: err.message })
         };
     }
