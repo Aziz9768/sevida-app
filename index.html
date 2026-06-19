@@ -1804,7 +1804,7 @@ function frCloseModal(){
         .dashboard-table th {
             font-weight: 600;
             font-size: 12px;
-            color: #495057;
+            color: #fff;
         }
        
         .widget-header.dark + .widget-content .dashboard-table th {
@@ -30669,6 +30669,13 @@ function initializeMemberSubTabs() {
                 if (typeof updateBreadcrumbs === 'function') {
                     updateBreadcrumbs(['Home', 'Members', member.name, tabName]);
                 }
+
+                // Re-render CoPilot suggested questions for new tab context
+                setTimeout(function() {
+                    if (typeof window._renderTabPrompts === 'function') {
+                        window._renderTabPrompts();
+                    }
+                }, 50);
             }
         });
     });
@@ -31937,32 +31944,69 @@ function renderWelcomeScreen() {
             </div>
         `;
 
-        // Populate suggested prompts after DOM is set
+        // Populate suggested prompts after DOM is set — tab-aware
         (function() {
             var promptsEl = document.getElementById('memberSuggestedPrompts');
             if (!promptsEl) return;
-            var dd = member.dashboardData || {};
-            var hasADT = ((dd.adts||[]).concat((member.healthHistory||{}).adts||[])).some(function(a){return a.acknowledged==='No';});
-            var consentPending = ['To Obtain Consent','Re-consent Required'].indexOf(member.consentStatus) > -1;
-            var prompts = [
-                { text: 'Summarize chart before my visit', fn: function(){ window.runAgentFromChat('a1','Pre-Visit Summarizer','Summarize chart before my visit'); } }
-            ];
-            if (hasADT) prompts.push({ text: 'Summarize the recent ADT event', fn: function(){ window.runAgentFromChat('a1','Pre-Visit Summarizer','Summarize the recent ADT event'); } });
-            prompts.push({ text: 'What are the open care gaps?', fn: function(){ window.runAgentFromChat('a4','Care Gap Finder','What are the open care gaps?'); } });
-            if (consentPending) {
-                prompts.push({ text: 'Draft a consent contact attempt note', fn: function(){ var inp=document.getElementById('aiInputField'); if(inp){inp.value='Draft a consent contact attempt note';inp.focus();} } });
-            } else {
-                prompts.push({ text: 'Show open tasks for this member', fn: function(){ handleAIQuestion('mx_open_tasks'); } });
+
+            function renderTabPrompts() {
+                // Get active member tab
+                var activeTabEl = document.querySelector('.page-content .content-tabs .tab.active');
+                var subTab = (activeTabEl && activeTabEl.dataset.tab) || 'dashboard';
+
+                // Get tab-aware questions
+                var questions = getMemberContextQuestions(member, subTab);
+
+                // Clear existing buttons (keep the label)
+                var label = promptsEl.querySelector('div');
+                promptsEl.innerHTML = '';
+                if (label) promptsEl.appendChild(label);
+                else {
+                    var lbl = document.createElement('div');
+                    lbl.style.cssText = 'font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px;';
+                    lbl.textContent = 'Suggested';
+                    promptsEl.appendChild(lbl);
+                }
+
+                // Show tab context label if not dashboard
+                if (subTab !== 'dashboard') {
+                    var tabNames = {
+                        'details':'Member Details', 'timeline':'Timeline',
+                        'insurance':'Insurance', 'screenings':'Screenings & Assessments',
+                        'bio-psycho':'Bio/Psycho/Social', 'history':'Health History',
+                        'careplans':'Care Plans', 'population':'Population',
+                        'activity':'Activity', 'careteam':'Care Team'
+                    };
+                    var tabLabel = document.createElement('div');
+                    tabLabel.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#443fa7;font-weight:600;background:#ede9fe;padding:2px 8px;border-radius:10px;margin-bottom:8px;';
+                    tabLabel.textContent = (tabNames[subTab] || subTab) + ' tab';
+                    promptsEl.appendChild(tabLabel);
+                }
+
+                // Render 4 questions
+                questions.slice(0, 4).forEach(function(q) {
+                    var btn = document.createElement('button');
+                    btn.textContent = q.text;
+                    btn.style.cssText = 'display:block;width:100%;text-align:left;padding:8px 11px;margin-bottom:5px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;color:#1e293b;cursor:pointer;font-family:inherit;transition:all 0.15s;line-height:1.4;';
+                    btn.onmouseover = function(){ this.style.background='#f0f0ff'; this.style.borderColor='#c8c6f0'; };
+                    btn.onmouseout  = function(){ this.style.background='#fff';    this.style.borderColor='#e2e8f0'; };
+                    btn.onclick = function() {
+                        // Send immediately
+                        var inp = document.getElementById('aiInputField');
+                        if (inp) {
+                            inp.value = q.text;
+                            if (typeof sendAIMessage === 'function') sendAIMessage();
+                        }
+                    };
+                    promptsEl.appendChild(btn);
+                });
             }
-            prompts.slice(0,4).forEach(function(p, i) {
-                var btn = document.createElement('button');
-                btn.textContent = p.text;
-                btn.style.cssText = 'display:block;width:100%;text-align:left;padding:8px 11px;margin-bottom:5px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;color:#1e293b;cursor:pointer;font-family:inherit;transition:all 0.15s;line-height:1.4;';
-                btn.onmouseover = function(){ this.style.background='#f0f0ff'; this.style.borderColor='#c8c6f0'; };
-                btn.onmouseout = function(){ this.style.background='#fff'; this.style.borderColor='#e2e8f0'; };
-                btn.onclick = p.fn;
-                promptsEl.appendChild(btn);
-            });
+
+            // Initial render
+            renderTabPrompts();
+
+            // Re-render when CM switches tabs
+            window._renderTabPrompts = renderTabPrompts;
         })();
 
         // Show suggestions toggle button
@@ -32206,10 +32250,6 @@ function getMemberContextQuestions(member, subTab) {
         'mx_labs':            'a1',
         'mx_allergies_vitals':'a1',
         'mx_care_gaps':       'a4', // Care Gap Finder
-        'mx_assess_due':      'a4',
-        'mx_assess_completed':'a4',
-        'mx_assess_missing':  'a4',
-        'mx_assess_timeline': 'a4',
         'mx_priority_pop':    'a4',
     };
 
@@ -32237,64 +32277,81 @@ function getMemberContextQuestions(member, subTab) {
         { id: 'mx_create_appt', text: 'Schedule an appointment', handler: 'qCreateAppointment' },
     ].filter(isAllowed);
 
-    // ── TAB-SPECIFIC QUESTIONS ──
+    // ── TAB-SPECIFIC QUESTIONS — shown first, common fill remaining slots ──
     const tabSpecific = {
         'dashboard': [
-            { id: 'mx_adt_summary', text: 'Summarize recent ADT events', handler: 'qMemberADTSummary' },
-            { id: 'mx_risk_acuity', text: 'Show risk factors & acuity history', handler: 'qMemberRiskAcuity' },
-            { id: 'mx_recent_notes', text: 'Summarize last 5 service notes', handler: 'qMemberRecentNotes' },
+            { id: 'mx_previsit',     text: 'Summarize chart before my visit',       handler: 'qPreVisit' },
+            { id: 'mx_adt_summary',  text: 'Summarize recent ADT events',            handler: 'qMemberADTSummary' },
+            { id: 'mx_care_gaps',    text: 'What are the open care gaps?',           handler: 'qMemberCareGaps' },
+            { id: 'mx_recent_notes', text: 'Summarize last 5 service notes',         handler: 'qMemberRecentNotes' },
         ],
         'details': [
-            { id: 'mx_demographics', text: 'Summarize demographics & contact info', handler: 'qMemberDemographics' },
-            { id: 'mx_enrollment', text: 'Show program & LOB enrollment', handler: 'qMemberEnrollment' },
-            { id: 'mx_comm_prefs', text: 'Show communication preferences', handler: 'qMemberCommPrefs' },
+            { id: 'mx_demographics',  text: 'Summarize demographics & contact info', handler: 'qMemberDemographics' },
+            { id: 'mx_enrollment',    text: 'Show program & LOB enrollment',          handler: 'qMemberEnrollment' },
+            { id: 'mx_comm_prefs',    text: 'Show communication preferences',         handler: 'qMemberCommPrefs' },
+            { id: 'mx_risk_acuity',   text: 'Show risk factors & acuity history',     handler: 'qMemberRiskAcuity' },
         ],
         'timeline': [
-            { id: 'mx_milestones', text: 'Summarize key journey milestones', handler: 'qMemberMilestones' },
-            { id: 'mx_engagement_gaps', text: 'Show gaps in member engagement', handler: 'qMemberEngagementGaps' },
+            { id: 'mx_milestones',       text: 'Summarize key journey milestones',   handler: 'qMemberMilestones' },
+            { id: 'mx_engagement_gaps',  text: 'Show gaps in member engagement',     handler: 'qMemberEngagementGaps' },
+            { id: 'mx_recent_notes',     text: 'Summarize last 5 service notes',     handler: 'qMemberRecentNotes' },
+            { id: 'mx_adt_summary',      text: 'Summarize recent ADT events',        handler: 'qMemberADTSummary' },
         ],
         'insurance': [
-            { id: 'mx_coverage_pcp', text: 'Summarize coverage & PCP info', handler: 'qMemberCoveragePCP' },
-            { id: 'mx_enroll_history', text: 'Show enrollment & care span history', handler: 'qMemberEnrollHistory' },
-            { id: 'mx_term_date', text: 'When is coverage term date?', handler: 'qMemberTermDate' },
+            { id: 'mx_coverage_pcp',    text: 'Summarize coverage & PCP info',        handler: 'qMemberCoveragePCP' },
+            { id: 'mx_enroll_history',  text: 'Show enrollment & care span history',  handler: 'qMemberEnrollHistory' },
+            { id: 'mx_term_date',       text: 'When is coverage term date?',          handler: 'qMemberTermDate' },
+            { id: 'mx_comm_prefs',      text: 'Show communication preferences',       handler: 'qMemberCommPrefs' },
         ],
         'screenings': [
-            { id: 'mx_assess_completed', text: 'Summarize completed assessments', handler: 'qMemberAssessCompleted' },
-            { id: 'mx_assess_timeline', text: 'Show assessment completion timeline', handler: 'qMemberAssessTimeline' },
+            { id: 'mx_assess_completed', text: 'What assessments has this member completed?',  handler: 'qMemberAssessCompleted' },
+            { id: 'mx_assess_due',       text: 'Which assessments are due or overdue?',        handler: 'qMemberAssessDue' },
+            { id: 'mx_assess_timeline',  text: 'Show assessment completion timeline',          handler: 'qMemberAssessTimeline' },
+            { id: 'mx_assess_missing',   text: 'Which required screenings are missing?',       handler: 'qMemberAssessMissing' },
         ],
         'bio-psycho': [
-            { id: 'mx_sdoh', text: 'Summarize social determinants', handler: 'qMemberSDOH' },
-            { id: 'mx_barriers', text: 'What barriers to care exist?', handler: 'qMemberBarriers' },
-            { id: 'mx_housing', text: 'Show housing & support situation', handler: 'qMemberHousing' },
+            { id: 'mx_sdoh',     text: 'Summarize social determinants of health',   handler: 'qMemberSDOH' },
+            { id: 'mx_barriers', text: 'What barriers to care exist for this member?', handler: 'qMemberBarriers' },
+            { id: 'mx_housing',  text: 'Show housing & support situation',          handler: 'qMemberHousing' },
+            { id: 'mx_care_gaps',text: 'Are there care gaps related to social needs?', handler: 'qMemberCareGaps' },
         ],
         'history': [
-            { id: 'mx_labs', text: 'Show recent labs with flags', handler: 'qMemberLabs' },
-            { id: 'mx_allergies_vitals', text: 'Allergies & vital signs summary', handler: 'qMemberAllergiesVitals' },
-        ],
-        'population': [
-            { id: 'mx_lob_programs', text: 'Show LOB & program details', handler: 'qMemberLOBPrograms' },
-            { id: 'mx_risk_trend', text: 'Show risk score breakdown & trend', handler: 'qMemberRiskTrend' },
-            { id: 'mx_priority_pop', text: 'What priority populations apply?', handler: 'qMemberPriorityPop' },
-        ],
-        'activity': [
-            { id: 'mx_recent_contacts', text: 'Summarize recent contacts', handler: 'qMemberRecentContacts' },
-            { id: 'mx_last_successful', text: 'When was last successful contact?', handler: 'qMemberLastContact' },
-            { id: 'mx_contact_breakdown', text: 'Show contact attempts breakdown', handler: 'qMemberContactBreakdown' },
-        ],
-        'careteam': [
-            { id: 'mx_full_team', text: 'Show full care team', handler: 'qMemberCareTeam' },
-            { id: 'mx_pcp_info', text: 'PCP info & last visit', handler: 'qMemberPCPInfo' },
-            { id: 'mx_coord_needs', text: 'Any care coordination needs?', handler: 'qMemberCoordNeeds' },
+            { id: 'mx_labs',            text: 'Show recent labs with flags',          handler: 'qMemberLabs' },
+            { id: 'mx_allergies_vitals',text: 'Allergies & vital signs summary',      handler: 'qMemberAllergiesVitals' },
+            { id: 'mx_medications',     text: 'Show current medications',             handler: 'qMemberMedications' },
+            { id: 'mx_diagnoses',       text: 'Summarize active diagnoses',           handler: 'qMemberDiagnoses' },
         ],
         'careplans': [
-            { id: 'mx_cp_summary', text: 'Summarize active care plan', handler: 'qMemberCarePlanSummary' },
-            { id: 'mx_cp_goals', text: 'What goals are overdue or at risk?', handler: 'qMemberGoalsAtRisk' },
-            { id: 'mx_cp_interventions', text: 'Show care plan interventions', handler: 'qMemberInterventions' },
-            { id: 'mx_cp_review', text: 'When is next care plan review?', handler: 'qMemberCPReview' },
+            { id: 'mx_cp_summary',      text: 'Summarize the active care plan',       handler: 'qMemberCarePlanSummary' },
+            { id: 'mx_cp_goals',        text: 'Which goals are overdue or at risk?',  handler: 'qMemberGoalsAtRisk' },
+            { id: 'mx_cp_interventions',text: 'Show care plan interventions',         handler: 'qMemberInterventions' },
+            { id: 'mx_cp_review',       text: 'When is the next care plan review?',   handler: 'qMemberCPReview' },
+        ],
+        'population': [
+            { id: 'mx_lob_programs',  text: 'Show LOB & program details',             handler: 'qMemberLOBPrograms' },
+            { id: 'mx_risk_trend',    text: 'Show risk score breakdown & trend',      handler: 'qMemberRiskTrend' },
+            { id: 'mx_priority_pop',  text: 'What priority populations apply?',       handler: 'qMemberPriorityPop' },
+            { id: 'mx_risk_acuity',   text: 'Show risk factors & acuity history',     handler: 'qMemberRiskAcuity' },
+        ],
+        'activity': [
+            { id: 'mx_recent_contacts',    text: 'Summarize recent contact attempts',    handler: 'qMemberRecentContacts' },
+            { id: 'mx_last_successful',    text: 'When was the last successful contact?', handler: 'qMemberLastContact' },
+            { id: 'mx_contact_breakdown',  text: 'Show contact attempts breakdown',       handler: 'qMemberContactBreakdown' },
+            { id: 'mx_open_tasks',         text: 'Show open tasks for this member',        handler: 'qMemberOpenTasks' },
+        ],
+        'careteam': [
+            { id: 'mx_full_team',    text: 'Show full care team',                   handler: 'qMemberCareTeam' },
+            { id: 'mx_pcp_info',     text: 'PCP info & last visit date',            handler: 'qMemberPCPInfo' },
+            { id: 'mx_coord_needs',  text: 'Any care coordination needs?',          handler: 'qMemberCoordNeeds' },
+            { id: 'mx_create_appt',  text: 'Schedule an appointment',              handler: 'qCreateAppointment' },
         ],
     };
 
-    return [...common, ...(tabSpecific[subTab] || tabSpecific['dashboard']).filter(isAllowed)];
+    // Tab-specific first, then fill remaining slots with common questions
+    const tabQs = (tabSpecific[subTab] || tabSpecific['dashboard']).filter(isAllowed);
+    const usedIds = new Set(tabQs.map(function(q){ return q.id; }));
+    const fillQs = common.filter(function(q){ return !usedIds.has(q.id); });
+    return [...tabQs, ...fillQs];
 }
 
 // Collect ALL member context question IDs for search (used by handleAIQuestion)
@@ -41005,7 +41062,6 @@ async function sendLLMMessage(userText) {
 function buildChatSystemPrompt() {
     const m = window.currentMember;
     const base = `You are Vida CoPilot, an AI assistant built into Sevida OS, a healthcare care management platform. You help Care Managers with any aspect of their work — clinical, administrative, referrals, behavioral health, and coordination tasks.\n\nRESPONSE RULES:\n- Be concise and clinically professional.\n- Use bullet points for lists, bold for key values. Keep under 250 words unless detail is needed.\n- Never make up clinical data. Only reference data provided in this prompt.\n- Answer ALL care management questions including behavioral health, social determinants, referrals, and care planning — these are all core CM responsibilities.\n- Never say a topic is outside your scope. If you lack specific data, say so and offer what help you can.\n- If asked to draft a note, remind the user to use the "Draft a service note" button for the full form.`;
-
     if (!m) {
         const total = typeof membersDB!=='undefined'?membersDB.length:0;
         const highRisk = typeof membersDB!=='undefined'?membersDB.filter(x=>x.riskCategory==='High').length:0;
@@ -42277,7 +42333,15 @@ renderMemberList = function(membersData) {
     getMemberContextQuestions = function(member, subTab) {
         const base = _orig(member, subTab);
 
-        // Inject new top-level smart questions into common section
+        // Smart questions only appear on the dashboard tab (default)
+        // Other tabs show their own specific questions first
+        var dashboardOnlyTabs = ['dashboard', null, undefined, ''];
+        if (dashboardOnlyTabs.indexOf(subTab) === -1) {
+            // Non-dashboard tab — return base questions as-is (tab-specific first)
+            return base;
+        }
+
+        // Dashboard tab — prepend smart questions
         const newCommon = [
             { id: 'mx_previsit_brief',   text: '✦ Brief me before my call',                handler: 'qPreCallBriefing' },
             { id: 'mx_what_changed',     text: '✦ What changed since I was last here?',     handler: 'qWhatChanged' },
@@ -78904,6 +78968,7 @@ function init() {
     injectAttachmentBtn();
     injectFeedbackLink();
     enrichEmptyState();
+    initSparkles();
 
     // Add actions to any existing response blocks
     document.querySelectorAll('.ai-response-block').forEach(addResponseActions);
@@ -79169,4 +79234,519 @@ window.sessionDeleteConfirmed = function(sessId) {
 
     refreshSessionPanels();
 };
+</script>
+
+<style>
+/* ── Sparkle icon ── */
+.vida-sparkle-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 5px;
+    background: none; border: none; cursor: pointer;
+    color: #7c6ef7; flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+    vertical-align: middle; padding: 0;
+}
+.vida-sparkle-btn:hover { background: #ede9fe; color: #5b50d6; }
+.vida-sparkle-wrap { display: inline-flex; align-items: center; gap: 4px; position: relative; width: 100%; }
+.vida-sparkle-wrap textarea,
+.vida-sparkle-wrap input[type="text"] { flex: 1; }
+/* ── Sparkle popup ── */
+.vida-sparkle-popup {
+    position: absolute; z-index: 99999; width: 340px;
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+    padding: 14px; top: 0; left: calc(100% + 8px);
+}
+.vida-sparkle-popup-header {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; color: #7c6ef7;
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px;
+}
+.vida-sparkle-generated {
+    font-size: 12.5px; color: #1e293b; line-height: 1.5;
+    background: #f8f7ff; border: 1px solid #e2e8f0;
+    border-radius: 7px; padding: 9px 11px; margin-bottom: 8px;
+    min-height: 52px; white-space: pre-wrap; word-break: break-word;
+}
+.vida-sparkle-alts { margin-bottom: 10px; }
+.vida-sparkle-alt-label { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+.vida-sparkle-alt-item {
+    font-size: 11.5px; color: #475569; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 6px;
+    padding: 6px 9px; margin-bottom: 4px; cursor: pointer;
+    transition: all 0.12s; line-height: 1.4;
+}
+.vida-sparkle-alt-item:hover { background: #f0f0ff; border-color: #c8c6f0; color: #1e293b; }
+.vida-sparkle-actions { display: flex; gap: 6px; margin-bottom: 8px; }
+.vida-sparkle-insert {
+    flex: 1; padding: 7px 10px; background: #282460; color: #fff;
+    border: none; border-radius: 7px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: background 0.12s;
+}
+.vida-sparkle-insert:hover { background: #1e1b4b; }
+.vida-sparkle-copy {
+    padding: 7px 10px; background: #fff; color: #475569;
+    border: 1px solid #e2e8f0; border-radius: 7px; font-size: 12px;
+    cursor: pointer; font-family: inherit; transition: all 0.12s;
+}
+.vida-sparkle-copy:hover { border-color: #282460; color: #282460; }
+.vida-sparkle-regen {
+    padding: 7px 10px; background: #fff; color: #7c6ef7;
+    border: 1px solid #e2e8f0; border-radius: 7px; font-size: 12px;
+    cursor: pointer; font-family: inherit; transition: all 0.12s;
+}
+.vida-sparkle-regen:hover { border-color: #7c6ef7; background: #f8f7ff; }
+.vida-sparkle-refine-wrap { display: flex; gap: 5px; }
+.vida-sparkle-refine-input {
+    flex: 1; padding: 6px 9px; border: 1px solid #e2e8f0;
+    border-radius: 6px; font-size: 11.5px; font-family: inherit;
+    color: #1e293b; outline: none; background: #f8fafc;
+}
+.vida-sparkle-refine-input:focus { border-color: #c8c6f0; background: #fff; }
+.vida-sparkle-refine-btn {
+    padding: 6px 10px; background: #f0f0ff; border: 1px solid #c8c6f0;
+    border-radius: 6px; font-size: 11.5px; color: #282460; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+}
+.vida-sparkle-loading { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; padding: 8px 0; }
+.vida-sparkle-dots span { width: 5px; height: 5px; background: #7c6ef7; border-radius: 50%; display: inline-block; animation: sp-b 1.2s infinite; }
+.vida-sparkle-dots span:nth-child(2) { animation-delay: .2s; }
+.vida-sparkle-dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes sp-b { 0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)} }
+</style>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+// VIDA SPARKLE — Inline AI assist on form fields & labels
+// ══════════════════════════════════════════════════════════════════════
+
+(function() {
+
+    // Fields to attach sparkle to (by ID, class, or label text match)
+    var SPARKLE_TARGETS = [
+        // Member notes
+        { id: 'notesTextArea',       label: 'Member Notes',        context: 'member_notes' },
+        { id: 'generalNotesTextArea',label: 'General Notes',       context: 'member_notes' },
+        // Service notes
+        { id: 'snSummary',           label: 'Service Note',        context: 'service_note' },
+        // Care plan review
+        { id: 'cpReviewNotes',       label: 'Care Plan Review',    context: 'care_plan_review' },
+        // Referral inbound notes
+        { id: 'ib-accept-notes',     label: 'Acceptance Notes',    context: 'referral_notes' },
+        { id: 'ib-decline-notes',    label: 'Decline Notes',       context: 'referral_notes' },
+        { id: 'ib-outcome-notes',    label: 'Outcome Notes',       context: 'referral_notes' },
+        { id: 'ib-note-text',        label: 'Referral Note',       context: 'referral_notes' },
+        // Clinical context
+        { query: 'textarea[placeholder*="clinical context"]', label: 'Clinical Context', context: 'clinical_context' },
+        // Referral outbound service line notes
+        { query: '[id^="sr-note-sl-"]',  label: 'Service Line Note',  context: 'referral_notes' },
+        { query: '[id^="sr-note-svc-"]', label: 'Service Note',       context: 'referral_notes' },
+        // Reason / next steps / additional info textareas (by placeholder)
+        { query: 'textarea[placeholder="Enter Reason"]',      label: 'Reason',       context: 'reason' },
+        { query: 'textarea[placeholder="Enter Next Steps"]',  label: 'Next Steps',   context: 'next_steps' },
+        { query: '#detailAdditionalInfo',                     label: 'Additional Info', context: 'additional_info' },
+        { query: '#pReasonText',                              label: 'Withdrawal Reason', context: 'reason' },
+    ];
+
+    // Widget headers on read-only member tabs — sparkle summarizes the whole section
+    var WIDGET_SPARKLE_TARGETS = [
+        { title: 'ADTs',             context: 'adt_summary',      action: 'Summarize ADT events' },
+        { title: 'Care Gaps',        context: 'care_gaps',        action: 'Explain care gaps' },
+        { title: 'Tasks',            context: 'tasks_summary',    action: 'Summarize open tasks' },
+        { title: 'Open Service Notes', context: 'service_notes',  action: 'Summarize service notes' },
+        { title: 'Upcoming Appointments', context: 'appointments', action: 'Summarize appointments' },
+        { title: 'Reference Center', context: 'reference',        action: 'Explain reference info' },
+    ];
+
+    var _seeded = new WeakSet();
+
+    function getMemberCtx() {
+        var m = window.currentMember;
+        if (!m) return '';
+        var diags = [];
+        if (m.diagnoses) {
+            ['primary','secondary','tertiary'].forEach(function(k){
+                if (m.diagnoses[k]) diags.push(m.diagnoses[k].split(' - ').pop());
+            });
+        }
+        return 'Member: ' + m.name + '. ' +
+            (diags.length ? 'Diagnoses: ' + diags.slice(0,2).join(', ') + '. ' : '') +
+            (m.riskTier ? 'Risk: ' + (['','High','Medium','Low'][m.riskTier] || '') + '. ' : '');
+    }
+
+    function buildPrompt(fieldLabel, fieldContext, currentValue, instruction) {
+        var memberCtx = getMemberCtx();
+        var fieldDesc = {
+            member_notes:      'a member general notes field',
+            service_note:      'a clinical service note summary',
+            care_plan_review:  'a care plan review summary',
+            referral_notes:    'a referral notes field',
+            clinical_context:  'a clinical context field',
+            reason:            'a reason/rationale field',
+            next_steps:        'a next steps field',
+            additional_info:   'an additional information field',
+        }[fieldContext] || 'a text field';
+
+        var base = 'You are an AI assistant for a healthcare care manager using Sevida OS. ' +
+            (memberCtx ? memberCtx : '') +
+            'Generate professional, concise content for ' + fieldDesc + ' called "' + fieldLabel + '". ' +
+            (currentValue ? 'The field currently contains: "' + currentValue.slice(0,200) + '". ' : '') +
+            (instruction ? 'Instruction: ' + instruction + '. ' : '') +
+            'Keep under 60 words. Clinical, professional tone. No bullet points unless essential. No preamble.';
+
+        return base;
+    }
+
+    function buildAltPrompts(fieldLabel, fieldContext) {
+        return [
+            'Make it shorter — one sentence',
+            'Focus on clinical urgency and next action',
+        ];
+    }
+
+    function callSparkleAPI(prompt, onDone) {
+        fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-6',
+                max_tokens: 200,
+                messages: [{ role: 'user', content: prompt }]
+            })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+            var text = (data.content && data.content[0] && data.content[0].text) || '';
+            onDone(text.trim());
+        })
+        .catch(function(){ onDone('Unable to generate suggestion. Please try again.'); });
+    }
+
+    function closeAllPopups() {
+        document.querySelectorAll('.vida-sparkle-popup').forEach(function(p){ p.remove(); });
+    }
+
+    function openSparklePopup(btn, field, fieldLabel, fieldContext) {
+        closeAllPopups();
+
+        var popup = document.createElement('div');
+        popup.className = 'vida-sparkle-popup';
+
+        // Check if popup would go off-screen to the right
+        var btnRect = btn.getBoundingClientRect();
+        if (btnRect.right + 360 > window.innerWidth) {
+            popup.style.left = 'auto';
+            popup.style.right = 'calc(100% + 8px)';
+        }
+
+        popup.innerHTML =
+            '<div class="vida-sparkle-popup-header">' +
+                '<svg width="13" height="13" viewBox="0 0 24 24" fill="#7c6ef7"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>' +
+                'AI Assist — ' + fieldLabel +
+            '</div>' +
+            '<div class="vida-sparkle-loading">' +
+                '<div class="vida-sparkle-dots"><span></span><span></span><span></span></div>' +
+                'Generating suggestion…' +
+            '</div>';
+
+        btn.parentElement.appendChild(popup);
+
+        // Close on outside click
+        setTimeout(function() {
+            document.addEventListener('click', function outsideClick(e) {
+                if (!popup.contains(e.target) && e.target !== btn) {
+                    popup.remove();
+                    document.removeEventListener('click', outsideClick);
+                }
+            });
+        }, 50);
+
+        var currentValue = field.value || field.textContent || '';
+        var prompt = buildPrompt(fieldLabel, fieldContext, currentValue, null);
+
+        // Generate main + 2 alternatives in parallel
+        var results = { main: null, alt1: null, alt2: null };
+        var altHints = buildAltPrompts(fieldLabel, fieldContext);
+
+        function tryRender() {
+            if (results.main === null) return;
+            renderPopup(results.main, [results.alt1, results.alt2].filter(Boolean));
+        }
+
+        callSparkleAPI(prompt, function(text) {
+            results.main = text;
+            tryRender();
+        });
+        callSparkleAPI(buildPrompt(fieldLabel, fieldContext, currentValue, altHints[0]), function(text) {
+            results.alt1 = text;
+            tryRender();
+        });
+        callSparkleAPI(buildPrompt(fieldLabel, fieldContext, currentValue, altHints[1]), function(text) {
+            results.alt2 = text;
+            tryRender();
+        });
+
+        function insertText(text) {
+            if (field.tagName === 'TEXTAREA' || field.tagName === 'INPUT') {
+                field.value = text;
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                field.dispatchEvent(new Event('change', { bubbles: true }));
+            } else {
+                field.textContent = text;
+            }
+            popup.remove();
+            field.focus();
+        }
+
+        function renderPopup(main, alts) {
+            popup.innerHTML =
+                '<div class="vida-sparkle-popup-header">' +
+                    '<svg width="13" height="13" viewBox="0 0 24 24" fill="#7c6ef7"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>' +
+                    'AI Assist — ' + fieldLabel +
+                '</div>' +
+                '<div class="vida-sparkle-generated">' + escSparkle(main) + '</div>' +
+                '<div class="vida-sparkle-actions">' +
+                    '<button class="vida-sparkle-insert">Insert</button>' +
+                    '<button class="vida-sparkle-copy">Copy</button>' +
+                    '<button class="vida-sparkle-regen">↻</button>' +
+                '</div>' +
+                (alts.length ? '<div class="vida-sparkle-alts"><div class="vida-sparkle-alt-label">Alternatives</div>' +
+                    alts.map(function(a, i){
+                        return '<div class="vida-sparkle-alt-item" data-alt="' + i + '">' + escSparkle(a) + '</div>';
+                    }).join('') +
+                '</div>' : '') +
+                '<div class="vida-sparkle-refine-wrap">' +
+                    '<input class="vida-sparkle-refine-input" placeholder="Refine: make it shorter, add diagnosis…" />' +
+                    '<button class="vida-sparkle-refine-btn">Go</button>' +
+                '</div>';
+
+            // Insert
+            popup.querySelector('.vida-sparkle-insert').addEventListener('click', function() {
+                insertText(main);
+            });
+
+            // Copy
+            popup.querySelector('.vida-sparkle-copy').addEventListener('click', function() {
+                navigator.clipboard.writeText(main).catch(function(){});
+                var btn = popup.querySelector('.vida-sparkle-copy');
+                btn.textContent = 'Copied ✓';
+                setTimeout(function(){ btn.textContent = 'Copy'; }, 1500);
+            });
+
+            // Regenerate
+            popup.querySelector('.vida-sparkle-regen').addEventListener('click', function() {
+                openSparklePopup(btn, field, fieldLabel, fieldContext);
+            });
+
+            // Alt click — insert that alternative
+            popup.querySelectorAll('.vida-sparkle-alt-item').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var idx = parseInt(el.dataset.alt);
+                    insertText(alts[idx]);
+                });
+            });
+
+            // Refine
+            var refineInput = popup.querySelector('.vida-sparkle-refine-input');
+            var refineBtn = popup.querySelector('.vida-sparkle-refine-btn');
+            function doRefine() {
+                var instruction = refineInput.value.trim();
+                if (!instruction) return;
+                popup.querySelector('.vida-sparkle-generated').textContent = 'Refining…';
+                callSparkleAPI(buildPrompt(fieldLabel, fieldContext, main, instruction), function(refined) {
+                    main = refined;
+                    popup.querySelector('.vida-sparkle-generated').textContent = refined;
+                    refineInput.value = '';
+                });
+            }
+            refineBtn.addEventListener('click', doRefine);
+            refineInput.addEventListener('keydown', function(e){
+                if (e.key === 'Enter') { e.preventDefault(); doRefine(); }
+            });
+        }
+    }
+
+    function escSparkle(t) {
+        return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function attachSparkle(field, fieldLabel, fieldContext) {
+        if (_seeded.has(field)) return;
+        _seeded.add(field);
+
+        // Wrap field in a relative container
+        var parent = field.parentElement;
+        var wrap = document.createElement('div');
+        wrap.className = 'vida-sparkle-wrap';
+        wrap.style.position = 'relative';
+        parent.insertBefore(wrap, field);
+        wrap.appendChild(field);
+
+        // Sparkle button
+        var btn = document.createElement('button');
+        btn.className = 'vida-sparkle-btn';
+        btn.title = 'AI Assist — ' + fieldLabel;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>';
+        btn.style.cssText = 'position:absolute;top:6px;right:-28px;';
+        wrap.appendChild(btn);
+
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openSparklePopup(btn, field, fieldLabel, fieldContext);
+        });
+    }
+
+    function attachWidgetSparkle(headerEl, label, context, action) {
+        if (_seeded.has(headerEl)) return;
+        _seeded.add(headerEl);
+
+        var btn = document.createElement('button');
+        btn.className = 'vida-sparkle-btn vida-sparkle-widget-btn';
+        btn.title = action;
+        btn.style.cssText = 'margin-left:6px;width:20px;height:20px;flex-shrink:0;';
+        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>';
+
+        // Insert after the h3 text
+        var h3 = headerEl.querySelector('.widget-title, h3, h4');
+        if (h3) {
+            h3.style.display = 'inline-flex';
+            h3.style.alignItems = 'center';
+            h3.appendChild(btn);
+        }
+
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openWidgetSparklePopup(btn, label, context, action, headerEl);
+        });
+    }
+
+    function openWidgetSparklePopup(btn, label, context, action, headerEl) {
+        closeAllPopups();
+
+        var popup = document.createElement('div');
+        popup.className = 'vida-sparkle-popup';
+        popup.style.cssText = 'position:fixed;z-index:99999;width:360px;';
+
+        // Position below the button
+        var btnRect = btn.getBoundingClientRect();
+        var top = btnRect.bottom + 6;
+        var left = btnRect.left;
+        if (left + 370 > window.innerWidth) left = window.innerWidth - 375;
+        popup.style.top = top + 'px';
+        popup.style.left = left + 'px';
+
+        popup.innerHTML =
+            '<div class="vida-sparkle-popup-header">' +
+                '<svg width="13" height="13" viewBox="0 0 24 24" fill="#7c6ef7"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>' +
+                action +
+            '</div>' +
+            '<div class="vida-sparkle-loading">' +
+                '<div class="vida-sparkle-dots"><span></span><span></span><span></span></div>' +
+                'Generating summary…' +
+            '</div>';
+
+        document.body.appendChild(popup);
+
+        setTimeout(function() {
+            document.addEventListener('click', function outsideClick(e) {
+                if (!popup.contains(e.target) && e.target !== btn) {
+                    popup.remove();
+                    document.removeEventListener('click', outsideClick);
+                }
+            });
+        }, 50);
+
+        // Build prompt from widget content
+        var widgetContent = headerEl.parentElement ? headerEl.parentElement.innerText : '';
+        var memberCtx = getMemberCtx();
+        var prompt = 'You are an AI assistant for a healthcare care manager. ' +
+            (memberCtx || '') +
+            action + ' based on this data:\n\n' + widgetContent.slice(0, 600) + '\n\n' +
+            'Provide a concise clinical summary in 2-3 sentences. Professional tone. No bullet points.';
+
+        callSparkleAPI(prompt, function(text) {
+            popup.innerHTML =
+                '<div class="vida-sparkle-popup-header">' +
+                    '<svg width="13" height="13" viewBox="0 0 24 24" fill="#7c6ef7"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>' +
+                    action +
+                '</div>' +
+                '<div class="vida-sparkle-generated">' + escSparkle(text) + '</div>' +
+                '<div class="vida-sparkle-actions">' +
+                    '<button class="vida-sparkle-copy" style="flex:1;">Copy</button>' +
+                    '<button class="vida-sparkle-regen">↻ Refresh</button>' +
+                '</div>' +
+                '<div class="vida-sparkle-refine-wrap">' +
+                    '<input class="vida-sparkle-refine-input" placeholder="Ask more: what should I do next?" />' +
+                    '<button class="vida-sparkle-refine-btn">Go</button>' +
+                '</div>';
+
+            popup.querySelector('.vida-sparkle-copy').addEventListener('click', function() {
+                navigator.clipboard.writeText(text).catch(function(){});
+                var cb = popup.querySelector('.vida-sparkle-copy');
+                cb.textContent = 'Copied ✓';
+                setTimeout(function(){ cb.textContent = 'Copy'; }, 1500);
+            });
+
+            popup.querySelector('.vida-sparkle-regen').addEventListener('click', function() {
+                openWidgetSparklePopup(btn, label, context, action, headerEl);
+            });
+
+            var refineInput = popup.querySelector('.vida-sparkle-refine-input');
+            popup.querySelector('.vida-sparkle-refine-btn').addEventListener('click', function() {
+                var q = refineInput.value.trim();
+                if (!q) return;
+                var refinePrompt = memberCtx + 'Based on: ' + text + '\n\nQuestion: ' + q + '\nAnswer concisely in 1-2 sentences.';
+                popup.querySelector('.vida-sparkle-generated').textContent = 'Thinking…';
+                callSparkleAPI(refinePrompt, function(r) {
+                    popup.querySelector('.vida-sparkle-generated').textContent = r;
+                    refineInput.value = '';
+                });
+            });
+            refineInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') { e.preventDefault(); popup.querySelector('.vida-sparkle-refine-btn').click(); }
+            });
+        });
+    }
+
+    function scanAndAttach() {
+        // Editable field sparkles
+        SPARKLE_TARGETS.forEach(function(target) {
+            var fields = [];
+            if (target.id) {
+                var el = document.getElementById(target.id);
+                if (el) fields.push(el);
+            }
+            if (target.query) {
+                document.querySelectorAll(target.query).forEach(function(el){ fields.push(el); });
+            }
+            fields.forEach(function(field) {
+                attachSparkle(field, target.label, target.context);
+            });
+        });
+
+        // Widget header sparkles (read-only sections)
+        document.querySelectorAll('.widget-header, .dashboard-widget-header').forEach(function(headerEl) {
+            var h3 = headerEl.querySelector('.widget-title, h3, h4');
+            if (!h3 || _seeded.has(headerEl)) return;
+            var titleText = h3.textContent.trim();
+            WIDGET_SPARKLE_TARGETS.forEach(function(target) {
+                if (titleText.toLowerCase().indexOf(target.title.toLowerCase()) === 0) {
+                    attachWidgetSparkle(headerEl, target.title, target.context, target.action);
+                }
+            });
+        });
+    }
+
+    window.initSparkles = function() {
+        scanAndAttach();
+        // Watch for dynamically injected fields
+        var observer = new MutationObserver(function() {
+            scanAndAttach();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    };
+
+})();
 </script>
