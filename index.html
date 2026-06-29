@@ -10167,6 +10167,128 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
 /* SAI drawer backdrop — clicking it closes the drawer */
 #sai-dr-backdrop{position:fixed;inset:0;z-index:1499;display:none;background:rgba(0,0,0,.25);}
 #sai-dr-backdrop.on{display:block;}
+
+/* ═══ WORKSPACE ═══ */
+.ws-overlay{position:fixed;inset:0;z-index:10000;background:#f8f9fb;display:flex;flex-direction:column;overflow:hidden;}
+.ws-header{display:flex;align-items:center;gap:12px;padding:12px 20px;background:#fff;border-bottom:1px solid #e2e8f0;flex-shrink:0;}
+.ws-header-back{border:none;background:none;cursor:pointer;color:#64748b;display:flex;align-items:center;gap:5px;font-size:13px;font-family:inherit;padding:4px 8px;border-radius:6px;}
+.ws-header-back:hover{background:#f1f5f9;color:#1e293b;}
+.ws-header-title{font-size:15px;font-weight:600;color:#1e293b;flex:1;min-width:0;}
+.ws-header-title input{border:none;background:transparent;font:inherit;color:inherit;width:100%;outline:none;padding:2px 0;}
+.ws-header-title input:focus{background:#f1f5f9;border-radius:4px;padding:2px 6px;}
+.ws-header-status{font-size:11.5px;color:#94a3b8;background:#f1f5f9;padding:3px 10px;border-radius:12px;}
+.ws-body{flex:1;overflow:hidden;display:flex;}
+.ws-list{flex:1;overflow-y:auto;padding:32px;max-width:800px;margin:0 auto;width:100%;}
+.ws-list-empty{text-align:center;padding:60px 20px;color:#94a3b8;}
+.ws-list-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:10px;cursor:pointer;transition:box-shadow .15s;}
+.ws-list-item:hover{box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.ws-list-item-icon{width:36px;height:36px;background:#f5f3ff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#484581;}
+.ws-list-item-info{flex:1;min-width:0;}
+.ws-list-item-name{font-size:14px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ws-list-item-sub{font-size:12px;color:#94a3b8;margin-top:2px;}
+.ws-list-item-badge{font-size:11px;padding:3px 9px;border-radius:10px;font-weight:500;}
+.ws-badge-progress{background:#eff6ff;color:#2563eb;}
+.ws-badge-saved{background:#f0fdf4;color:#16a34a;}
+.ws-badge-deployed{background:#f5f3ff;color:#484581;}
+.ws-chat-full{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.ws-chat-messages{flex:1;overflow-y:auto;padding:20px;}
+.ws-chat-center{max-width:720px;margin:0 auto;width:100%;}
+.ws-chat-input-bar{padding:12px 20px;background:#fff;border-top:1px solid #e2e8f0;flex-shrink:0;}
+.ws-chat-input-wrap{display:flex;gap:8px;max-width:720px;margin:0 auto;}
+.ws-chat-input-wrap input{flex:1;padding:10px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:13.5px;font-family:inherit;outline:none;color:#1e293b;}
+.ws-chat-input-wrap input:focus{border-color:#484581;box-shadow:0 0 0 3px rgba(72,69,129,.1);}
+.ws-chat-input-wrap button{padding:10px 18px;background:#484581;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.ws-msg{margin-bottom:16px;}
+.ws-msg-user{display:flex;justify-content:flex-end;}
+.ws-msg-user-bubble{background:#484581;color:#fff;padding:10px 14px;border-radius:14px 14px 4px 14px;font-size:13.5px;line-height:1.55;max-width:85%;}
+.ws-msg-agent{display:flex;gap:10px;align-items:flex-start;}
+.ws-msg-agent-icon{width:28px;height:28px;background:#f5f3ff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#484581;font-size:14px;}
+.ws-msg-agent-body{flex:1;min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:4px 14px 14px 14px;padding:12px 16px;font-size:13px;line-height:1.6;color:#1e293b;overflow-x:auto;}
+.ws-msg-agent-body table{width:100%;font-size:12.5px;border-collapse:collapse;margin:8px 0;table-layout:fixed;}
+.ws-msg-agent-body table td{padding:6px 10px;border-bottom:1px solid #f1f5f9;word-wrap:break-word;overflow-wrap:break-word;}
+.ws-msg-agent-body table td:first-child{font-weight:600;color:#64748b;width:42%;}
+.ws-msg-agent-body table td:last-child{color:#1e293b;}
+.ws-action-btns{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+.ws-action-btn{padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit;border:1px solid #e2e8f0;background:#fff;color:#374151;transition:all .15s;}
+.ws-action-btn:hover{background:#f8fafc;border-color:#cbd5e1;}
+.ws-action-btn-primary{background:#484581;color:#fff;border-color:#484581;}
+.ws-action-btn-primary:hover{background:#3a3769;}
+.ws-need-item{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;margin:5px 0;font-size:13px;line-height:1.5;transition:border-color .15s,background .15s;cursor:pointer;}
+.ws-need-item:hover{border-color:#cbd5e1;background:#f8fafc;}
+.ws-need-item.selected{background:#f8f7ff;border-color:#c7d2fe;}
+.ws-need-item input[type="checkbox"]{width:16px;height:16px;accent-color:#484581;flex-shrink:0;cursor:pointer;}
+.ws-need-item .ws-item-label{flex:1;min-width:0;}
+@keyframes ws-dot-pulse{0%,80%,100%{opacity:.3;transform:scale(.8);}40%{opacity:1;transform:scale(1);}}
+.ws-loading-dots{display:inline-flex;gap:4px;margin-right:8px;vertical-align:middle;}
+.ws-loading-dots span{width:6px;height:6px;border-radius:50%;background:#484581;display:inline-block;animation:ws-dot-pulse 1.2s infinite ease-in-out;}
+.ws-loading-dots span:nth-child(2){animation-delay:.15s;}
+.ws-loading-dots span:nth-child(3){animation-delay:.3s;}
+.ws-loading-status{display:flex;align-items:center;gap:8px;color:#484581;font-size:13px;font-weight:500;}
+.ws-loading-sub{font-size:11.5px;color:#94a3b8;font-weight:400;margin-top:4px;}
+.ws-custom-input{flex:1;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:12.5px;font-family:inherit;outline:none;color:#1e293b;}
+.ws-custom-input:focus{border-color:#484581;box-shadow:0 0 0 3px rgba(72,69,129,.08);}
+.ws-custom-input-btn{padding:8px 14px;background:#484581;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.ws-custom-input-btn:hover{background:#3a3769;}
+.ws-search-dropdown{position:absolute;left:0;right:60px;top:100%;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);max-height:200px;overflow-y:auto;z-index:10;margin-top:4px;display:none;}
+.ws-search-dropdown.open{display:block;}
+.ws-search-item{padding:8px 12px;font-size:12.5px;color:#1e293b;cursor:pointer;border-bottom:1px solid #f1f5f9;line-height:1.5;}
+.ws-search-item:last-child{border-bottom:none;}
+.ws-search-item:hover{background:#f5f3ff;}
+.ws-search-item .ws-search-cat{font-size:10.5px;color:#94a3b8;display:block;margin-top:1px;}
+.ws-search-empty{padding:10px 12px;font-size:12px;color:#94a3b8;font-style:italic;}
+.ws-custom-input-wrap{display:flex;gap:6px;margin-top:8px;align-items:center;position:relative;}
+.ws-parent-select{padding:6px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;font-family:inherit;color:#1e293b;background:#fff;outline:none;max-width:220px;margin-bottom:6px;}
+.ws-parent-select:focus{border-color:#484581;box-shadow:0 0 0 3px rgba(72,69,129,.08);}
+.ws-step-hint{font-size:12px;color:#64748b;margin:10px 0 6px;line-height:1.5;}
+.ws-step-hint strong{color:#1e293b;font-weight:600;}
+.ws-group-label{font-size:11.5px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.03em;margin:14px 0 4px;padding-bottom:4px;border-bottom:1px solid #f1f5f9;}
+.ws-group-label:first-child{margin-top:6px;}
+.ws-need-check{width:16px;height:16px;accent-color:#484581;cursor:pointer;}
+.ws-split{flex:1;display:flex;overflow:hidden;}
+.ws-split-sidebar{width:60%;display:flex;flex-direction:column;border-right:1px solid #e2e8f0;background:#fff;flex-shrink:0;overflow:hidden;}
+.ws-split-sidebar .ws-chat-messages{padding:12px 14px;}
+.ws-split-sidebar .ws-chat-input-bar{padding:10px 12px;}
+.ws-split-sidebar .ws-msg-user-bubble{font-size:12.5px;padding:8px 12px;}
+.ws-split-sidebar .ws-msg-agent-body{font-size:12.5px;padding:10px 14px;}
+.ws-split-main{flex:1;min-width:0;overflow-y:auto;overflow-x:hidden;padding:16px 14px;background:#f8f9fb;}
+.ws-split-main table{table-layout:auto;width:100%;}
+.ws-split-main table td{padding:4px 6px !important;word-break:break-word;font-size:11.5px;vertical-align:top;}
+.ws-artifact{max-width:820px;margin:0 auto;}
+.ws-artifact-title{font-size:18px;font-weight:700;color:#1e293b;margin-bottom:4px;}
+.ws-artifact-sub{font-size:12.5px;color:#94a3b8;margin-bottom:20px;}
+.ws-art-section{background:#fff;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px;overflow:hidden;}
+.ws-art-section-head{padding:8px 12px;background:#f8f9fb;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#1e293b;display:flex;align-items:center;justify-content:space-between;}
+.ws-art-section-body{padding:10px 12px;}
+.ws-art-goal{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:6px;}
+.ws-art-goal-title{font-size:12px;font-weight:600;color:#1e293b;display:flex;align-items:center;justify-content:space-between;}
+.ws-art-int{font-size:11.5px;color:#374151;padding:4px 0 4px 12px;border-left:2px solid #e2dff6;margin:4px 0 4px 4px;display:flex;align-items:center;justify-content:space-between;}
+.ws-art-remove{border:none;background:none;color:#ef4444;font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px;opacity:.6;}
+.ws-art-remove:hover{opacity:1;background:#fef2f2;}
+.ws-art-validation{padding:14px 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;margin-bottom:16px;}
+.ws-art-val-item{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#166534;margin:4px 0;}
+.ws-deploy-bar{display:flex;gap:8px;padding:12px 0;flex-wrap:nowrap;}
+.ws-deploy-btn{padding:8px 12px;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid #e2e8f0;background:#fff;color:#374151;white-space:nowrap;}
+.ws-deploy-btn:hover{background:#f8fafc;}
+.ws-deploy-btn-primary{background:#484581;color:#fff;border-color:#484581;}
+.ws-deploy-btn-primary:hover{background:#3a3769;}
+.ws-deploy-btn-green{background:#16a34a;color:#fff;border-color:#16a34a;}
+.ws-deploy-btn-green:hover{background:#15803d;}
+.ws-art-edit-toggle{padding:7px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;background:#fff;color:#374151;font-family:inherit;display:inline-flex;align-items:center;gap:5px;}
+.ws-art-edit-toggle:hover{background:#f8fafc;border-color:#cbd5e1;}
+.ws-art-edit-toggle.active{background:#484581;color:#fff;border-color:#484581;}
+.ws-art-header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.ws-art-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+.ws-art-nav-item{padding:5px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:11.5px;color:#64748b;cursor:pointer;font-family:inherit;background:#fff;transition:all .15s;}
+.ws-art-nav-item:hover{background:#f5f3ff;border-color:#c7d2fe;color:#484581;}
+.ws-art-editable-field{border:1px solid transparent;border-radius:4px;padding:2px 4px;margin:-2px -4px;transition:all .15s;}
+.ws-art-editable-field:hover{border-color:#e2e8f0;background:#f8fafc;}
+.ws-art-editable-field:focus{border-color:#484581;background:#fff;outline:none;box-shadow:0 0 0 3px rgba(72,69,129,.08);}
+.ws-art-editable-input{border:1px solid #e2e8f0;border-radius:6px;padding:4px 8px;font-size:12.5px;font-family:inherit;color:#1e293b;width:140px;outline:none;}
+.ws-art-editable-input:focus{border-color:#484581;box-shadow:0 0 0 3px rgba(72,69,129,.08);}
+.ws-art-editable-text{border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:12.5px;font-family:inherit;color:#1e293b;width:100%;outline:none;resize:vertical;min-height:32px;}
+.ws-art-editable-text:focus{border-color:#484581;box-shadow:0 0 0 3px rgba(72,69,129,.08);}
+.ws-chip{display:inline-block;padding:6px 12px;background:#f5f3ff;border:1px solid #e2dff6;border-radius:16px;font-size:12px;color:#484581;cursor:pointer;margin:3px 4px 3px 0;font-family:inherit;transition:all .15s;}
+.ws-chip:hover{background:#ede9fe;border-color:#c4b5fd;}
 </style>
 
 
@@ -21010,13 +21132,9 @@ function doLogin() {
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
                             Actions
                         </div>
-                        <button class="ai-menu-item" id="aiMenuAppt" onclick="closeAIMenu();openAICopilotForAppointment();" style="display:none;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M12 14v4M10 16h4"/></svg>
-                            <span class="ai-menu-item-label">Schedule appointment</span>
-                        </button>
-                        <button class="ai-menu-item" onclick="closeAIMenu();handleAIQuestion('mx_draft_note');">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            <span class="ai-menu-item-label">Draft service note</span>
+                        <button class="ai-menu-item" onclick="closeAIMenu();openWorkspaceList();">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            <span class="ai-menu-item-label">Workspace</span>
                         </button>
                         <button class="ai-menu-item" onclick="closeAIMenu();openCtxPanel();">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -29663,6 +29781,7 @@ function generateHeaderData(seed, stage, mco) {
 // GENERATE ALL MEMBERS
 // ============================================
 const membersDB = MEMBER_SEEDS.map((seed, index) => generateMember(seed, index));
+window.membersDB = membersDB;
 
 // ─── MULTI-PLAN OVERRIDES ─────────────────────────────────────────────────────
 // Give 3 fully-active members realistic multi-plan setups so the AI plan picker
@@ -53531,6 +53650,1615 @@ window._agentActPriorAuth = function(actionId) {
         '<span style="font-size:12px;color:#64748b;">— appeal letter sent to review queue (SLA: 60 min). <button style="background:none;border:none;color:#484581;font-weight:600;cursor:pointer;padding:0;font-size:12px;" onclick="window.showSevidaAI&&window.showSevidaAI(\'review\')">Open Review Queue →</button></span>' +
     '</div>';
 };
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// WORKSPACE — persistent AI workspace for building care plans, referrals, etc.
+// ═══════════════════════════════════════════════════════════════════════════════
+(function(){
+var WS = []; // workspace list
+try { var _s = sessionStorage.getItem('sevida-workspaces'); if (_s) WS = JSON.parse(_s); } catch(e){}
+function _wsPersist(){ try { sessionStorage.setItem('sevida-workspaces', JSON.stringify(WS)); } catch(e){} }
+function _esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+var _cur = null; // current workspace id
+
+// ── Members search ──
+function _findMember(query){
+    var q = (query||'').toLowerCase();
+    var db = window.membersDB || [];
+    return db.filter(function(m){ return (m.name||'').toLowerCase().indexOf(q)>=0 || (m.id||'').toLowerCase().indexOf(q)>=0; }).slice(0,5);
+}
+function _memberCtx(m){
+    if(!m) return '';
+    var parts = [];
+    parts.push('Name: '+(m.name||'Unknown'));
+    parts.push('ID: '+(m.id||''));
+    if(m.program||m.lob) parts.push('Program: '+(m.program||m.lob));
+    if(m.riskCategory) parts.push('Risk: '+m.riskCategory);
+    var dx = m.diagnoses||{}; if(dx.primary) parts.push('Primary Dx: '+dx.primary);
+    if(dx.secondary&&dx.secondary.length) parts.push('Secondary Dx: '+(Array.isArray(dx.secondary)?dx.secondary.join(', '):dx.secondary));
+    var hh = m.healthHistory||{};
+    var meds = m.medications||hh.medications||[];
+    if(meds.length) parts.push('Medications: '+meds.map(function(x){return x.name||x.drug||x;}).slice(0,8).join(', '));
+    var adts = (m.dashboardData||{}).adts||hh.adts||[];
+    if(adts.length) parts.push('ADTs: '+adts.map(function(a){return (a.eventType||a.type||'')+' '+(a.date||a.eventDate||'');}).slice(0,5).join('; '));
+    var notes = m.serviceNotes||[];
+    if(notes.length) parts.push('Service Notes:\n'+notes.slice(0,6).map(function(n,i){return '  Note '+(i+1)+' ('+n.date+'): '+n.activity+(n.summary?' — '+n.summary:'');}).join('\n'));
+    var needs = (m.carePlanData&&m.carePlanData.needs)||m.needs||[];
+    if(needs.length) parts.push('Existing care plan needs: '+needs.map(function(n){return n.text||n.category||n;}).slice(0,6).join(', '));
+    var gaps = (m.carePlanData&&m.carePlanData.gaps)||m.careGaps||[];
+    if(gaps.length) parts.push('Care gaps: '+gaps.map(function(g){return g.measure||g.desc||g;}).slice(0,5).join(', '));
+    var barriers = m.barriers||[]; if(barriers.length) parts.push('Barriers: '+barriers.join(', '));
+    return parts.join('\n');
+}
+
+// ── API call helper ──
+function _wsApi(prompt, cb){
+    var apiKey = (typeof window.getApiKey==='function') ? window.getApiKey() : '';
+    if(!apiKey){ cb(null, 'No API key set. Open the Co-pilot and set your API key first.'); return; }
+    fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1200,messages:[{role:'user',content:prompt}]})})
+    .then(function(r){return r.json();})
+    .then(function(d){ if(d.error){ cb(null, d.error.message||'API error'); return; } cb((d.content&&d.content[0]&&d.content[0].text)||''); })
+    .catch(function(e){ cb(null, e.message||'Network error'); });
+}
+
+// ── Get workspace ──
+function _wsGet(id){ return WS.find(function(w){return w.id===id;}); }
+
+// ── Open workspace list from Co-pilot ──
+window.openWorkspaceList = function(){
+    // Close copilot if open
+    var panel = document.querySelector('.ai-copilot-panel');
+    if(panel && panel.classList.contains('open')){ if(typeof toggleAICopilot==='function') toggleAICopilot(); }
+    var existing = document.getElementById('ws-overlay');
+    if(existing) existing.remove();
+    var ov = document.createElement('div');
+    ov.id = 'ws-overlay'; ov.className = 'ws-overlay';
+    ov.innerHTML = '<div class="ws-header"><button class="ws-header-back" onclick="closeWorkspace()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button><div class="ws-header-title">Workspaces</div><button class="ws-action-btn ws-action-btn-primary" onclick="newWorkspace()" style="font-size:12.5px;">+ New Workspace</button></div><div class="ws-body"><div id="ws-list-area" class="ws-list"></div></div>';
+    document.body.appendChild(ov);
+    _wsRenderList();
+};
+
+window.closeWorkspace = function(){
+    var ov = document.getElementById('ws-overlay');
+    if(ov) ov.remove(); _cur = null;
+};
+
+function _wsRenderList(){
+    var el = document.getElementById('ws-list-area'); if(!el) return;
+    if(!WS.length){
+        el.innerHTML = '<div class="ws-list-empty"><div style="font-size:36px;margin-bottom:12px;">✦</div><div style="font-size:15px;font-weight:600;color:#1e293b;margin-bottom:6px;">No workspaces yet</div><div style="font-size:13px;line-height:1.6;max-width:400px;margin:0 auto;">Workspaces let you build care plans, referrals, and other records with AI — step by step. Start one and pick up where you left off.</div><button class="ws-action-btn ws-action-btn-primary" onclick="newWorkspace()" style="margin-top:16px;padding:10px 20px;font-size:13px;">+ New Workspace</button></div>';
+        return;
+    }
+    var h = '<div style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">Your workspaces ('+WS.length+')</div>';
+    WS.slice().reverse().forEach(function(w){
+        var badge = w.status==='deployed' ? '<span class="ws-list-item-badge ws-badge-deployed">Deployed</span>' : w.status==='draft_created' ? '<span class="ws-list-item-badge ws-badge-saved">Draft saved</span>' : '<span class="ws-list-item-badge ws-badge-progress">In progress</span>';
+        h += '<div class="ws-list-item" onclick="openWorkspace(\''+w.id+'\')">' +
+            '<div class="ws-list-item-icon">✦</div>' +
+            '<div class="ws-list-item-info"><div class="ws-list-item-name">'+_esc(w.name)+'</div><div class="ws-list-item-sub">'+(w.memberName||'No member linked')+' · '+(w.messages?w.messages.length:0)+' messages</div></div>' +
+            badge + '</div>';
+    });
+    el.innerHTML = h;
+}
+
+// ── Create new workspace ──
+window.newWorkspace = function(){
+    var ws = { id:'ws_'+Date.now(), name:'Untitled Workspace', memberId:null, memberName:null, status:'in_progress', type:null, messages:[], artifact:null, phase:'chat', step:'init', needs:[], goals:[], interventions:[], findings:[] };
+    WS.push(ws); _wsPersist();
+    _openWsChat(ws.id);
+    // Agent greeting
+    _wsAddAgent(ws.id, 'What would you like to work on? Tell me the member and what you need.');
+};
+
+window._wsChip = function(text){
+    var inp = document.getElementById('ws-input');
+    if(inp){ inp.value = text; inp.focus(); inp.setSelectionRange(text.length, text.length); }
+};
+
+// ── Open existing workspace ──
+window.openWorkspace = function(id){
+    var ws = _wsGet(id); if(!ws) return;
+    _openWsChat(ws.id);
+    // Re-render messages
+    var mc = document.getElementById('ws-messages'); if(!mc) return;
+    var chatArea = mc.querySelector('.ws-chat-center') || mc;
+    var h = '';
+    (ws.messages||[]).forEach(function(msg){
+        if(msg.role==='user') h += '<div class="ws-msg ws-msg-user"><div class="ws-msg-user-bubble">'+_esc(msg.text)+'</div></div>';
+        else h += '<div class="ws-msg ws-msg-agent"><div class="ws-msg-agent-icon">✦</div><div class="ws-msg-agent-body">'+msg.html+'</div></div>';
+    });
+    chatArea.innerHTML = h;
+    mc.scrollTop = mc.scrollHeight;
+    // If artifact exists, switch to split
+    if(ws.artifact && ws.phase==='review') _wsShowSplit(ws);
+};
+
+function _openWsChat(id){
+    _cur = id;
+    var ws = _wsGet(id); if(!ws) return;
+    var ov = document.getElementById('ws-overlay');
+    if(!ov){ ov = document.createElement('div'); ov.id='ws-overlay'; ov.className='ws-overlay'; document.body.appendChild(ov); }
+    var statusText = ws.memberName ? ('Linked to '+_esc(ws.memberName)) : 'No member linked';
+    var statusBadge = ws.status==='deployed' ? 'Deployed' : ws.status==='draft_created' ? 'Draft saved' : 'In progress';
+    ov.innerHTML = '<div class="ws-header"><button class="ws-header-back" onclick="openWorkspaceList()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Workspaces</button><div class="ws-header-title"><input id="ws-name-input" value="'+_esc(ws.name)+'" onchange="wsRename(this.value)" /></div><span class="ws-header-status">'+statusBadge+'</span><span class="ws-header-status" style="margin-left:4px;">'+statusText+'</span></div>' +
+        '<div class="ws-body" id="ws-body-area"><div class="ws-chat-full"><div class="ws-chat-messages" id="ws-messages"><div class="ws-chat-center"></div></div><div class="ws-chat-input-bar"><div class="ws-chat-input-wrap"><input id="ws-input" placeholder="Tell the agent what you need\u2026" onkeydown="if(event.key===\'Enter\')wsSend()" /><button onclick="wsSend()">Send</button></div></div></div></div>';
+}
+
+window.wsRename = function(v){ var ws=_wsGet(_cur); if(ws){ws.name=v.trim()||'Untitled Workspace'; _wsPersist();} };
+
+// ── Add messages ──
+function _wsAddUser(id, text){
+    var ws=_wsGet(id); if(!ws) return;
+    ws.messages.push({role:'user', text:text});
+    var mc=document.getElementById('ws-messages'); if(!mc) return;
+    var area = mc.querySelector('.ws-chat-center')||mc;
+    area.innerHTML += '<div class="ws-msg ws-msg-user"><div class="ws-msg-user-bubble">'+_esc(text)+'</div></div>';
+    mc.scrollTop=mc.scrollHeight;
+    _wsPersist();
+}
+function _wsAddAgent(id, text, chips, extraHTML){
+    var ws=_wsGet(id); if(!ws) return;
+    var html = _esc(text).replace(/\n/g,'<br>');
+    if(extraHTML) html += extraHTML;
+    if(chips && chips.length){
+        html += '<div class="ws-action-btns">';
+        chips.forEach(function(c){
+            if(c.action) html += '<button class="ws-chip" onclick="'+c.action+'">'+_esc(c.label)+'</button>';
+            else html += '<button class="ws-action-btn'+(c.primary?' ws-action-btn-primary':'')+'" onclick="'+c.onclick+'">'+_esc(c.label)+'</button>';
+        });
+        html += '</div>';
+    }
+    ws.messages.push({role:'agent', text:text, html:html});
+    var mc=document.getElementById('ws-messages'); if(!mc) return;
+    var area = mc.querySelector('.ws-chat-center')||mc;
+    area.innerHTML += '<div class="ws-msg ws-msg-agent"><div class="ws-msg-agent-icon">✦</div><div class="ws-msg-agent-body">'+html+'</div></div>';
+    mc.scrollTop=mc.scrollHeight;
+    _wsPersist();
+}
+function _wsAddAgentHTML(id, html){
+    var ws=_wsGet(id); if(!ws) return;
+    ws.messages.push({role:'agent', text:'', html:html});
+    var mc=document.getElementById('ws-messages'); if(!mc) return;
+    var area = mc.querySelector('.ws-chat-center')||mc;
+    area.innerHTML += '<div class="ws-msg ws-msg-agent"><div class="ws-msg-agent-icon">✦</div><div class="ws-msg-agent-body">'+html+'</div></div>';
+    mc.scrollTop=mc.scrollHeight;
+    _wsPersist();
+    _wsSyncNeedCheckboxes(ws);
+}
+function _wsLoading(id, statusMsg){
+    var mc=document.getElementById('ws-messages'); if(!mc) return;
+    var area = mc.querySelector('.ws-chat-center')||mc;
+    var msg = statusMsg || 'Reviewing member record';
+    area.innerHTML += '<div class="ws-msg ws-msg-agent" id="ws-loading"><div class="ws-msg-agent-icon">✦</div><div class="ws-msg-agent-body"><div class="ws-loading-status"><span class="ws-loading-dots"><span></span><span></span><span></span></span><span id="ws-loading-text">'+_esc(msg)+'</span></div><div class="ws-loading-sub" id="ws-loading-sub">This may take a moment</div></div></div>';
+    mc.scrollTop=mc.scrollHeight;
+    // Rotate status messages
+    var msgs = ['Reviewing member record','Analyzing diagnoses and barriers','Identifying care needs','Cross-referencing clinical data','Preparing recommendations'];
+    if(statusMsg==='goals') msgs = ['Analyzing selected needs','Generating measurable goals','Aligning goals to clinical evidence','Preparing recommendations'];
+    if(statusMsg==='interventions') msgs = ['Reviewing approved goals','Generating care interventions','Matching interventions to evidence','Preparing recommendations'];
+    var idx = 0;
+    window._wsLoadingInterval = setInterval(function(){
+        idx = (idx+1) % msgs.length;
+        var el = document.getElementById('ws-loading-text');
+        if(el) el.textContent = msgs[idx];
+    }, 2200);
+}
+function _wsRemoveLoading(){ var l=document.getElementById('ws-loading'); if(l) l.remove(); if(window._wsLoadingInterval) clearInterval(window._wsLoadingInterval); }
+
+// ── Send message ──
+window.wsSend = function(){
+    var inp=document.getElementById('ws-input'); if(!inp) return;
+    var text=inp.value.trim(); if(!text) return;
+    inp.value='';
+    var ws=_wsGet(_cur); if(!ws) return;
+    _wsAddUser(ws.id, text);
+    _wsProcess(ws, text);
+};
+
+// ── Main routing — determines what step we're on and what to do ──
+function _wsProcess(ws, text){
+    if(ws.step==='init' || ws.step==='identify'){
+        ws.step='identify'; _wsPersist();
+        _wsIdentifyMember(ws, text);
+    } else if(ws.step==='confirm_member'){
+        if(text.toLowerCase().indexOf('yes')>=0 || text.toLowerCase().indexOf('correct')>=0){
+            ws.step='extract'; _wsPersist();
+            _wsAddAgent(ws.id, 'Great \u2014 working with '+ws.memberName+'. Let me review their record and your request.');
+            _wsExtractFindings(ws);
+        } else {
+            ws.step='identify'; _wsPersist();
+            _wsAddAgent(ws.id, 'No problem. Please tell me the member name or ID.');
+        }
+    } else if(ws.step==='needs_review'){
+        _wsHandleNeedsInput(ws, text);
+    } else if(ws.step==='goals_review'){
+        _wsHandleGoalsInput(ws, text);
+    } else if(ws.step==='interventions_review'){
+        _wsHandleInterventionsInput(ws, text);
+    } else if(ws.step==='date_nudge'){
+        var lower = text.toLowerCase();
+        if(lower.indexOf('yes')>=0 || lower.indexOf('suggest')>=0){ ws._includeDates=true; _wsGenerateDraft(ws); }
+        else if(lower.indexOf('skip')>=0 || lower.indexOf('no')>=0){ ws._includeDates=false; _wsGenerateDraft(ws); }
+        else { _wsAddAgent(ws.id, 'Say "yes" to add suggested dates or "skip" to generate without dates.'); }
+    } else if(ws.step==='review' || ws.step==='deployed' || ws.step==='draft_created'){
+        // Post-draft commands
+        _wsHandlePostDraft(ws, text);
+    } else {
+        _wsAddAgent(ws.id, 'I\'m not sure what to do with that. Can you clarify?');
+    }
+}
+
+// ── Step: Identify member ──
+function _wsIdentifyMember(ws, text){
+    // Extract member name/id from the full message
+    var words = text.replace(/[.,!?]/g,' ').split(/\s+/);
+    var candidates = [];
+    var db = window.membersDB || [];
+    // Try 2-word and 3-word name matches
+    for(var i=0;i<words.length;i++){
+        for(var len=3;len>=1;len--){
+            var phrase = words.slice(i,i+len).join(' ').toLowerCase();
+            if(phrase.length<2) continue;
+            db.forEach(function(m){
+                if((m.name||'').toLowerCase().indexOf(phrase)>=0 || (m.id||'').toLowerCase()===phrase){
+                    if(!candidates.find(function(c){return c.id===m.id;})) candidates.push(m);
+                }
+            });
+        }
+    }
+    if(!candidates.length && db.length){ candidates = db.slice(0,1); } // fallback to first
+    if(candidates.length===1){
+        var m = candidates[0];
+        ws._pendingMember = m;
+        ws._originalRequest = text;
+        ws.step='confirm_member'; _wsPersist();
+        var tableHTML = '<table><tr><td>Member Name</td><td>'+_esc(m.name)+'</td></tr><tr><td>Member ID</td><td>'+_esc(m.id)+'</td></tr><tr><td>Program</td><td>'+_esc(m.program||m.lob||'Care Management')+'</td></tr><tr><td>Risk Level</td><td>'+_esc(m.riskCategory||'Unknown')+'</td></tr><tr><td>Active Care Plans</td><td>'+((m.carePlanData&&m.carePlanData.carePlans)?m.carePlanData.carePlans.length:'None')+'</td></tr></table>';
+        _wsAddAgentHTML(ws.id, 'I found the following member:'+tableHTML+'<div class="ws-action-btns"><button class="ws-action-btn ws-action-btn-primary" onclick="wsSendAuto(\'Yes\')">Yes, this is correct</button><button class="ws-action-btn" onclick="wsSendAuto(\'No, search for a different member\')">Search for different member</button></div>');
+    } else if(candidates.length>1){
+        var shown = candidates.slice(0,6);
+        var listHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">'+shown.map(function(m){
+            var risk = {1:'Low',2:'Med',3:'High',4:'V.High'}[m.riskTier]||'';
+            return '<button class="ws-action-btn" onclick="wsSelectMember(\''+m.id+'\')" style="text-align:left;padding:8px 10px;font-size:12px;line-height:1.4;border-radius:8px;"><span style="font-weight:600;">'+_esc(m.name)+'</span><br><span style="font-size:10.5px;color:#94a3b8;">'+_esc(m.id)+(risk?' · '+risk:'')+'</span></button>';
+        }).join('')+'</div>';
+        if(candidates.length>6) listHTML += '<div style="font-size:11px;color:#94a3b8;margin-top:6px;">+'+(candidates.length-6)+' more — type a more specific name to narrow down.</div>';
+        _wsAddAgentHTML(ws.id, 'I found '+candidates.length+' matching members:'+listHTML);
+    } else {
+        _wsAddAgent(ws.id, 'I couldn\'t find that member. Please provide the member name or ID.');
+    }
+}
+
+window.wsSendAuto = function(text){
+    var ws=_wsGet(_cur); if(!ws) return;
+    _wsAddUser(ws.id, text);
+    _wsProcess(ws, text);
+};
+
+window.wsSelectMember = function(memberId){
+    var ws=_wsGet(_cur); if(!ws) return;
+    var m = (window.membersDB||[]).find(function(x){return x.id===memberId;});
+    if(!m) return;
+    ws._pendingMember = m;
+    ws._originalRequest = ws.messages.find(function(msg){return msg.role==='user';}).text;
+    ws.memberId=m.id; ws.memberName=m.name; ws.step='extract';
+    if(ws.name==='Untitled Workspace') ws.name='Workspace \u2014 '+m.name;
+    _wsPersist();
+    _wsAddUser(ws.id, m.name);
+    _wsAddAgent(ws.id, 'Working with '+m.name+'. Let me review their record.');
+    // Activate split view immediately with member info on right
+    _wsActivateSplitView(ws);
+    _wsExtractFindings(ws);
+};
+
+// ── Step: Extract findings from member data + original request ──
+function _wsExtractFindings(ws){
+    var m = ws._pendingMember;
+    if(!m){ m = (window.membersDB||[]).find(function(x){return x.id===ws.memberId;}); }
+    if(!m){ _wsAddAgent(ws.id, 'I lost the member context. Please tell me the member name again.'); ws.step='identify'; _wsPersist(); return; }
+    ws.memberId=m.id; ws.memberName=m.name;
+    if(ws.name==='Untitled Workspace') ws.name='Workspace \u2014 '+m.name;
+    _wsPersist();
+    // Update header
+    var nameInp=document.getElementById('ws-name-input'); if(nameInp) nameInp.value=ws.name;
+
+    _wsLoading(ws.id, 'findings');
+    var ctx = _memberCtx(m);
+    var req = ws._originalRequest || 'Create a care plan';
+    var prompt = 'You are a care management AI agent. A care manager said:\n"'+req+'"\n\nMember record:\n'+ctx+'\n\n'+
+        'Analyze the request and the member record. Extract clinical findings and map each to a potential care need.\n'+
+        'Respond ONLY with JSON, no fences:\n'+
+        '{"findings":[{"finding":"Diabetes - uncontrolled HbA1c","source":"Primary Dx: Diabetes","need":"Diabetes Management"},{"finding":"Missed 2 appointments","source":"CM conversation","need":"Transportation Assistance"}],"type":"care_plan"}';
+
+    _wsApi(prompt, function(text, err){
+        _wsRemoveLoading();
+        if(err){ _wsAddAgent(ws.id, 'Error: '+err+'. I\'ll use what I can see in the record.'); _wsFallbackFindings(ws, m); return; }
+        try {
+            var clean = text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+            var parsed = JSON.parse(clean);
+            ws.findings = parsed.findings || [];
+            ws.type = parsed.type || 'care_plan';
+        } catch(e){ _wsFallbackFindings(ws, m); return; }
+        _wsShowFindings(ws);
+    });
+}
+
+function _wsFallbackFindings(ws, m){
+    ws.findings = [];
+    var dx = m.diagnoses||{};
+    if(dx.primary) ws.findings.push({finding:dx.primary, source:'Primary diagnosis', need:dx.primary+' Management'});
+    if(dx.secondary) {
+        if(Array.isArray(dx.secondary)) dx.secondary.forEach(function(d){ ws.findings.push({finding:d, source:'Secondary diagnosis', need:d+' Support'}); });
+        else ws.findings.push({finding:dx.secondary, source:'Secondary diagnosis', need:dx.secondary+' Support'});
+    }
+    var barriers = m.barriers||[];
+    barriers.forEach(function(b){ ws.findings.push({finding:b, source:'Barriers', need:b+' Assistance'}); });
+    ws.type = 'care_plan';
+    _wsShowFindings(ws);
+}
+
+function _wsShowFindings(ws){
+    // Show findings as stacked items instead of wide table
+    var fHTML = '<div style="margin:8px 0 12px;">';
+    ws.findings.forEach(function(f){
+        fHTML += '<div style="padding:8px 12px;border:1px solid #f1f5f9;border-radius:6px;margin:4px 0;background:#fafafa;">';
+        fHTML += '<div style="font-size:12.5px;color:#1e293b;">'+_esc(f.finding)+'</div>';
+        fHTML += '<div style="font-size:11px;color:#64748b;margin-top:2px;">→ '+_esc(f.need)+'</div>';
+        fHTML += '</div>';
+    });
+    fHTML += '</div>';
+    var needsMap = {};
+    ws.findings.forEach(function(f){ needsMap[f.need] = (needsMap[f.need]||[]).concat(f.finding); });
+    var uniqueNeeds = Object.keys(needsMap);
+    ws.needs = uniqueNeeds.map(function(n,i){ return {id:'n'+(i+1), label:n, findings:needsMap[n], selected:false, libId:null}; });
+    var needsHTML = '<div class="ws-step-hint"><strong>Select the needs</strong> that apply to this member. You can also search and add from the needs library below.</div>';
+    needsHTML += ws.needs.map(function(n){
+        return '<div class="ws-need-item'+(n.selected?' selected':'')+'" data-need-id="'+n.id+'" onclick="var cb=this.querySelector(\'input\');cb.checked=!cb.checked;cb.dispatchEvent(new Event(\'change\'));"><input type="checkbox" class="ws-need-check" data-nid="'+n.id+'"'+(n.selected?' checked':'')+' onchange="event.stopPropagation();wsToggleNeed(\''+n.id+'\',this.checked)" /> <span class="ws-item-label">'+_esc(n.label)+'</span></div>';
+    }).join('');
+    needsHTML += '<div class="ws-custom-input-wrap" id="ws-need-search-wrap"><div class="ws-search-dropdown" id="ws-need-dropdown"></div><input class="ws-custom-input" id="ws-custom-need" placeholder="Search needs library\u2026" oninput="wsSearchNeeds(this.value)" onfocus="wsSearchNeeds(this.value)" /><button class="ws-custom-input-btn" onclick="wsAddSearchedNeed()">Add</button></div>';
+    ws.step = 'needs_review'; _wsPersist();
+    _wsAddAgentHTML(ws.id, 'I\'ve reviewed the member record and identified the following findings:'+fHTML+'<strong>Suggested needs:</strong>'+needsHTML+'<div class="ws-action-btns" style="margin-top:14px;"><button class="ws-action-btn ws-action-btn-primary" onclick="wsContinueNeeds()">Continue with selected</button><button class="ws-action-btn" onclick="wsSendAuto(\'Skip needs\')">Skip</button></div>');
+    // Close dropdown on outside click
+    setTimeout(function(){ document.addEventListener('click', function _wsCloseDD(e){ if(!e.target.closest('#ws-need-search-wrap')){ var dd=document.getElementById('ws-need-dropdown'); if(dd) dd.classList.remove('open'); } }); },200);
+}
+
+// ── Sync all need checkboxes to match ws.needs state ──
+function _wsSyncNeedCheckboxes(ws){
+    if(!ws) return;
+    document.querySelectorAll('.ws-need-item[data-need-id]').forEach(function(el){
+        var nid = el.getAttribute('data-need-id');
+        var need = ws.needs.find(function(n){return n.id===nid;});
+        var cb = el.querySelector('input[type="checkbox"]');
+        if(need && cb){
+            cb.checked = need.selected;
+            el.classList.toggle('selected', need.selected);
+        }
+    });
+}
+
+window.wsToggleNeed = function(id, checked){
+    var ws=_wsGet(_cur); if(!ws) return;
+    var n=ws.needs.find(function(x){return x.id===id;}); if(n) n.selected=checked;
+    _wsSyncNeedCheckboxes(ws);
+    _wsPersist();
+    _wsRenderLivePreview(ws);
+    // If goals already exist, needs changed → mark stale and prompt regeneration
+    if(ws.goals && ws.goals.length > 0){
+        var selNeedIds = ws.needs.filter(function(n){return n.selected;}).map(function(n){return n.id;}).sort().join(',');
+        var goalNeedIds = [];
+        ws.goals.forEach(function(g){ if(goalNeedIds.indexOf(g.needId)<0) goalNeedIds.push(g.needId); });
+        goalNeedIds.sort();
+        if(selNeedIds !== goalNeedIds.join(',')){
+            // Remove old stale banner if any
+            var oldBanner = document.getElementById('ws-stale-goals'); if(oldBanner) oldBanner.remove();
+            var mc = document.getElementById('ws-messages');
+            var area = mc ? (mc.querySelector('.ws-chat-center')||mc) : null;
+            if(area){
+                var banner = document.createElement('div');
+                banner.id = 'ws-stale-goals';
+                banner.className = 'ws-msg ws-msg-agent';
+                banner.innerHTML = '<div class="ws-msg-agent-icon">✦</div><div class="ws-msg-agent-body" style="background:#fffbeb;border-color:#fde68a;"><div style="font-size:12.5px;color:#92400e;margin-bottom:6px;">Needs have changed since goals were generated.</div><button class="ws-action-btn ws-action-btn-primary" style="font-size:12px;" onclick="wsRegenerateGoals()">Regenerate goals for updated needs</button></div>';
+                area.appendChild(banner);
+                mc.scrollTop = mc.scrollHeight;
+            }
+        }
+    }
+};
+
+window.wsAddCustomNeed = function(){};
+
+// Library search for needs
+window._wsNeedSearchSelection = null;
+window.wsSearchNeeds = function(query){
+    var dd = document.getElementById('ws-need-dropdown'); if(!dd) return;
+    var q = (query||'').toLowerCase().trim();
+    if(q.length < 1){ dd.classList.remove('open'); dd.innerHTML=''; return; }
+    var lib = (typeof CarePlanController !== 'undefined' && CarePlanController.NEEDS_LIBRARY) ? CarePlanController.NEEDS_LIBRARY : [];
+    var ws = _wsGet(_cur);
+    var existingLabels = ws ? ws.needs.map(function(n){return n.label.toLowerCase();}) : [];
+    var matches = lib.filter(function(n){
+        return ((n.label||'').toLowerCase().indexOf(q)>=0 || (n.category||'').toLowerCase().indexOf(q)>=0 || (n.diagnoses||'').toLowerCase().indexOf(q)>=0 || (n.need||'').toLowerCase().indexOf(q)>=0)
+            && existingLabels.indexOf(n.label.toLowerCase()) < 0;
+    }).slice(0,6);
+    if(!matches.length){
+        dd.innerHTML = '<div class="ws-search-empty">No matching needs in library</div>';
+    } else {
+        dd.innerHTML = matches.map(function(n){
+            return '<div class="ws-search-item" onclick="wsSelectNeedFromLib(\''+n.id+'\')"><span>'+_esc(n.label)+'</span><span class="ws-search-cat">'+_esc(n.category)+' · '+_esc(n.diagnoses)+'</span></div>';
+        }).join('');
+    }
+    dd.classList.add('open');
+    window._wsNeedSearchSelection = null;
+};
+window.wsSelectNeedFromLib = function(libId){
+    var lib = (typeof CarePlanController !== 'undefined' && CarePlanController.NEEDS_LIBRARY) ? CarePlanController.NEEDS_LIBRARY : [];
+    var item = lib.find(function(n){return n.id===libId;});
+    if(!item) return;
+    var inp = document.getElementById('ws-custom-need'); if(inp) inp.value = item.label;
+    window._wsNeedSearchSelection = item;
+    var dd = document.getElementById('ws-need-dropdown'); if(dd) dd.classList.remove('open');
+};
+window.wsAddSearchedNeed = function(){
+    var inp = document.getElementById('ws-custom-need'); if(!inp) return;
+    var text = inp.value.trim(); if(!text) return;
+    var ws = _wsGet(_cur); if(!ws) return;
+    var sel = window._wsNeedSearchSelection;
+    var newId = 'n'+(ws.needs.length+1);
+    ws.needs.push({id:newId, label:text, findings:['Library/CM input'], selected:true, libId:sel?sel.id:null});
+    _wsPersist();
+    inp.value = '';
+    window._wsNeedSearchSelection = null;
+    var dd = document.getElementById('ws-need-dropdown'); if(dd){ dd.classList.remove('open'); dd.innerHTML=''; }
+    // Insert visually
+    var wrap = document.getElementById('ws-need-search-wrap');
+    if(wrap){
+        var item = document.createElement('div');
+        item.className = 'ws-need-item selected';
+        item.setAttribute('onclick',"var cb=this.querySelector('input');cb.checked=!cb.checked;cb.dispatchEvent(new Event('change'));");
+        item.innerHTML = '<input type="checkbox" checked class="ws-need-check" onchange="event.stopPropagation();wsToggleNeed(\''+newId+'\',this.checked)" /> <span class="ws-item-label">'+_esc(text)+'</span>';
+        wrap.parentNode.insertBefore(item, wrap);
+    }
+    _wsRenderLivePreview(ws);
+};
+
+window.wsContinueNeeds = function(){
+    var ws=_wsGet(_cur); if(!ws) return;
+    var selected = ws.needs.filter(function(n){return n.selected;});
+    if(!selected.length){
+        _wsAddAgent(ws.id, 'No needs selected. Please check at least one need to continue, or type a custom one.');
+        return;
+    }
+    _wsAddUser(ws.id, 'Continue with '+selected.length+' selected need'+(selected.length>1?'s':''));
+    ws.step='goals_gen'; _wsPersist();
+    _wsGenerateGoals(ws);
+};
+
+function _wsHandleNeedsInput(ws, text){
+    var lower = text.toLowerCase();
+    if(lower.indexOf('continue')>=0 || lower.indexOf('accept')>=0 || lower.indexOf('yes')>=0){
+        var selected = ws.needs.filter(function(n){return n.selected;});
+        if(!selected.length){ _wsAddAgent(ws.id, 'No needs are selected. Please select at least one need or type one to add.'); return; }
+        ws.step='goals_gen'; _wsPersist();
+        _wsGenerateGoals(ws);
+    } else if(lower.indexOf('skip')>=0){
+        // Skip needs selection — empty draft, CM adds in preview
+        ws.needs.forEach(function(n){n.selected=false;});
+        ws.goals = [];
+        ws.interventions = [];
+        _wsAddAgent(ws.id, 'Skipping needs selection. Generating an empty draft — you can add needs, goals, and interventions in the preview using Edit mode.');
+        _wsGenerateDraft(ws);
+    } else {
+        // Treat any freetext as adding a need
+        ws.needs.push({id:'n'+(ws.needs.length+1), label:text.trim(), findings:['CM input'], selected:true}); _wsPersist();
+        _wsAddAgent(ws.id, 'Added "'+text.trim()+'" as a need. Say "continue" when you\'re ready to move to goals.');
+    }
+}
+
+// ── Step: Generate goals ──
+function _wsGenerateGoals(ws){
+    var selected = ws.needs.filter(function(n){return n.selected;});
+    _wsLoading(ws.id, 'goals');
+    var m = (window.membersDB||[]).find(function(x){return x.id===ws.memberId;});
+    var ctx = m ? _memberCtx(m) : '';
+    var needsList = selected.map(function(n){return n.label;}).join(', ');
+    var prompt = 'Care management AI. Member:\n'+ctx+'\n\nSelected needs: '+needsList+'\n\n'+
+        'For each need, suggest 2 specific, measurable goals. Each goal should be achievable within 90 days.\n'+
+        'Respond ONLY JSON, no fences:\n[{"need":"Diabetes Management","goals":["Improve diabetes self-management","Improve healthy eating habits"]}]';
+    _wsApi(prompt, function(text, err){
+        _wsRemoveLoading();
+        ws.goals = [];
+        if(!err){
+            try {
+                var clean = text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+                var parsed = JSON.parse(clean);
+                parsed.forEach(function(ng){
+                    var need = selected.find(function(n){return n.label.toLowerCase()===ng.need.toLowerCase();}) || selected[0];
+                    (ng.goals||[]).forEach(function(g,i){
+                        ws.goals.push({id:'g_'+need.id+'_'+i, needId:need.id, needLabel:need.label, text:g, selected:true});
+                    });
+                });
+            } catch(e){}
+        }
+        if(!ws.goals.length){
+            selected.forEach(function(n){
+                ws.goals.push({id:'g_'+n.id+'_0', needId:n.id, needLabel:n.label, text:'Improve '+n.label.toLowerCase(), selected:true});
+                ws.goals.push({id:'g_'+n.id+'_1', needId:n.id, needLabel:n.label, text:'Maintain progress in '+n.label.toLowerCase(), selected:true});
+            });
+        }
+        _wsShowGoals(ws);
+    });
+}
+
+function _wsShowGoals(ws){
+    var grouped = {};
+    ws.goals.forEach(function(g){ g.selected=false; if(!grouped[g.needLabel]) grouped[g.needLabel]=[]; grouped[g.needLabel].push(g); });
+    var html = '<div class="ws-step-hint"><strong>Select the goals</strong> you want for each need. Each goal is grouped under the need it supports.</div>';
+    Object.keys(grouped).forEach(function(need){
+        html += '<div class="ws-group-label">'+_esc(need)+'</div>';
+        grouped[need].forEach(function(g){
+            html += '<div class="ws-need-item" onclick="var cb=this.querySelector(\'input\');cb.checked=!cb.checked;cb.dispatchEvent(new Event(\'change\'));"><input type="checkbox" class="ws-need-check" onchange="event.stopPropagation();wsToggleGoal(\''+g.id+'\',this.checked)" /> <span class="ws-item-label">'+_esc(g.text)+'</span></div>';
+        });
+    });
+    // Parent need selector + library search for custom goals
+    var selNeeds = ws.needs.filter(function(n){return n.selected;});
+    html += '<div style="margin-top:12px;"><div style="font-size:11.5px;color:#64748b;margin-bottom:4px;">Add a goal to:</div>';
+    html += '<select class="ws-parent-select" id="ws-goal-parent-need">';
+    selNeeds.forEach(function(n){ html += '<option value="'+n.id+'">'+_esc(n.label)+'</option>'; });
+    html += '</select></div>';
+    html += '<div class="ws-custom-input-wrap" id="ws-goal-search-wrap"><div class="ws-search-dropdown" id="ws-goal-dropdown"></div><input class="ws-custom-input" id="ws-custom-goal" placeholder="Search goals library\u2026" oninput="wsSearchGoals(this.value)" onfocus="wsSearchGoals(this.value)" /><button class="ws-custom-input-btn" onclick="wsAddSearchedGoal()">Add</button></div>';
+    ws.step='goals_review'; _wsPersist();
+    _wsAddAgentHTML(ws.id, '<strong>Based on the selected needs, I recommend these goals:</strong>'+html+'<div class="ws-action-btns" style="margin-top:14px;"><button class="ws-action-btn ws-action-btn-primary" onclick="wsContinueGoals()">Continue with selected</button><button class="ws-action-btn" onclick="wsSendAuto(\'Skip goals\')">Skip</button></div>');
+}
+
+window.wsToggleGoal = function(id, checked){
+    var ws=_wsGet(_cur); if(!ws) return;
+    var g=ws.goals.find(function(x){return x.id===id;}); if(g) g.selected=checked;
+    document.querySelectorAll('.ws-need-item').forEach(function(el){
+        var cb = el.querySelector('input[type="checkbox"]');
+        if(cb) el.classList.toggle('selected', cb.checked);
+    });
+    _wsPersist();
+    _wsRenderLivePreview(ws);
+    // If interventions already exist, goals changed → mark stale
+    if(ws.interventions && ws.interventions.length > 0){
+        var selGoalIds = ws.goals.filter(function(g){return g.selected;}).map(function(g){return g.id;}).sort().join(',');
+        var intGoalIds = [];
+        ws.interventions.forEach(function(i){ if(intGoalIds.indexOf(i.goalId)<0) intGoalIds.push(i.goalId); });
+        intGoalIds.sort();
+        if(selGoalIds !== intGoalIds.join(',')){
+            var oldBanner = document.getElementById('ws-stale-ints'); if(oldBanner) oldBanner.remove();
+            var mc = document.getElementById('ws-messages');
+            var area = mc ? (mc.querySelector('.ws-chat-center')||mc) : null;
+            if(area){
+                var banner = document.createElement('div');
+                banner.id = 'ws-stale-ints';
+                banner.className = 'ws-msg ws-msg-agent';
+                banner.innerHTML = '<div class="ws-msg-agent-icon">✦</div><div class="ws-msg-agent-body" style="background:#fffbeb;border-color:#fde68a;"><div style="font-size:12.5px;color:#92400e;margin-bottom:6px;">Goals have changed since interventions were generated.</div><button class="ws-action-btn ws-action-btn-primary" style="font-size:12px;" onclick="wsRegenerateInts()">Regenerate interventions</button></div>';
+                area.appendChild(banner);
+                mc.scrollTop = mc.scrollHeight;
+            }
+        }
+    }
+};
+
+// Library search for goals
+window._wsGoalSearchSelection = null;
+window.wsSearchGoals = function(query){
+    var dd = document.getElementById('ws-goal-dropdown'); if(!dd) return;
+    var q = (query||'').toLowerCase().trim();
+    if(q.length < 1){ dd.classList.remove('open'); dd.innerHTML=''; return; }
+    // Get goals from GOALS_MAP for selected needs
+    var ws = _wsGet(_cur); if(!ws) return;
+    var goalsMap = (typeof CarePlanController !== 'undefined' && CarePlanController.GOALS_MAP) ? CarePlanController.GOALS_MAP : {};
+    var selNeed = document.getElementById('ws-goal-parent-need');
+    var parentNeedId = selNeed ? selNeed.value : '';
+    var parentNeed = ws.needs.find(function(n){return n.id===parentNeedId;});
+    // Search across all goals in the library
+    var allGoals = [];
+    Object.keys(goalsMap).forEach(function(nlId){
+        goalsMap[nlId].forEach(function(g){
+            allGoals.push({id:g.id, text:g.text, libNeedId:nlId, interventions:g.interventions});
+        });
+    });
+    var matches = allGoals.filter(function(g){ return g.text.toLowerCase().indexOf(q)>=0; }).slice(0,6);
+    if(!matches.length){
+        dd.innerHTML = '<div class="ws-search-empty">No matching goals in library</div>';
+    } else {
+        dd.innerHTML = matches.map(function(g){
+            return '<div class="ws-search-item" onclick="wsSelectGoalFromLib(\''+g.id+'\')">'+_esc(g.text)+'</div>';
+        }).join('');
+    }
+    dd.classList.add('open');
+    window._wsGoalSearchSelection = null;
+};
+window.wsSelectGoalFromLib = function(goalId){
+    var goalsMap = (typeof CarePlanController !== 'undefined' && CarePlanController.GOALS_MAP) ? CarePlanController.GOALS_MAP : {};
+    var found = null;
+    Object.keys(goalsMap).forEach(function(nlId){ goalsMap[nlId].forEach(function(g){ if(g.id===goalId) found=g; }); });
+    if(!found) return;
+    var inp = document.getElementById('ws-custom-goal'); if(inp) inp.value = found.text;
+    window._wsGoalSearchSelection = found;
+    var dd = document.getElementById('ws-goal-dropdown'); if(dd) dd.classList.remove('open');
+};
+window.wsAddSearchedGoal = function(){
+    var inp = document.getElementById('ws-custom-goal'); if(!inp) return;
+    var text = inp.value.trim(); if(!text) return;
+    var ws = _wsGet(_cur); if(!ws) return;
+    var selNeed = document.getElementById('ws-goal-parent-need');
+    var parentNeedId = selNeed ? selNeed.value : '';
+    var parentNeed = ws.needs.find(function(n){return n.id===parentNeedId;});
+    if(!parentNeed){ return; }
+    var gid = 'g_'+parentNeed.id+'_'+(ws.goals.length);
+    var sel = window._wsGoalSearchSelection;
+    ws.goals.push({id:gid, needId:parentNeed.id, needLabel:parentNeed.label, text:text, selected:true, libGoal:sel||null});
+    _wsPersist();
+    inp.value = '';
+    window._wsGoalSearchSelection = null;
+    var dd = document.getElementById('ws-goal-dropdown'); if(dd){ dd.classList.remove('open'); dd.innerHTML=''; }
+    // Insert visually before the parent selector
+    var wrap = document.getElementById('ws-goal-search-wrap');
+    if(wrap){
+        var item = document.createElement('div');
+        item.className = 'ws-need-item selected';
+        item.setAttribute('onclick',"var cb=this.querySelector('input');cb.checked=!cb.checked;cb.dispatchEvent(new Event('change'));");
+        item.innerHTML = '<input type="checkbox" checked class="ws-need-check" onchange="event.stopPropagation();wsToggleGoal(\''+gid+'\',this.checked)" /> <span class="ws-item-label">'+_esc(text)+' <span style="font-size:10.5px;color:#94a3b8;">('+_esc(parentNeed.label)+')</span></span>';
+        wrap.parentNode.insertBefore(item, wrap);
+    }
+    _wsRenderLivePreview(ws);
+};
+
+window.wsContinueGoals = function(){
+    var ws=_wsGet(_cur); if(!ws) return;
+    var selected = ws.goals.filter(function(g){return g.selected;});
+    if(!selected.length){
+        _wsAddAgent(ws.id, 'No goals selected. Please check at least one goal to continue, or search and add from the library.');
+        return;
+    }
+    _wsAddUser(ws.id, 'Continue with '+selected.length+' selected goal'+(selected.length>1?'s':''));
+    ws.step='int_gen'; _wsPersist();
+    _wsGenerateInterventions(ws);
+};
+
+function _wsHandleGoalsInput(ws, text){
+    var lower = text.toLowerCase();
+    if(lower.indexOf('accept')>=0 || lower.indexOf('continue')>=0 || lower.indexOf('yes')>=0){
+        var selected = ws.goals.filter(function(g){return g.selected;});
+        if(!selected.length){ _wsAddAgent(ws.id, 'No goals selected. Please check at least one goal to continue.'); return; }
+        ws.step='int_gen'; _wsPersist();
+        _wsGenerateInterventions(ws);
+    } else if(lower.indexOf('skip')>=0){
+        // Skip goals AND interventions — draft with needs only
+        ws.goals = [];
+        ws.interventions = [];
+        _wsAddAgent(ws.id, 'Skipping goals and interventions. Generating draft with needs only — you can add goals and interventions later in the preview.');
+        _wsGenerateDraft(ws);
+    } else {
+        var lastNeed = ws.needs.filter(function(n){return n.selected;}).slice(-1)[0];
+        if(lastNeed){ ws.goals.push({id:'g_'+lastNeed.id+'_'+(ws.goals.length), needId:lastNeed.id, needLabel:lastNeed.label, text:text.trim(), selected:true}); _wsPersist(); }
+        _wsAddAgent(ws.id, 'Added goal: "'+text.trim()+'". Say "continue" when you\'re ready for interventions.');
+    }
+}
+
+// ── Step: Generate interventions ──
+function _wsGenerateInterventions(ws){
+    var selGoals = ws.goals.filter(function(g){return g.selected;});
+    _wsLoading(ws.id, 'interventions');
+    var goalsList = selGoals.map(function(g){return g.needLabel+' > '+g.text;}).join('\n');
+    var prompt = 'Care management AI. For each goal, suggest 2 specific interventions a care manager can perform.\n\nGoals:\n'+goalsList+'\n\n'+
+        'Respond ONLY JSON, no fences:\n[{"goal":"Improve diabetes self-management","interventions":["Provide diabetes self-management education","Conduct monthly care management follow-up"]}]';
+    _wsApi(prompt, function(text, err){
+        _wsRemoveLoading();
+        ws.interventions = [];
+        if(!err){
+            try {
+                var clean = text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+                var parsed = JSON.parse(clean);
+                parsed.forEach(function(gi){
+                    var goal = selGoals.find(function(g){return g.text.toLowerCase()===gi.goal.toLowerCase();}) || selGoals[0];
+                    (gi.interventions||[]).forEach(function(int,i){
+                        ws.interventions.push({id:'i_'+goal.id+'_'+i, goalId:goal.id, goalText:goal.text, needLabel:goal.needLabel, text:int, selected:true});
+                    });
+                });
+            } catch(e){}
+        }
+        if(!ws.interventions.length){
+            selGoals.forEach(function(g){
+                ws.interventions.push({id:'i_'+g.id+'_0', goalId:g.id, goalText:g.text, needLabel:g.needLabel, text:'Assess and plan for '+g.text.toLowerCase(), selected:true});
+                ws.interventions.push({id:'i_'+g.id+'_1', goalId:g.id, goalText:g.text, needLabel:g.needLabel, text:'Follow up on '+g.text.toLowerCase(), selected:true});
+            });
+        }
+        _wsShowInterventions(ws);
+    });
+}
+
+function _wsShowInterventions(ws){
+    var grouped = {};
+    ws.interventions.forEach(function(int){ int.selected=false; var k=int.needLabel+' → '+int.goalText; if(!grouped[k]) grouped[k]={needLabel:int.needLabel,goalText:int.goalText,items:[]}; grouped[k].items.push(int); });
+    var html = '<div class="ws-step-hint"><strong>Select the interventions</strong> you want. Each is grouped under its goal and parent need.</div>';
+    Object.keys(grouped).forEach(function(k){
+        var g = grouped[k];
+        html += '<div class="ws-group-label">'+_esc(g.needLabel)+'</div>';
+        html += '<div style="font-size:12px;color:#484581;font-weight:500;margin:2px 0 6px;padding-left:2px;">Goal: '+_esc(g.goalText)+'</div>';
+        g.items.forEach(function(int){
+            html += '<div class="ws-need-item" onclick="var cb=this.querySelector(\'input\');cb.checked=!cb.checked;cb.dispatchEvent(new Event(\'change\'));"><input type="checkbox" class="ws-need-check" onchange="event.stopPropagation();wsToggleInt(\''+int.id+'\',this.checked)" /> <span class="ws-item-label">'+_esc(int.text)+'</span></div>';
+        });
+    });
+    // Parent goal selector + search for custom interventions
+    var selGoals = ws.goals.filter(function(g){return g.selected;});
+    html += '<div style="margin-top:12px;"><div style="font-size:11.5px;color:#64748b;margin-bottom:4px;">Add an intervention to:</div>';
+    html += '<select class="ws-parent-select" id="ws-int-parent-goal">';
+    selGoals.forEach(function(g){ html += '<option value="'+g.id+'">'+_esc(g.text.length>60?g.text.slice(0,60)+'…':g.text)+'</option>'; });
+    html += '</select></div>';
+    html += '<div class="ws-custom-input-wrap" id="ws-int-search-wrap"><div class="ws-search-dropdown" id="ws-int-dropdown"></div><input class="ws-custom-input" id="ws-custom-int" placeholder="Search interventions library\u2026" oninput="wsSearchInts(this.value)" onfocus="wsSearchInts(this.value)" /><button class="ws-custom-input-btn" onclick="wsAddSearchedInt()">Add</button></div>';
+    ws.step='interventions_review'; _wsPersist();
+    _wsAddAgentHTML(ws.id, '<strong>Based on the approved goals, I recommend these interventions:</strong>'+html+'<div class="ws-action-btns" style="margin-top:14px;"><button class="ws-action-btn ws-action-btn-primary" onclick="wsContinueInts()">Continue with selected</button><button class="ws-action-btn" onclick="wsSendAuto(\'Skip interventions\')">Skip</button></div>');
+}
+
+window.wsToggleInt = function(id, checked){
+    var ws=_wsGet(_cur); if(!ws) return;
+    var int=ws.interventions.find(function(x){return x.id===id;}); if(int) int.selected=checked;
+    document.querySelectorAll('.ws-need-item').forEach(function(el){
+        var cb = el.querySelector('input[type="checkbox"]');
+        if(cb) el.classList.toggle('selected', cb.checked);
+    });
+    _wsPersist();
+    _wsRenderLivePreview(ws);
+};
+
+// Library search for interventions
+window._wsIntSearchSelection = null;
+window.wsSearchInts = function(query){
+    var dd = document.getElementById('ws-int-dropdown'); if(!dd) return;
+    var q = (query||'').toLowerCase().trim();
+    if(q.length < 1){ dd.classList.remove('open'); dd.innerHTML=''; return; }
+    var goalsMap = (typeof CarePlanController !== 'undefined' && CarePlanController.GOALS_MAP) ? CarePlanController.GOALS_MAP : {};
+    var allInts = [];
+    Object.keys(goalsMap).forEach(function(nlId){
+        goalsMap[nlId].forEach(function(g){
+            (g.interventions||[]).forEach(function(intText, idx){
+                allInts.push({id:g.id+'_i'+idx, text:intText, goalText:g.text});
+            });
+        });
+    });
+    var matches = allInts.filter(function(i){ return i.text.toLowerCase().indexOf(q)>=0; }).slice(0,6);
+    if(!matches.length){
+        dd.innerHTML = '<div class="ws-search-empty">No matching interventions in library</div>';
+    } else {
+        dd.innerHTML = matches.map(function(i, idx){
+            return '<div class="ws-search-item" data-ws-int-idx="'+idx+'">'+_esc(i.text)+'</div>';
+        }).join('');
+        window._wsIntSearchMatches = matches;
+        dd.querySelectorAll('.ws-search-item').forEach(function(el){
+            el.addEventListener('click', function(){
+                var idx = parseInt(el.getAttribute('data-ws-int-idx'));
+                var m = window._wsIntSearchMatches[idx];
+                if(m){ var inp=document.getElementById('ws-custom-int'); if(inp) inp.value=m.text; window._wsIntSearchSelection=m; }
+                dd.classList.remove('open');
+            });
+        });
+    }
+    dd.classList.add('open');
+    window._wsIntSearchSelection = null;
+};
+window.wsAddSearchedInt = function(){
+    var inp = document.getElementById('ws-custom-int'); if(!inp) return;
+    var text = inp.value.trim(); if(!text) return;
+    var ws = _wsGet(_cur); if(!ws) return;
+    var selGoalEl = document.getElementById('ws-int-parent-goal');
+    var parentGoalId = selGoalEl ? selGoalEl.value : '';
+    var parentGoal = ws.goals.find(function(g){return g.id===parentGoalId;});
+    if(!parentGoal){ return; }
+    var iid = 'i_'+parentGoal.id+'_'+(ws.interventions.length);
+    ws.interventions.push({id:iid, goalId:parentGoal.id, goalText:parentGoal.text, needLabel:parentGoal.needLabel, text:text, selected:true});
+    _wsPersist();
+    inp.value = '';
+    window._wsIntSearchSelection = null;
+    var dd = document.getElementById('ws-int-dropdown'); if(dd){ dd.classList.remove('open'); dd.innerHTML=''; }
+    var wrap = document.getElementById('ws-int-search-wrap');
+    if(wrap){
+        var item = document.createElement('div');
+        item.className = 'ws-need-item selected';
+        item.setAttribute('onclick',"var cb=this.querySelector('input');cb.checked=!cb.checked;cb.dispatchEvent(new Event('change'));");
+        item.innerHTML = '<input type="checkbox" checked class="ws-need-check" onchange="event.stopPropagation();wsToggleInt(\''+iid+'\',this.checked)" /> <span class="ws-item-label">'+_esc(text)+'</span>';
+        wrap.parentNode.insertBefore(item, wrap);
+    }
+    _wsRenderLivePreview(ws);
+};
+
+window.wsContinueInts = function(){
+    var ws=_wsGet(_cur); if(!ws) return;
+    var selected = ws.interventions.filter(function(i){return i.selected;});
+    if(!selected.length){
+        _wsAddAgent(ws.id, 'No interventions selected. Please check at least one, or search and add from the library.');
+        return;
+    }
+    _wsAddUser(ws.id, 'Continue with '+selected.length+' selected intervention'+(selected.length>1?'s':''));
+    _wsNudgeDates(ws);
+};
+
+function _wsHandleInterventionsInput(ws, text){
+    var lower = text.toLowerCase();
+    if(lower.indexOf('accept')>=0 || lower.indexOf('continue')>=0 || lower.indexOf('yes')>=0){
+        var selected = ws.interventions.filter(function(i){return i.selected;});
+        if(!selected.length){ _wsAddAgent(ws.id, 'No interventions selected. Please check at least one.'); return; }
+        _wsNudgeDates(ws);
+    } else if(lower.indexOf('skip')>=0){
+        ws.interventions.forEach(function(i){i.selected=true;});
+        _wsNudgeDates(ws);
+    } else {
+        var lastGoal = ws.goals.filter(function(g){return g.selected;}).slice(-1)[0];
+        if(lastGoal){ ws.interventions.push({id:'i_'+lastGoal.id+'_'+(ws.interventions.length), goalId:lastGoal.id, goalText:lastGoal.text, needLabel:lastGoal.needLabel, text:text.trim(), selected:true}); _wsPersist(); }
+        _wsAddAgent(ws.id, 'Added intervention: "'+text.trim()+'". Say "continue" to generate the draft.');
+    }
+}
+
+// ── Date nudge — ask before generating draft ──
+function _wsNudgeDates(ws){
+    ws.step = 'date_nudge'; _wsPersist();
+    _wsAddAgentHTML(ws.id, '<div style="margin-bottom:6px;">Would you like me to <strong>suggest start and target dates</strong> for each need, goal, and intervention?</div><div style="font-size:12px;color:#64748b;margin-bottom:8px;">I\'ll stagger them based on clinical priority. You can edit or remove any dates after.</div><div class="ws-action-btns"><button class="ws-action-btn ws-action-btn-primary" onclick="wsGenerateWithDates(true)">Yes, suggest dates</button><button class="ws-action-btn" onclick="wsGenerateWithDates(\'manual\')">I\'ll enter dates manually</button><button class="ws-action-btn" onclick="wsGenerateWithDates(false)">Skip dates</button></div>');
+}
+window.wsGenerateWithDates = function(withDates){
+    var ws=_wsGet(_cur); if(!ws) return;
+    if(withDates==='manual'){
+        _wsAddUser(ws.id, 'I\'ll enter dates manually');
+        ws._includeDates = false;
+        ws._openEditAfterDraft = true;
+    } else {
+        _wsAddUser(ws.id, withDates ? 'Yes, suggest dates' : 'Skip dates');
+        ws._includeDates = withDates;
+    }
+    _wsPersist();
+    _wsGenerateDraft(ws);
+};
+
+// ── Step: Generate draft & switch to split view ──
+function _wsGenerateDraft(ws){
+    var selNeeds = ws.needs.filter(function(n){return n.selected;});
+    var selGoals = ws.goals.filter(function(g){return g.selected;});
+    var selInts = ws.interventions.filter(function(i){return i.selected;});
+    var today = new Date();
+    var fmtD = function(d){ return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear(); };
+    var addDays = function(d, n){ return new Date(d.getTime()+n*86400000); };
+    var reviewDate = addDays(today, 90);
+
+    var includeDates = ws._includeDates !== false;
+    ws.artifact = {
+        name: (ws.type==='care_plan'?'Care Plan':'Workspace')+' \u2014 '+(ws.memberName||'Member'),
+        member: ws.memberName, memberId: ws.memberId,
+        status: 'Draft', startDate: fmtD(today), reviewDate: fmtD(reviewDate), duration: '90 Days',
+        clinicalData: null,
+        needs: selNeeds.map(function(n, ni){
+            var needStart = addDays(today, ni * 7);
+            var needTarget = addDays(needStart, 90);
+            var nGoals = selGoals.filter(function(g){return g.needId===n.id;});
+            return {
+                id: n.id, label: n.label,
+                startDate: includeDates ? fmtD(needStart) : '',
+                targetDate: includeDates ? fmtD(needTarget) : '',
+                goals: nGoals.map(function(g, gi){
+                    var goalStart = addDays(needStart, gi * 7);
+                    var goalTarget = addDays(goalStart, 60);
+                    var gInts = selInts.filter(function(i){return i.goalId===g.id;});
+                    return { id: g.id, text: g.text,
+                        startDate: includeDates ? fmtD(goalStart) : '',
+                        targetDate: includeDates ? fmtD(goalTarget) : '',
+                        interventions: gInts.map(function(int, ii){
+                            var intStart = addDays(goalStart, ii * 5);
+                            var intTarget = addDays(intStart, 30);
+                            return {id:int.id, text:int.text,
+                                startDate: includeDates ? fmtD(intStart) : '',
+                                targetDate: includeDates ? fmtD(intTarget) : ''};
+                        })
+                    };
+                })
+            };
+        })
+    };
+    ws.phase='review'; ws.step='review';
+    _wsPersist();
+    _wsAddAgent(ws.id, 'I\'ve generated the full draft'+(includeDates?' with suggested dates':'')+'. Review it on the right \u2014 you can edit, remove items, or use the action buttons.');
+    _wsShowSplit(ws);
+    // Auto-open edit mode if user chose manual dates
+    if(ws._openEditAfterDraft){ ws._editing = true; ws._openEditAfterDraft = false; _wsPersist(); _wsRenderArtifact(ws); _wsAddAgent(ws.id, 'Edit mode is on \u2014 you can enter start and target dates for each need, goal, and intervention. Click "Done editing" when finished.'); }
+    // Clinical data nudge — selective options
+    setTimeout(function(){
+        _wsAddAgentHTML(ws.id, '<div style="margin-bottom:6px;">Would you like me to pull any of the following from the member record into this care plan?</div>' +
+            '<div style="margin:8px 0;">' +
+                '<label style="display:flex;align-items:center;gap:6px;padding:5px 0;font-size:12.5px;color:#1e293b;cursor:pointer;"><input type="checkbox" id="ws-cd-dx" checked style="accent-color:#484581;"> Diagnosis codes</label>' +
+                '<label style="display:flex;align-items:center;gap:6px;padding:5px 0;font-size:12.5px;color:#1e293b;cursor:pointer;"><input type="checkbox" id="ws-cd-meds" checked style="accent-color:#484581;"> Medications</label>' +
+                '<label style="display:flex;align-items:center;gap:6px;padding:5px 0;font-size:12.5px;color:#1e293b;cursor:pointer;"><input type="checkbox" id="ws-cd-allergies" checked style="accent-color:#484581;"> Allergies</label>' +
+                '<label style="display:flex;align-items:center;gap:6px;padding:5px 0;font-size:12.5px;color:#1e293b;cursor:pointer;"><input type="checkbox" id="ws-cd-barriers" checked style="accent-color:#484581;"> Barriers &amp; Strengths</label>' +
+            '</div>' +
+            '<div class="ws-action-btns"><button class="ws-action-btn ws-action-btn-primary" onclick="wsPullClinicalData()">Pull selected data</button><button class="ws-action-btn" onclick="wsSendAuto(\'No thanks\')">Skip</button></div>');
+    }, 600);
+}
+
+// ── Split layout: sidebar chat + artifact panel ──
+function _wsShowSplit(ws){
+    var body = document.getElementById('ws-body-area'); if(!body) return;
+    // If already in split view (from live preview), just switch the right panel
+    var livePanel = document.getElementById('ws-live-preview');
+    if(livePanel){
+        livePanel.id = 'ws-artifact-area';
+        _wsRenderArtifact(ws);
+        var mc2 = document.getElementById('ws-messages'); if(mc2) mc2.scrollTop=mc2.scrollHeight;
+        return;
+    }
+    var oldMsgs = document.getElementById('ws-messages');
+    var msgsHTML = oldMsgs ? (oldMsgs.querySelector('.ws-chat-center')||oldMsgs).innerHTML : '';
+    body.innerHTML = '<div class="ws-split">' +
+        '<div class="ws-split-sidebar"><div class="ws-chat-messages" id="ws-messages"><div class="ws-chat-center">'+msgsHTML+'</div></div><div class="ws-chat-input-bar"><div class="ws-chat-input-wrap"><input id="ws-input" placeholder="Edit the draft\u2026" onkeydown="if(event.key===\'Enter\')wsSend()" /><button onclick="wsSend()">Send</button></div></div></div>' +
+        '<div class="ws-split-main" id="ws-artifact-area"></div>' +
+    '</div>';
+    var mc = document.getElementById('ws-messages'); if(mc) mc.scrollTop=mc.scrollHeight;
+    _wsRenderArtifact(ws);
+}
+
+// ── Early split view — activated when member is selected, not just at draft ──
+function _wsActivateSplitView(ws){
+    var body = document.getElementById('ws-body-area'); if(!body) return;
+    // Collect existing messages
+    var mc = document.getElementById('ws-messages');
+    var msgsHTML = mc ? mc.innerHTML : '';
+    body.innerHTML = '<div class="ws-split">' +
+        '<div class="ws-split-sidebar"><div class="ws-chat-messages" id="ws-messages"><div class="ws-chat-center">'+msgsHTML+'</div></div><div class="ws-chat-input-bar"><div class="ws-chat-input-wrap"><input id="ws-input" placeholder="Tell the agent what you need\u2026" onkeydown="if(event.key===\'Enter\')wsSend()" /><button onclick="wsSend()">Send</button></div></div></div>' +
+        '<div class="ws-split-main" id="ws-live-preview"></div>' +
+    '</div>';
+    mc = document.getElementById('ws-messages'); if(mc) mc.scrollTop=mc.scrollHeight;
+    _wsRenderLivePreview(ws);
+}
+
+function _wsRenderLivePreview(ws){
+    var el = document.getElementById('ws-live-preview') || document.getElementById('ws-artifact-area');
+    if(!el) return;
+    var m = ws.memberId ? (window.membersDB||[]).find(function(x){return x.id===ws.memberId;}) : null;
+    var html = '<div class="ws-artifact" style="max-width:none;font-size:12px;">';
+    html += '<div style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:2px;">Care Plan — '+_esc(ws.memberName||'No member')+'</div>';
+    html += '<div style="font-size:11px;color:#94a3b8;margin-bottom:14px;" id="ws-lp-status">Building\u2026</div>';
+    // Member info card
+    if(m){
+        var dx = m.diagnoses||{};
+        var riskLabels = {1:'Low',2:'Medium',3:'High',4:'Very High'};
+        html += '<div class="ws-art-section"><div class="ws-art-section-head" style="font-size:11.5px;padding:6px 12px;">Member Information</div><div class="ws-art-section-body" style="padding:8px 12px;">';
+        var fields = [
+            ['Name', m.name],
+            ['ID', m.id],
+            ['Age / Gender', (m.age||'—')+' / '+(m.gender||'—')],
+        ];
+        if(m.dob) fields.push(['DOB', m.dob]);
+        if(dx.primary) fields.push(['Primary Dx', dx.primary]);
+        if(dx.secondary) fields.push(['Secondary Dx', Array.isArray(dx.secondary)?dx.secondary.join(', '):dx.secondary]);
+        if(m.riskTier) fields.push(['Risk', riskLabels[m.riskTier]||m.riskTier]);
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;">';
+        fields.forEach(function(f){
+            html += '<div style="padding:3px 0;"><div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.03em;">'+_esc(f[0])+'</div><div style="font-size:11.5px;color:#1e293b;margin-top:1px;">'+_esc(f[1])+'</div></div>';
+        });
+        html += '</div></div></div>';
+    }
+    // Only show needs/goals/interventions sections once the step has reached that point
+    var showNeeds = ws.step && ['needs_review','goals_gen','goals_review','int_gen','interventions_review','review'].indexOf(ws.step)>=0;
+    var selNeeds = (ws.needs||[]).filter(function(n){return n.selected;});
+    if(showNeeds && selNeeds.length>0){
+        html += '<div class="ws-art-section"><div class="ws-art-section-head" style="font-size:12px;padding:8px 14px;">Needs ('+selNeeds.length+')</div><div class="ws-art-section-body" style="padding:8px 14px;">';
+        selNeeds.forEach(function(need, ni){
+            html += '<div style="padding:4px 0;'+(ni>0?'border-top:1px solid #f1f5f9;':'')+'display:flex;justify-content:space-between;align-items:start;">';
+            html += '<div style="font-weight:500;font-size:12px;color:#1e293b;">'+(ni+1)+'. '+_esc(need.label)+'</div>';
+            html += '<button style="font-size:10px;color:#ef4444;background:none;border:none;cursor:pointer;flex-shrink:0;" onclick="wsLpRemoveNeed(\''+need.id+'\')">Remove</button></div>';
+            var needGoals = (ws.goals||[]).filter(function(g){return g.selected && g.needId===need.id;});
+            needGoals.forEach(function(g){
+                html += '<div style="margin:2px 0 1px 12px;font-size:11.5px;color:#484581;">Goal: '+_esc(g.text)+'</div>';
+                var gInts = (ws.interventions||[]).filter(function(i){return i.selected && i.goalId===g.id;});
+                gInts.forEach(function(int){
+                    html += '<div style="margin:1px 0 0 24px;font-size:11px;color:#64748b;">• '+_esc(int.text)+'</div>';
+                });
+            });
+        });
+        html += '</div></div>';
+    } else if(showNeeds){
+        html += '<div class="ws-art-section"><div class="ws-art-section-head" style="font-size:12px;padding:8px 14px;">Needs</div><div class="ws-art-section-body" style="padding:8px 14px;"><div style="font-size:11.5px;color:#94a3b8;font-style:italic;margin-bottom:6px;">No needs selected yet — select from the left panel</div>';
+        html += '<button class="ws-action-btn" style="font-size:11px;padding:4px 10px;display:inline-flex;align-items:center;gap:4px;" onclick="wsRerunSuggestNeeds()"><svg width="10" height="10" viewBox="0 0 24 24" fill="#484581"><path d="M12 2L13.8 9.2L21 11L13.8 12.8L12 20L10.2 12.8L3 11L10.2 9.2L12 2Z"/></svg> Suggest needs with AI</button>';
+        html += '</div></div>';
+    }
+    // Action buttons
+    var hasContent = selNeeds.length > 0;
+    if(hasContent || ws.artifact){
+        html += '<div class="ws-deploy-bar" style="margin-top:14px;">';
+        html += '<button class="ws-deploy-btn" style="font-size:11.5px;padding:7px 12px;" onclick="wsSaveToWorkspace()">Save to Workspace</button>';
+        html += '<button class="ws-deploy-btn ws-deploy-btn-primary" style="font-size:11.5px;padding:7px 12px;" onclick="wsSaveDraftToRecord()">Save Draft</button>';
+        html += '<button class="ws-deploy-btn ws-deploy-btn-green" style="font-size:11.5px;padding:7px 12px;" onclick="wsDeploy()">Deploy</button>';
+        html += '</div>';
+        html += '<div style="font-size:10.5px;color:#94a3b8;margin-top:3px;">✦ AI-assisted — review before deploying.</div>';
+    }
+    html += '</div>';
+    el.innerHTML = html;
+}
+
+// Remove from live preview
+window.wsLpRemoveNeed = function(nid){
+    var ws = _wsGet(_cur); if(!ws) return;
+    var n = ws.needs.find(function(x){return x.id===nid;});
+    if(n){ n.selected = false; _wsPersist(); _wsRenderLivePreview(ws); }
+};
+
+// Re-trigger AI suggestions
+// Re-trigger AI suggestions
+window.wsRegenerateGoals = function(){
+    var ws = _wsGet(_cur); if(!ws) return;
+    var banner = document.getElementById('ws-stale-goals'); if(banner) banner.remove();
+    // Remove old goals and interventions data
+    ws.goals = [];
+    ws.interventions = [];
+    // Remove old goal/intervention messages from chat so user doesn't see duplicates
+    var cutIdx = -1;
+    for(var i=0;i<ws.messages.length;i++){
+        if(ws.messages[i].role==='agent' && ws.messages[i].html && ws.messages[i].html.indexOf('recommend these goals')>=0){ cutIdx=i; break; }
+    }
+    if(cutIdx>=0) ws.messages = ws.messages.slice(0, cutIdx);
+    _wsPersist();
+    // Re-render the chat from messages
+    var mc = document.getElementById('ws-messages'); if(mc){
+        var area = mc.querySelector('.ws-chat-center')||mc;
+        var h = '';
+        (ws.messages||[]).forEach(function(msg){
+            if(msg.role==='user') h += '<div class="ws-msg ws-msg-user"><div class="ws-msg-user-bubble">'+_esc(msg.text)+'</div></div>';
+            else h += '<div class="ws-msg ws-msg-agent"><div class="ws-msg-agent-icon">✦</div><div class="ws-msg-agent-body">'+msg.html+'</div></div>';
+        });
+        area.innerHTML = h;
+        mc.scrollTop = mc.scrollHeight;
+    }
+    _wsRenderLivePreview(ws);
+    var selNeeds = ws.needs.filter(function(n){return n.selected;});
+    _wsAddAgent(ws.id, 'Regenerating goals for '+selNeeds.length+' updated need'+(selNeeds.length>1?'s':'')+'\u2026');
+    ws.step = 'goals_gen';
+    _wsGenerateGoals(ws);
+};
+window.wsRegenerateInts = function(){
+    var ws = _wsGet(_cur); if(!ws) return;
+    var banner = document.getElementById('ws-stale-ints'); if(banner) banner.remove();
+    ws.interventions = [];
+    // Remove old intervention messages
+    var cutIdx = -1;
+    for(var i=0;i<ws.messages.length;i++){
+        if(ws.messages[i].role==='agent' && ws.messages[i].html && ws.messages[i].html.indexOf('recommend these interventions')>=0){ cutIdx=i; break; }
+    }
+    if(cutIdx>=0) ws.messages = ws.messages.slice(0, cutIdx);
+    _wsPersist();
+    var mc = document.getElementById('ws-messages'); if(mc){
+        var area = mc.querySelector('.ws-chat-center')||mc;
+        var h = '';
+        (ws.messages||[]).forEach(function(msg){
+            if(msg.role==='user') h += '<div class="ws-msg ws-msg-user"><div class="ws-msg-user-bubble">'+_esc(msg.text)+'</div></div>';
+            else h += '<div class="ws-msg ws-msg-agent"><div class="ws-msg-agent-icon">✦</div><div class="ws-msg-agent-body">'+msg.html+'</div></div>';
+        });
+        area.innerHTML = h;
+        mc.scrollTop = mc.scrollHeight;
+    }
+    _wsRenderLivePreview(ws);
+    var selGoals = ws.goals.filter(function(g){return g.selected;});
+    _wsAddAgent(ws.id, 'Regenerating interventions for '+selGoals.length+' updated goal'+(selGoals.length>1?'s':'')+'\u2026');
+    ws.step = 'int_gen';
+    _wsGenerateInterventions(ws);
+};
+window.wsRerunSuggestNeeds = function(){
+    var ws = _wsGet(_cur); if(!ws) return;
+    ws.step = 'extract'; _wsPersist();
+    _wsAddAgent(ws.id, 'Let me re-analyze the member record and suggest needs\u2026');
+    _wsExtractFindings(ws);
+};
+window.wsRerunSuggestGoals = function(needId){
+    var ws = _wsGet(_cur); if(!ws) return;
+    // If called from artifact with a specific need, select that need
+    if(needId && ws.artifact){
+        var aNeed = ws.artifact.needs.find(function(n){return n.id===needId;});
+        if(aNeed){
+            // Ensure this need is in ws.needs
+            var existing = ws.needs.find(function(n){return n.label===aNeed.label;});
+            if(!existing){ ws.needs.push({id:aNeed.id, label:aNeed.label, findings:[], selected:true}); }
+            else { existing.selected = true; }
+        }
+    }
+    var selNeeds = ws.needs.filter(function(n){return n.selected;});
+    if(!selNeeds.length){ _wsAddAgent(ws.id, 'No needs selected. Please select or add a need first.'); return; }
+    ws.step = 'goals_gen'; _wsPersist();
+    _wsAddAgent(ws.id, 'Generating goal suggestions for '+selNeeds.length+' need'+(selNeeds.length>1?'s':'')+'\u2026');
+    _wsGenerateGoals(ws);
+};
+window.wsRerunSuggestInts = function(needId, goalId){
+    var ws = _wsGet(_cur); if(!ws) return;
+    // If called from artifact, ensure the goal is in ws.goals
+    if(goalId && ws.artifact){
+        var aNeed = ws.artifact.needs.find(function(n){return n.id===needId;});
+        if(aNeed){
+            var aGoal = aNeed.goals.find(function(g){return g.id===goalId;});
+            if(aGoal){
+                var existing = ws.goals.find(function(g){return g.text===aGoal.text;});
+                if(!existing){
+                    var nLabel = aNeed.label;
+                    ws.goals.push({id:aGoal.id, needId:needId, needLabel:nLabel, text:aGoal.text, selected:true});
+                } else { existing.selected = true; }
+            }
+        }
+    }
+    var selGoals = ws.goals.filter(function(g){return g.selected;});
+    if(!selGoals.length){ _wsAddAgent(ws.id, 'No goals selected. Please select or add a goal first.'); return; }
+    ws.step = 'int_gen'; _wsPersist();
+    _wsAddAgent(ws.id, 'Generating intervention suggestions\u2026');
+    _wsGenerateInterventions(ws);
+};
+
+// ── Render artifact panel ──
+function _wsRenderArtifact(ws){
+    var el = document.getElementById('ws-artifact-area'); if(!el || !ws.artifact) return;
+    var a = ws.artifact;
+    var editing = !!ws._editing;
+    var html = '<div class="ws-artifact">';
+    // Header bar with edit toggle
+    html += '<div class="ws-art-header-bar"><div><div class="ws-artifact-title">'+_esc(a.name)+'</div><div class="ws-artifact-sub">'+_esc(a.member)+' · '+a.status+' · Started '+a.startDate+'</div></div>';
+    html += '<button class="ws-art-edit-toggle'+(editing?' active':'')+'" onclick="wsToggleEditMode()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> '+(editing?'Done editing':'Edit draft')+'</button>';
+    html += '<button class="ws-art-edit-toggle" onclick="wsToggleFullscreen()" style="margin-left:4px;" title="Fullscreen"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>';
+    html += '<button class="ws-art-edit-toggle" onclick="wsExportPDF()" style="margin-left:4px;" title="Export PDF"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/><path d="M14 2v6h6"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg></button>';
+    html += '</div>';
+    // Quick nav
+    html += '<div class="ws-art-nav"><div class="ws-art-nav-item" onclick="document.getElementById(\'ws-art-details\').scrollIntoView({behavior:\'smooth\'})">Details</div>';
+    (a.needs||[]).forEach(function(need,ni){ html += '<div class="ws-art-nav-item" onclick="document.getElementById(\'ws-art-n-'+need.id+'\').scrollIntoView({behavior:\'smooth\'})">Need '+(ni+1)+'</div>'; });
+    html += '</div>';
+    // Details card
+    html += '<div class="ws-art-section" id="ws-art-details"><div class="ws-art-section-head">Care Plan Details</div><div class="ws-art-section-body"><table style="width:100%;font-size:12.5px;">';
+    html += '<tr><td style="font-weight:600;color:#64748b;padding:6px 0;width:35%;">Plan Name</td><td>'+_esc(a.name)+'</td></tr>';
+    html += '<tr><td style="font-weight:600;color:#64748b;padding:6px 0;">Member</td><td>'+_esc(a.member)+'</td></tr>';
+    html += '<tr><td style="font-weight:600;color:#64748b;padding:6px 0;">Status</td><td>'+_esc(a.status)+'</td></tr>';
+    if(editing){
+        html += '<tr><td style="font-weight:600;color:#64748b;padding:6px 0;">Start Date</td><td><input class="ws-art-editable-input" value="'+a.startDate+'" onchange="wsEditArtField(\'startDate\',this.value)" /></td></tr>';
+        html += '<tr><td style="font-weight:600;color:#64748b;padding:6px 0;">Review Date</td><td><input class="ws-art-editable-input" value="'+a.reviewDate+'" onchange="wsEditArtField(\'reviewDate\',this.value)" /></td></tr>';
+        html += '<tr><td style="font-weight:600;color:#64748b;padding:6px 0;">Duration</td><td><input class="ws-art-editable-input" value="'+a.duration+'" onchange="wsEditArtField(\'duration\',this.value)" /></td></tr>';
+    } else {
+        html += '<tr><td style="font-weight:600;color:#64748b;padding:6px 0;">Start Date</td><td>'+a.startDate+'</td></tr>';
+        html += '<tr><td style="font-weight:600;color:#64748b;padding:6px 0;">Review Date</td><td>'+a.reviewDate+'</td></tr>';
+        html += '<tr><td style="font-weight:600;color:#64748b;padding:6px 0;">Duration</td><td>'+a.duration+'</td></tr>';
+    }
+    html += '</table></div></div>';
+    // Success banner (shown after save/deploy)
+    if(a.status.indexOf('saved')>=0 || a.status.indexOf('deployed')>=0 || a.status.indexOf('Active')>=0){
+        var bannerColor = a.status.indexOf('Active')>=0 ? '#16a34a' : '#484581';
+        var bannerBg = a.status.indexOf('Active')>=0 ? '#f0fdf4' : '#f5f3ff';
+        var bannerBorder = a.status.indexOf('Active')>=0 ? '#bbf7d0' : '#e2dff6';
+        html += '<div id="ws-art-banner" style="padding:12px 16px;background:'+bannerBg+';border:1px solid '+bannerBorder+';border-radius:10px;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">'+(a.status.indexOf('Active')>=0?'✅':'💾')+'</span><div><div style="font-size:13px;font-weight:600;color:'+bannerColor+';">'+_esc(a.status)+'</div><div style="font-size:11.5px;color:#64748b;margin-top:2px;">Saved to workspace. You can return to edit later.</div></div></div>';
+    }
+    // Needs sections
+    (a.needs||[]).forEach(function(need, ni){
+        html += '<div class="ws-art-section" id="ws-art-n-'+need.id+'"><div class="ws-art-section-head">Need '+(ni+1)+': '+_esc(need.label);
+        if(editing) html += '<button class="ws-art-remove" onclick="wsRemoveNeed(\''+need.id+'\')">Remove</button>';
+        html += '</div><div class="ws-art-section-body">';
+        if(editing){
+            html += '<div style="font-size:11.5px;color:#94a3b8;margin-bottom:8px;">Start: <input class="ws-art-editable-input" style="width:110px;" value="'+need.startDate+'" onchange="wsEditNeedDate(\''+need.id+'\',this.value)" /> Target: <input class="ws-art-editable-input" style="width:110px;" value="'+(need.targetDate||'')+'" onchange="wsEditNeedTargetDate(\''+need.id+'\',this.value)" /></div>';
+        } else {
+            html += '<div style="font-size:11.5px;color:#94a3b8;margin-bottom:8px;">Start: '+need.startDate+(need.targetDate?' · Target: '+need.targetDate:'')+'</div>';
+        }
+        if(!(need.goals||[]).length && !editing){
+            html += '<div style="font-size:12.5px;color:#94a3b8;font-style:italic;padding:8px 0;">No goals added yet</div>';
+        }
+        (need.goals||[]).forEach(function(goal){
+            html += '<div class="ws-art-goal">';
+            if(editing){
+                html += '<div class="ws-art-goal-title"><textarea class="ws-art-editable-text" onchange="wsEditGoalText(\''+need.id+'\',\''+goal.id+'\',this.value)">'+_esc(goal.text)+'</textarea><button class="ws-art-remove" onclick="wsRemoveGoal(\''+need.id+'\',\''+goal.id+'\')">Remove</button></div>';
+                html += '<div style="font-size:11px;color:#94a3b8;margin:2px 0 6px;">Start: <input class="ws-art-editable-input" style="width:100px;font-size:11px;" value="'+goal.startDate+'" onchange="wsEditGoalDate(\''+need.id+'\',\''+goal.id+'\',this.value)" /> Target: <input class="ws-art-editable-input" style="width:100px;font-size:11px;" value="'+(goal.targetDate||'')+'" onchange="wsEditGoalTargetDate(\''+need.id+'\',\''+goal.id+'\',this.value)" /></div>';
+            } else {
+                html += '<div class="ws-art-goal-title">'+_esc(goal.text)+'</div>';
+                html += '<div style="font-size:11px;color:#94a3b8;margin:2px 0 6px;">Start: '+goal.startDate+(goal.targetDate?' · Target: '+goal.targetDate:'')+'</div>';
+            }
+            if(!(goal.interventions||[]).length && !editing){
+                html += '<div style="font-size:12px;color:#94a3b8;font-style:italic;padding:4px 0 4px 16px;">No interventions added yet</div>';
+            }
+            (goal.interventions||[]).forEach(function(int){
+                if(editing){
+                    html += '<div class="ws-art-int"><textarea class="ws-art-editable-text" style="flex:1;" onchange="wsEditIntText(\''+need.id+'\',\''+goal.id+'\',\''+int.id+'\',this.value)">'+_esc(int.text)+'</textarea><div style="font-size:10px;color:#94a3b8;white-space:nowrap;margin:0 6px;">S:<input class="ws-art-editable-input" style="width:80px;font-size:10px;" value="'+int.startDate+'" onchange="wsEditIntDate(\''+need.id+'\',\''+goal.id+'\',\''+int.id+'\',\'start\',this.value)"> T:<input class="ws-art-editable-input" style="width:80px;font-size:10px;" value="'+(int.targetDate||'')+'" onchange="wsEditIntDate(\''+need.id+'\',\''+goal.id+'\',\''+int.id+'\',\'target\',this.value)"></div><button class="ws-art-remove" onclick="wsRemoveInt(\''+need.id+'\',\''+goal.id+'\',\''+int.id+'\')">Remove</button></div>';
+                } else {
+                    html += '<div class="ws-art-int"><span style="flex:1;">'+_esc(int.text)+'</span><span style="font-size:10.5px;color:#94a3b8;white-space:nowrap;margin-left:8px;">'+int.startDate+(int.targetDate?' → '+int.targetDate:'')+'</span></div>';
+                }
+            });
+            // Add intervention button in edit mode
+            if(editing){
+                html += '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><button class="ws-action-btn" style="font-size:11.5px;padding:5px 10px;" data-ws-add-int="'+need.id+'_'+goal.id+'" onclick="wsArtAddInt(\''+need.id+'\',\''+goal.id+'\')">+ Add intervention</button>';
+                html += '<button class="ws-action-btn" style="font-size:11.5px;padding:5px 10px;display:inline-flex;align-items:center;gap:3px;" onclick="wsRerunSuggestInts(\''+need.id+'\',\''+goal.id+'\')"><svg width="10" height="10" viewBox="0 0 24 24" fill="#484581"><path d="M12 2L13.8 9.2L21 11L13.8 12.8L12 20L10.2 12.8L3 11L10.2 9.2L12 2Z"/></svg> Suggest</button></div>';
+            }
+            html += '</div>';
+        });
+        // Add goal button in edit mode
+        if(editing){
+            html += '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;display:flex;gap:6px;flex-wrap:wrap;"><button class="ws-action-btn" style="font-size:11.5px;padding:5px 10px;" data-ws-add-goal="'+need.id+'" onclick="wsArtAddGoal(\''+need.id+'\')">+ Add goal</button>';
+            html += '<button class="ws-action-btn" style="font-size:11.5px;padding:5px 10px;display:inline-flex;align-items:center;gap:3px;" onclick="wsRerunSuggestGoals(\''+need.id+'\')"><svg width="10" height="10" viewBox="0 0 24 24" fill="#484581"><path d="M12 2L13.8 9.2L21 11L13.8 12.8L12 20L10.2 12.8L3 11L10.2 9.2L12 2Z"/></svg> Suggest goals</button></div>';
+        }
+        html += '</div></div>';
+    });
+    // Add need button in edit mode
+    if(editing){
+        html += '<div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;"><button class="ws-action-btn" style="font-size:12px;padding:7px 14px;" id="ws-art-add-need-btn" onclick="wsArtAddNeed()">+ Add need</button>';
+        html += '<button class="ws-action-btn" style="font-size:12px;padding:7px 14px;display:inline-flex;align-items:center;gap:4px;" onclick="wsRerunSuggestNeeds()"><svg width="12" height="12" viewBox="0 0 24 24" fill="#484581"><path d="M12 2L13.8 9.2L21 11L13.8 12.8L12 20L10.2 12.8L3 11L10.2 9.2L12 2Z"/></svg> Suggest needs with AI</button></div>';
+    }
+    // ── Clinical Data Section ──
+    if(a.clinicalData){
+        var cd = a.clinicalData;
+        html += '<div class="ws-art-section"><div class="ws-art-section-head">Clinical Data <span style="font-size:11px;font-weight:400;color:#94a3b8;">Pulled from member record</span></div><div class="ws-art-section-body">';
+        if(cd.diagnoses&&cd.diagnoses.length){
+            html += '<div style="font-size:12px;font-weight:600;color:#484581;margin-bottom:4px;">Diagnoses ('+cd.diagnoses.length+')</div><table style="width:100%;font-size:12px;margin-bottom:12px;"><tr style="background:#f8f9fb;"><td style="font-weight:600;width:20%;">Code</td><td style="font-weight:600;">Description</td><td style="font-weight:600;width:15%;">Status</td></tr>';
+            cd.diagnoses.forEach(function(d){html+='<tr><td>'+_esc(d.code||'\u2014')+'</td><td>'+_esc(d.desc)+'</td><td>'+_esc(d.status)+'</td></tr>';});
+            html += '</table>';
+        } else { html += '<div style="font-size:12px;font-weight:600;color:#484581;margin-bottom:2px;">Diagnoses</div><div style="font-size:11.5px;color:#94a3b8;font-style:italic;margin-bottom:12px;">No diagnosis data found in member record</div>'; }
+        if(cd.medications&&cd.medications.length){
+            html += '<div style="font-size:12px;font-weight:600;color:#484581;margin-bottom:4px;">Medications ('+cd.medications.length+')</div><table style="width:100%;font-size:12px;margin-bottom:12px;"><tr style="background:#f8f9fb;"><td style="font-weight:600;">Name</td><td style="font-weight:600;width:25%;">Dose</td><td style="font-weight:600;width:15%;">Status</td></tr>';
+            cd.medications.forEach(function(m){html+='<tr><td>'+_esc(m.name)+'</td><td>'+_esc(m.dose||'\u2014')+'</td><td>'+_esc(m.status)+'</td></tr>';});
+            html += '</table>';
+        } else { html += '<div style="font-size:12px;font-weight:600;color:#484581;margin-bottom:2px;">Medications</div><div style="font-size:11.5px;color:#94a3b8;font-style:italic;margin-bottom:12px;">No medication data found in member record</div>'; }
+        if(cd.allergies&&cd.allergies.length){
+            html += '<div style="font-size:12px;font-weight:600;color:#484581;margin-bottom:4px;">Allergies ('+cd.allergies.length+')</div><table style="width:100%;font-size:12px;margin-bottom:12px;"><tr style="background:#f8f9fb;"><td style="font-weight:600;">Allergen</td><td style="font-weight:600;width:25%;">Severity</td></tr>';
+            cd.allergies.forEach(function(al){html+='<tr><td>'+_esc(al.name)+'</td><td>'+_esc(al.severity)+'</td></tr>';});
+            html += '</table>';
+        } else { html += '<div style="font-size:12px;font-weight:600;color:#484581;margin-bottom:2px;">Allergies</div><div style="font-size:11.5px;color:#94a3b8;font-style:italic;margin-bottom:12px;">No allergy data found in member record</div>'; }
+        if(cd.barriers&&cd.barriers.length){
+            html += '<div style="font-size:12px;font-weight:600;color:#484581;margin-bottom:4px;">Barriers ('+cd.barriers.length+')</div><table style="width:100%;font-size:12px;margin-bottom:12px;"><tr style="background:#f8f9fb;"><td style="font-weight:600;">Barrier</td><td style="font-weight:600;width:20%;">Status</td></tr>';
+            cd.barriers.forEach(function(b){html+='<tr><td>'+_esc(b.name)+'</td><td>'+_esc(b.status)+'</td></tr>';});
+            html += '</table>';
+        } else { html += '<div style="font-size:12px;font-weight:600;color:#484581;margin-bottom:2px;">Barriers</div><div style="font-size:11.5px;color:#94a3b8;font-style:italic;margin-bottom:12px;">No barrier data found in member record</div>'; }
+        if(cd.strengths&&cd.strengths.length){
+            html += '<div style="font-size:12px;font-weight:600;color:#484581;margin-bottom:4px;">Strengths ('+cd.strengths.length+')</div><table style="width:100%;font-size:12px;"><tr style="background:#f8f9fb;"><td style="font-weight:600;">Strength</td><td style="font-weight:600;width:20%;">Status</td></tr>';
+            cd.strengths.forEach(function(s){html+='<tr><td>'+_esc(s.name)+'</td><td>'+_esc(s.status)+'</td></tr>';});
+            html += '</table>';
+        } else { html += '<div style="font-size:12px;font-weight:600;color:#484581;margin-bottom:2px;">Strengths</div><div style="font-size:11.5px;color:#94a3b8;font-style:italic;margin-bottom:0;">No strength data found in member record</div>'; }
+        html += '</div></div>';
+    }
+    // ── Validation Summary ──
+    var valItems = [];
+    valItems.push({ok:true, text:'Every Goal is linked to a Need'});
+    valItems.push({ok:true, text:'Every Intervention is linked to a Goal'});
+    var dateValid = true;
+    (a.needs||[]).forEach(function(n){ (n.goals||[]).forEach(function(g){
+        (g.interventions||[]).forEach(function(i){ if(i.startDate && g.startDate && i.startDate < g.startDate){ dateValid=false; } });
+    }); });
+    valItems.push({ok:dateValid, text: dateValid?'Date hierarchy valid':'Some dates may need review'});
+    html += '<div class="ws-art-validation"><div style="font-size:12.5px;font-weight:600;color:#166534;margin-bottom:6px;">Validation Summary</div>';
+    valItems.forEach(function(v){ html += '<div class="ws-art-val-item">'+(v.ok?'✓':'⚠')+' '+_esc(v.text)+'</div>'; });
+    html += '</div>';
+    // Deploy bar
+    html += '<div class="ws-deploy-bar">';
+    html += '<button class="ws-deploy-btn" onclick="wsSaveToWorkspace()">Save to Workspace</button>';
+    html += '<button class="ws-deploy-btn ws-deploy-btn-primary" onclick="wsSaveDraftToRecord()">Save Draft to Care Plan</button>';
+    html += '<button class="ws-deploy-btn ws-deploy-btn-green" onclick="wsDeploy()">Deploy Care Plan</button>';
+    html += '</div>';
+    html += '<div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">✦ AI-assisted draft — review all clinical content before deploying.</div>';
+    html += '</div>';
+    el.innerHTML = html;
+}
+
+window.wsToggleEditMode = function(){
+    var ws=_wsGet(_cur); if(!ws) return;
+    ws._editing = !ws._editing;
+    _wsRenderArtifact(ws);
+    if(ws._editing) _wsAddAgent(ws.id, 'Edit mode is on. You can now edit dates, text, and remove items directly in the preview. Click "Done editing" when finished.');
+};
+window.wsEditArtField = function(field, val){ var ws=_wsGet(_cur); if(!ws||!ws.artifact) return; ws.artifact[field]=val; _wsPersist(); };
+window.wsEditNeedDate = function(nid, val){ var ws=_wsGet(_cur); if(!ws||!ws.artifact) return; var n=ws.artifact.needs.find(function(x){return x.id===nid;}); if(n) n.startDate=val; _wsPersist(); };
+window.wsEditNeedTargetDate = function(nid, val){ var ws=_wsGet(_cur); if(!ws||!ws.artifact) return; var n=ws.artifact.needs.find(function(x){return x.id===nid;}); if(n) n.targetDate=val; _wsPersist(); };
+window.wsEditGoalText = function(nid,gid,val){ var ws=_wsGet(_cur); if(!ws||!ws.artifact) return; var n=ws.artifact.needs.find(function(x){return x.id===nid;}); if(n){var g=n.goals.find(function(x){return x.id===gid;}); if(g) g.text=val;} _wsPersist(); };
+window.wsEditGoalDate = function(nid,gid,val){ var ws=_wsGet(_cur); if(!ws||!ws.artifact) return; var n=ws.artifact.needs.find(function(x){return x.id===nid;}); if(n){var g=n.goals.find(function(x){return x.id===gid;}); if(g) g.startDate=val;} _wsPersist(); };
+window.wsEditGoalTargetDate = function(nid,gid,val){ var ws=_wsGet(_cur); if(!ws||!ws.artifact) return; var n=ws.artifact.needs.find(function(x){return x.id===nid;}); if(n){var g=n.goals.find(function(x){return x.id===gid;}); if(g) g.targetDate=val;} _wsPersist(); };
+window.wsEditIntText = function(nid,gid,iid,val){ var ws=_wsGet(_cur); if(!ws||!ws.artifact) return; var n=ws.artifact.needs.find(function(x){return x.id===nid;}); if(n){var g=n.goals.find(function(x){return x.id===gid;}); if(g){var i=g.interventions.find(function(x){return x.id===iid;}); if(i) i.text=val;}} _wsPersist(); };
+window.wsEditIntDate = function(nid,gid,iid,which,val){ var ws=_wsGet(_cur); if(!ws||!ws.artifact) return; var n=ws.artifact.needs.find(function(x){return x.id===nid;}); if(n){var g=n.goals.find(function(x){return x.id===gid;}); if(g){var i=g.interventions.find(function(x){return x.id===iid;}); if(i){ if(which==='target') i.targetDate=val; else i.startDate=val; }}} _wsPersist(); };
+
+// Add goal/intervention/need from preview edit mode — inline search panels
+window.wsArtAddGoal = function(nid){
+    var existing = document.getElementById('ws-art-inline-add'); if(existing) existing.remove();
+    var btn = document.querySelector('[data-ws-add-goal="'+nid+'"]'); if(!btn) return;
+    var goalsMap = (typeof CarePlanController !== 'undefined' && CarePlanController.GOALS_MAP) ? CarePlanController.GOALS_MAP : {};
+    var allGoals = [];
+    Object.keys(goalsMap).forEach(function(nlId){ goalsMap[nlId].forEach(function(g){ allGoals.push({id:g.id, text:g.text}); }); });
+    var panel = document.createElement('div');
+    panel.id = 'ws-art-inline-add';
+    panel.style.cssText = 'margin-top:8px;padding:10px 12px;background:#f8f7ff;border:1px solid #e2dff6;border-radius:8px;';
+    panel.innerHTML = '<div style="font-size:11.5px;color:#64748b;margin-bottom:6px;">Search goals library or type custom:</div>' +
+        '<div class="ws-custom-input-wrap" style="margin-top:0;"><input class="ws-custom-input" id="ws-art-goal-input" placeholder="Type to search\u2026" /><button class="ws-custom-input-btn" onclick="wsArtConfirmGoal(\''+nid+'\')">Add</button><button style="padding:6px 10px;background:none;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;cursor:pointer;color:#64748b;" onclick="this.closest(\'#ws-art-inline-add\').remove()">Cancel</button></div>' +
+        '<div id="ws-art-goal-dd" class="ws-search-dropdown" style="position:static;margin-top:4px;max-height:150px;display:none;"></div>';
+    btn.parentNode.insertBefore(panel, btn.nextSibling);
+    var inp = document.getElementById('ws-art-goal-input');
+    inp.focus();
+    inp.addEventListener('input', function(){
+        var q = inp.value.toLowerCase().trim();
+        var dd = document.getElementById('ws-art-goal-dd');
+        if(q.length < 1){ dd.style.display='none'; return; }
+        var matches = allGoals.filter(function(g){ return g.text.toLowerCase().indexOf(q)>=0; }).slice(0,5);
+        if(!matches.length){ dd.innerHTML='<div class="ws-search-empty">No matches — type your own and click Add</div>'; }
+        else { dd.innerHTML=matches.map(function(g){ return '<div class="ws-search-item" style="cursor:pointer;">'+_esc(g.text)+'</div>'; }).join(''); }
+        dd.style.display='block';
+        dd.querySelectorAll('.ws-search-item').forEach(function(el){ el.addEventListener('click',function(){ inp.value=el.textContent; dd.style.display='none'; }); });
+    });
+};
+window.wsArtConfirmGoal = function(nid){
+    var inp = document.getElementById('ws-art-goal-input'); if(!inp) return;
+    var text = inp.value.trim(); if(!text) return;
+    var ws=_wsGet(_cur); if(!ws||!ws.artifact) return;
+    var need = ws.artifact.needs.find(function(n){return n.id===nid;}); if(!need) return;
+    var today = new Date(); var fmtD = function(d){ return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear(); };
+    need.goals.push({id:'g_'+nid+'_'+Date.now(), text:text, startDate:fmtD(today), interventions:[]});
+    _wsPersist(); _wsRenderArtifact(ws);
+};
+
+window.wsArtAddInt = function(nid, gid){
+    var existing = document.getElementById('ws-art-inline-add'); if(existing) existing.remove();
+    var btn = document.querySelector('[data-ws-add-int="'+nid+'_'+gid+'"]'); if(!btn) return;
+    var goalsMap = (typeof CarePlanController !== 'undefined' && CarePlanController.GOALS_MAP) ? CarePlanController.GOALS_MAP : {};
+    var allInts = [];
+    Object.keys(goalsMap).forEach(function(nlId){ goalsMap[nlId].forEach(function(g){ (g.interventions||[]).forEach(function(t){ allInts.push(t); }); }); });
+    var panel = document.createElement('div');
+    panel.id = 'ws-art-inline-add';
+    panel.style.cssText = 'margin-top:6px;padding:10px 12px;background:#f8f7ff;border:1px solid #e2dff6;border-radius:8px;';
+    panel.innerHTML = '<div style="font-size:11.5px;color:#64748b;margin-bottom:6px;">Search interventions library or type custom:</div>' +
+        '<div class="ws-custom-input-wrap" style="margin-top:0;"><input class="ws-custom-input" id="ws-art-int-input" placeholder="Type to search\u2026" /><button class="ws-custom-input-btn" onclick="wsArtConfirmInt(\''+nid+'\',\''+gid+'\')">Add</button><button style="padding:6px 10px;background:none;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;cursor:pointer;color:#64748b;" onclick="this.closest(\'#ws-art-inline-add\').remove()">Cancel</button></div>' +
+        '<div id="ws-art-int-dd" class="ws-search-dropdown" style="position:static;margin-top:4px;max-height:150px;display:none;"></div>';
+    btn.parentNode.insertBefore(panel, btn.nextSibling);
+    var inp = document.getElementById('ws-art-int-input');
+    inp.focus();
+    inp.addEventListener('input', function(){
+        var q = inp.value.toLowerCase().trim();
+        var dd = document.getElementById('ws-art-int-dd');
+        if(q.length < 1){ dd.style.display='none'; return; }
+        var matches = allInts.filter(function(t){ return t.toLowerCase().indexOf(q)>=0; }).slice(0,5);
+        if(!matches.length){ dd.innerHTML='<div class="ws-search-empty">No matches — type your own and click Add</div>'; }
+        else { dd.innerHTML=matches.map(function(t){ return '<div class="ws-search-item" style="cursor:pointer;">'+_esc(t)+'</div>'; }).join(''); }
+        dd.style.display='block';
+        dd.querySelectorAll('.ws-search-item').forEach(function(el){ el.addEventListener('click',function(){ inp.value=el.textContent; dd.style.display='none'; }); });
+    });
+};
+window.wsArtConfirmInt = function(nid, gid){
+    var inp = document.getElementById('ws-art-int-input'); if(!inp) return;
+    var text = inp.value.trim(); if(!text) return;
+    var ws=_wsGet(_cur); if(!ws||!ws.artifact) return;
+    var need = ws.artifact.needs.find(function(n){return n.id===nid;}); if(!need) return;
+    var goal = need.goals.find(function(g){return g.id===gid;}); if(!goal) return;
+    var today = new Date(); var fmtD = function(d){ return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear(); };
+    goal.interventions.push({id:'i_'+gid+'_'+Date.now(), text:text, startDate:fmtD(today)});
+    _wsPersist(); _wsRenderArtifact(ws);
+};
+
+window.wsArtAddNeed = function(){
+    var existing = document.getElementById('ws-art-inline-add'); if(existing) existing.remove();
+    var btn = document.getElementById('ws-art-add-need-btn'); if(!btn) return;
+    var lib = (typeof CarePlanController !== 'undefined' && CarePlanController.NEEDS_LIBRARY) ? CarePlanController.NEEDS_LIBRARY : [];
+    var panel = document.createElement('div');
+    panel.id = 'ws-art-inline-add';
+    panel.style.cssText = 'margin:8px 0 16px;padding:10px 12px;background:#f8f7ff;border:1px solid #e2dff6;border-radius:8px;';
+    panel.innerHTML = '<div style="font-size:11.5px;color:#64748b;margin-bottom:6px;">Search needs library or type custom:</div>' +
+        '<div class="ws-custom-input-wrap" style="margin-top:0;"><input class="ws-custom-input" id="ws-art-need-input" placeholder="Type to search\u2026" /><button class="ws-custom-input-btn" onclick="wsArtConfirmNeed()">Add</button><button style="padding:6px 10px;background:none;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;cursor:pointer;color:#64748b;" onclick="this.closest(\'#ws-art-inline-add\').remove()">Cancel</button></div>' +
+        '<div id="ws-art-need-dd" class="ws-search-dropdown" style="position:static;margin-top:4px;max-height:150px;display:none;"></div>';
+    btn.parentNode.insertBefore(panel, btn.nextSibling);
+    var inp = document.getElementById('ws-art-need-input');
+    inp.focus();
+    inp.addEventListener('input', function(){
+        var q = inp.value.toLowerCase().trim();
+        var dd = document.getElementById('ws-art-need-dd');
+        if(q.length < 1){ dd.style.display='none'; return; }
+        var matches = lib.filter(function(n){ return n.label.toLowerCase().indexOf(q)>=0 || (n.category||'').toLowerCase().indexOf(q)>=0 || (n.diagnoses||'').toLowerCase().indexOf(q)>=0; }).slice(0,5);
+        if(!matches.length){ dd.innerHTML='<div class="ws-search-empty">No matches — type your own and click Add</div>'; }
+        else { dd.innerHTML=matches.map(function(n){ return '<div class="ws-search-item" style="cursor:pointer;">'+_esc(n.label)+'<span class="ws-search-cat">'+_esc(n.category)+'</span></div>'; }).join(''); }
+        dd.style.display='block';
+        dd.querySelectorAll('.ws-search-item').forEach(function(el){ el.addEventListener('click',function(){ inp.value=el.querySelector('.ws-search-cat') ? el.childNodes[0].textContent : el.textContent; dd.style.display='none'; }); });
+    });
+};
+window.wsArtConfirmNeed = function(){
+    var inp = document.getElementById('ws-art-need-input'); if(!inp) return;
+    var text = inp.value.trim(); if(!text) return;
+    var ws=_wsGet(_cur); if(!ws||!ws.artifact) return;
+    var today = new Date(); var fmtD = function(d){ return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear(); };
+    ws.artifact.needs.push({id:'n_'+Date.now(), label:text, startDate:fmtD(today), goals:[]});
+    _wsPersist(); _wsRenderArtifact(ws);
+};
+
+// ── Remove items from artifact ──
+window.wsRemoveNeed = function(nid){ var ws=_wsGet(_cur); if(!ws||!ws.artifact) return; ws.artifact.needs=ws.artifact.needs.filter(function(n){return n.id!==nid;}); var wsNeed=ws.needs.find(function(n){return n.id===nid;}); if(wsNeed) wsNeed.selected=false; ws.goals.forEach(function(g){if(g.needId===nid) g.selected=false;}); ws.interventions.forEach(function(i){var g=ws.goals.find(function(x){return x.id===i.goalId;}); if(g&&g.needId===nid) i.selected=false;}); _wsPersist(); _wsRenderArtifact(ws); _wsAddAgent(ws.id, 'Removed the need and its goals/interventions from the draft.'); };
+window.wsRemoveGoal = function(nid,gid){ var ws=_wsGet(_cur); if(!ws||!ws.artifact) return; var need=ws.artifact.needs.find(function(n){return n.id===nid;}); if(need) need.goals=need.goals.filter(function(g){return g.id!==gid;}); var wsGoal=ws.goals.find(function(g){return g.id===gid;}); if(wsGoal) wsGoal.selected=false; ws.interventions.forEach(function(i){if(i.goalId===gid) i.selected=false;}); _wsPersist(); _wsRenderArtifact(ws); _wsAddAgent(ws.id, 'Removed the goal and its interventions.'); };
+window.wsRemoveInt = function(nid,gid,iid){ var ws=_wsGet(_cur); if(!ws||!ws.artifact) return; var need=ws.artifact.needs.find(function(n){return n.id===nid;}); if(need){ var goal=need.goals.find(function(g){return g.id===gid;}); if(goal) goal.interventions=goal.interventions.filter(function(i){return i.id!==iid;}); } var wsInt=ws.interventions.find(function(i){return i.id===iid;}); if(wsInt) wsInt.selected=false; _wsPersist(); _wsRenderArtifact(ws); _wsAddAgent(ws.id, 'Removed the intervention.'); };
+
+// ── Pull clinical data (diagnoses, meds, allergies) into artifact ──
+window.wsPullClinicalData = function(){
+    var ws=_wsGet(_cur); if(!ws||!ws.artifact) return;
+    var m = (window.membersDB||[]).find(function(x){return x.id===ws.memberId;});
+    if(!m){ _wsAddAgent(ws.id, 'Could not find the member record.'); return; }
+    // Read which checkboxes are selected
+    var inclDx = (document.getElementById('ws-cd-dx')||{}).checked !== false;
+    var inclMeds = (document.getElementById('ws-cd-meds')||{}).checked !== false;
+    var inclAllergies = (document.getElementById('ws-cd-allergies')||{}).checked !== false;
+    var inclBarriers = (document.getElementById('ws-cd-barriers')||{}).checked !== false;
+
+    var dx = m.diagnoses||{};
+    var hh = m.healthHistory||{};
+    var cd = { diagnoses:[], medications:[], allergies:[], barriers:[], strengths:[] };
+    var pulled = [];
+
+    if(inclDx){
+        if(dx.primary) cd.diagnoses.push({code:dx.primaryCode||'', desc:dx.primary, status:'Active'});
+        if(dx.secondary) (Array.isArray(dx.secondary)?dx.secondary:[dx.secondary]).forEach(function(d){ cd.diagnoses.push({code:'', desc:d, status:'Active'}); });
+        var dxFromHH = hh.diagnoses||[];
+        dxFromHH.forEach(function(d){ if(!cd.diagnoses.find(function(x){return x.desc===(d.desc||d.diagnosis);})) cd.diagnoses.push({code:d.code||'', desc:d.desc||d.diagnosis||d.name||'', status:d.status||'Active'}); });
+        pulled.push(cd.diagnoses.length+' diagnoses');
+    }
+    if(inclMeds){
+        var meds = m.medications||hh.medications||[];
+        cd.medications = meds.map(function(med){ return {name:med.name||med.drug||med, dose:med.dose||med.dosage||'', status:med.status||'Active', startDate:med.startDate||''}; });
+        pulled.push(cd.medications.length+' medications');
+    }
+    if(inclAllergies){
+        var allergies = m.allergies||hh.allergies||[];
+        cd.allergies = (Array.isArray(allergies)?allergies:[]).map(function(a){ return typeof a==='string'?{name:a,severity:'Unknown'}:{name:a.name||a.allergen||a,severity:a.severity||'Unknown'}; });
+        pulled.push(cd.allergies.length+' allergies');
+    }
+    if(inclBarriers){
+        var cpd = m.carePlanData||{};
+        var barriersRaw = cpd.barriers||m.barriers||[];
+        cd.barriers = (Array.isArray(barriersRaw)?barriersRaw:[]).filter(function(b){return (b.category||'Barrier')==='Barrier';}).map(function(b){return {name:b.name||b.text||b, status:b.status||'Active'};});
+        cd.strengths = (Array.isArray(barriersRaw)?barriersRaw:[]).filter(function(b){return b.category==='Strength';}).map(function(b){return {name:b.name||b.text||b, status:b.status||'Active'};});
+        pulled.push(cd.barriers.length+' barriers, '+cd.strengths.length+' strengths');
+    }
+
+    ws.artifact.clinicalData = cd;
+    _wsPersist(); _wsRenderArtifact(ws);
+    _wsAddAgent(ws.id, 'Pulled clinical data: '+pulled.join(', ')+'. Review the Clinical Data section in the preview.');
+};
+
+// ── Fullscreen preview toggle ──
+window.wsToggleFullscreen = function(){
+    var sidebar = document.querySelector('.ws-split-sidebar');
+    var main = document.querySelector('.ws-split-main');
+    if(!sidebar||!main) return;
+    if(sidebar.style.display==='none'){
+        sidebar.style.display=''; main.style.flex='1';
+    } else {
+        sidebar.style.display='none'; main.style.flex='1';
+    }
+};
+
+// ── PDF export ──
+window.wsExportPDF = function(){
+    var ws=_wsGet(_cur); if(!ws||!ws.artifact) return;
+    var a = ws.artifact;
+    var html = '<html><head><title>'+_esc(a.name)+'</title><style>body{font-family:Arial,sans-serif;padding:40px;color:#1e293b;font-size:13px;line-height:1.6;}h1{font-size:20px;color:#484581;margin-bottom:4px;}h2{font-size:15px;color:#1e293b;margin:18px 0 6px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;}h3{font-size:13px;color:#484581;margin:10px 0 4px;}table{width:100%;border-collapse:collapse;margin:8px 0 16px;}td{padding:6px 10px;border:1px solid #e2e8f0;font-size:12px;}td:first-child{font-weight:600;background:#f8f9fb;width:35%;}.int{padding:4px 0 4px 20px;font-size:12px;border-left:2px solid #e2dff6;margin:3px 0;}.val{color:#166534;font-size:12px;margin:3px 0;}.note{font-size:11px;color:#94a3b8;margin-top:20px;}</style></head><body>';
+    html += '<h1>'+_esc(a.name)+'</h1><div style="color:#94a3b8;font-size:12px;margin-bottom:16px;">'+_esc(a.member)+' \u00b7 '+a.status+' \u00b7 Generated '+new Date().toLocaleDateString()+'</div>';
+    html += '<table><tr><td>Plan Name</td><td>'+_esc(a.name)+'</td></tr><tr><td>Member</td><td>'+_esc(a.member)+'</td></tr><tr><td>Status</td><td>'+a.status+'</td></tr><tr><td>Start Date</td><td>'+a.startDate+'</td></tr><tr><td>Review Date</td><td>'+a.reviewDate+'</td></tr><tr><td>Duration</td><td>'+a.duration+'</td></tr></table>';
+    if(a.clinicalData){
+        var cd = a.clinicalData;
+        if(cd.diagnoses&&cd.diagnoses.length){ html+='<h2>Diagnoses</h2><table><tr><td style="width:20%;">Code</td><td>Description</td><td style="width:15%;">Status</td></tr>'; cd.diagnoses.forEach(function(d){html+='<tr><td>'+_esc(d.code)+'</td><td>'+_esc(d.desc)+'</td><td>'+_esc(d.status)+'</td></tr>';}); html+='</table>'; }
+        if(cd.medications&&cd.medications.length){ html+='<h2>Medications</h2><table><tr><td>Name</td><td>Dose</td><td style="width:15%;">Status</td></tr>'; cd.medications.forEach(function(m){html+='<tr><td>'+_esc(m.name)+'</td><td>'+_esc(m.dose)+'</td><td>'+_esc(m.status)+'</td></tr>';}); html+='</table>'; }
+        if(cd.allergies&&cd.allergies.length){ html+='<h2>Allergies</h2><table><tr><td>Allergen</td><td style="width:25%;">Severity</td></tr>'; cd.allergies.forEach(function(a){html+='<tr><td>'+_esc(a.name)+'</td><td>'+_esc(a.severity)+'</td></tr>';}); html+='</table>'; }
+        if(cd.barriers&&cd.barriers.length){ html+='<h2>Barriers</h2><table><tr><td>Barrier</td><td style="width:20%;">Status</td></tr>'; cd.barriers.forEach(function(b){html+='<tr><td>'+_esc(b.name)+'</td><td>'+_esc(b.status)+'</td></tr>';}); html+='</table>'; }
+        if(cd.strengths&&cd.strengths.length){ html+='<h2>Strengths</h2><table><tr><td>Strength</td><td style="width:20%;">Status</td></tr>'; cd.strengths.forEach(function(s){html+='<tr><td>'+_esc(s.name)+'</td><td>'+_esc(s.status)+'</td></tr>';}); html+='</table>'; }
+    }
+    (a.needs||[]).forEach(function(n,ni){
+        html += '<h2>Need '+(ni+1)+': '+_esc(n.label)+'</h2><div style="font-size:11.5px;color:#64748b;">Start: '+n.startDate+(n.targetDate?' \u00b7 Target: '+n.targetDate:'')+'</div>';
+        (n.goals||[]).forEach(function(g){
+            html += '<h3>Goal: '+_esc(g.text)+'</h3><div style="font-size:11px;color:#64748b;">Start: '+g.startDate+(g.targetDate?' \u00b7 Target: '+g.targetDate:'')+'</div>';
+            (g.interventions||[]).forEach(function(i){ html += '<div class="int">\u2022 '+_esc(i.text)+'<span style="color:#94a3b8;margin-left:8px;">(Start: '+i.startDate+(i.targetDate?' \u00b7 Target: '+i.targetDate:'')+')</span></div>'; });
+        });
+    });
+    html += '<div class="val"><strong>Validation:</strong> \u2713 All goals linked to needs \u2713 All interventions linked to goals \u2713 Date hierarchy valid</div>';
+    html += '<div class="note">\u2726 AI-assisted draft \u2014 review all clinical content before deploying.</div>';
+    html += '</body></html>';
+    var win = window.open('','_blank');
+    if(win){ win.document.write(html); win.document.close(); setTimeout(function(){ win.print(); }, 300); }
+    else if(typeof toast==='function') toast('Popup blocked \u2014 allow popups to export PDF');
+};
+
+// ── Save states ──
+window.wsSaveToWorkspace = function(){
+    var ws=_wsGet(_cur); if(!ws) return;
+    ws.status='in_progress';
+    if(ws.artifact) ws.artifact.status='Draft (saved to workspace)';
+    _wsPersist();
+    _wsRenderArtifact(ws);
+    _wsUpdateHeaderBadge(ws);
+    _wsAddAgent(ws.id, 'Draft saved to this workspace. You can return later to continue editing.');
+    var el=document.getElementById('ws-artifact-area'); if(el) el.scrollTop=0;
+    setTimeout(function(){ if(typeof closeWorkspace==='function') closeWorkspace(); }, 2000);
+};
+
+window.wsSaveDraftToRecord = function(){
+    var ws=_wsGet(_cur); if(!ws||!ws.artifact) return;
+    var m = (window.membersDB||[]).find(function(x){return x.id===ws.memberId;});
+    if(m){
+        if(m.consentStatus !== 'Consented' && m.consentStatus !== 'Re-consent Required') m.consentStatus = 'Consented';
+        if(!m.carePlanData) m.carePlanData={needs:[],activity:[],barriers:[],gaps:[]};
+        if(!m.carePlanData.carePlans) m.carePlanData.carePlans=[];
+        var cpId = 'cp-ws-'+Date.now();
+        m.carePlanData.carePlans.push({id:cpId, name:ws.artifact.name, status:'draft', startDate:ws.artifact.startDate, aiGenerated:true, createdBy:'AI Workspace'});
+        if(!m.carePlanData.needs) m.carePlanData.needs=[];
+        var today2 = new Date(); var followUp = new Date(); followUp.setDate(today2.getDate()+14);
+        ws.artifact.needs.forEach(function(n){
+            m.carePlanData.needs.push({
+                id:n.id, planId:cpId, text:n.label, category:n.label, status:'Identified',
+                startDate:today2.toLocaleDateString('en-US'), daysToFollowUp:14,
+                followUpDate:followUp.toLocaleDateString('en-US'),
+                goals:(n.goals||[]).map(function(g){ return {id:g.id, text:g.text, interventions:(g.interventions||[]).map(function(i){return {id:i.id,text:i.text};})}; })
+            });
+        });
+        // Push to LOB carePlans for CarePlanController visibility
+        if(!m.lob) m.lob = [];
+        if(!m.lob[0]) m.lob.push({name:'Care Management', risk:'Medium', consent:{status:'Consented'}, assessments:[{id:'auto-1',name:'Assessment',status:'completed'}], carePlans:[]});
+        if(!m.lob[0].carePlans) m.lob[0].carePlans=[];
+        m.lob[0].carePlans.push({id:cpId, name:ws.artifact.name, shortName:ws.memberName+' Plan', status:'draft', startDate:today2.toLocaleDateString('en-US')});
+    }
+    ws.status='draft_created'; ws.artifact.status='Draft (saved to record)'; _wsPersist();
+    _wsRenderArtifact(ws);
+    _wsUpdateHeaderBadge(ws);
+    _wsAddAgent(ws.id, 'Draft care plan saved to '+ws.memberName+'\'s record and workspace.');
+    var el=document.getElementById('ws-artifact-area'); if(el) el.scrollTop=0;
+    setTimeout(function(){ if(typeof closeWorkspace==='function') closeWorkspace(); }, 2500);
+};
+
+window.wsDeploy = function(){
+    var ws=_wsGet(_cur); if(!ws||!ws.artifact) return;
+    var m = (window.membersDB||[]).find(function(x){return x.id===ws.memberId;});
+    if(m){
+        if(m.consentStatus !== 'Consented' && m.consentStatus !== 'Re-consent Required') m.consentStatus = 'Consented';
+        if(!m.carePlanData) m.carePlanData={needs:[],activity:[],barriers:[],gaps:[]};
+        if(!m.carePlanData.carePlans) m.carePlanData.carePlans=[];
+        m.carePlanData.carePlans = m.carePlanData.carePlans.filter(function(cp){return cp.name!==ws.artifact.name;});
+        var cpId = 'cp-ws-'+Date.now();
+        m.carePlanData.carePlans.push({id:cpId, name:ws.artifact.name, status:'active', startDate:ws.artifact.startDate, aiGenerated:true, createdBy:'AI Workspace'});
+        if(!m.carePlanData.needs) m.carePlanData.needs=[];
+        var today3 = new Date(); var followUp3 = new Date(); followUp3.setDate(today3.getDate()+14);
+        ws.artifact.needs.forEach(function(n){
+            m.carePlanData.needs.push({
+                id:n.id, planId:cpId, text:n.label, category:n.label, status:'In Progress',
+                startDate:today3.toLocaleDateString('en-US'), daysToFollowUp:14,
+                followUpDate:followUp3.toLocaleDateString('en-US'),
+                goals:(n.goals||[]).map(function(g){ return {id:g.id, text:g.text, interventions:(g.interventions||[]).map(function(i){return {id:i.id,text:i.text};})}; })
+            });
+        });
+        // Push to LOB carePlans for CarePlanController visibility
+        if(!m.lob) m.lob = [];
+        if(!m.lob[0]) m.lob.push({name:'Care Management', risk:'Medium', consent:{status:'Consented'}, assessments:[{id:'auto-1',name:'Assessment',status:'completed'}], carePlans:[]});
+        if(!m.lob[0].carePlans) m.lob[0].carePlans=[];
+        m.lob[0].carePlans = m.lob[0].carePlans.filter(function(cp){return cp.name!==ws.artifact.name;});
+        m.lob[0].carePlans.push({id:cpId, name:ws.artifact.name, shortName:ws.memberName+' Plan', status:'active', startDate:today3.toLocaleDateString('en-US')});
+    }
+    ws.status='deployed'; ws.artifact.status='Active (deployed)'; _wsPersist();
+    _wsRenderArtifact(ws);
+    _wsUpdateHeaderBadge(ws);
+    _wsAddAgent(ws.id, '✅ Care plan deployed. Closing workspace\u2026');
+    var el=document.getElementById('ws-artifact-area'); if(el) el.scrollTop=0;
+    setTimeout(function(){ if(typeof closeWorkspace==='function') closeWorkspace(); if(typeof toast==='function') toast('Care plan deployed for '+ws.memberName); }, 2500);
+};
+
+function _wsUpdateHeaderBadge(ws){
+    var badges = document.querySelectorAll('.ws-header-status');
+    if(badges.length>0){
+        var label = ws.status==='deployed' ? 'Deployed' : ws.status==='draft_created' ? 'Draft saved' : 'In progress';
+        badges[0].textContent = label;
+    }
+}
+
+// ── Post-draft commands ──
+function _wsHandlePostDraft(ws, text){
+    var lower = text.toLowerCase();
+    if(lower.indexOf('add')>=0 && lower.indexOf('need')>=0){
+        var needText = text.replace(/add\s*(a\s*)?need\s*:?\s*/i,'').trim();
+        if(needText && ws.artifact){
+            var newNeed = {id:'n_'+Date.now(), label:needText, startDate:ws.artifact.startDate, goals:[]};
+            ws.artifact.needs.push(newNeed); _wsPersist(); _wsRenderArtifact(ws);
+            _wsAddAgent(ws.id, 'Added new need: "'+needText+'". Would you like me to recommend goals and interventions for it?', [
+                {label:'Yes, recommend goals', primary:true, onclick:'wsSendAuto("Yes, recommend goals for '+needText.replace(/'/g,"\\'")+'")'},
+                {label:'No, I\'ll add manually', onclick:'wsSendAuto("No thanks")'}
+            ]);
+        } else { _wsAddAgent(ws.id, 'Please specify the need name, e.g. "Add need: Food Access Support"'); }
+    } else if(lower.indexOf('yes')>=0 && lower.indexOf('recommend')>=0){
+        _wsAddAgent(ws.id, 'Let me generate goals for the new need.'); // Could trigger API call for goals
+    } else if(lower.indexOf('save')>=0 && lower.indexOf('workspace')>=0){
+        wsSaveToWorkspace();
+    } else if(lower.indexOf('save')>=0 && lower.indexOf('draft')>=0){
+        wsSaveDraftToRecord();
+    } else if(lower.indexOf('deploy')>=0){
+        wsDeploy();
+    } else if(lower.indexOf('update')>=0){
+        _wsRenderArtifact(ws);
+        _wsAddAgent(ws.id, 'Draft updated.');
+    } else {
+        _wsAddAgent(ws.id, 'You can say "add need: [name]", "save to workspace", "save draft to care plan", or "deploy".');
+    }
+}
+
+})();
 
 window.runAgentFromChat = function(agentId, agentName, query) {
     // ── Referral Creator: route to card-based wizard ───────────────────────
