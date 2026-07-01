@@ -48904,7 +48904,9 @@ function doReassignCM() {
 
   window.getApiKey = function() {
     if (_keyStore['sevida_api_key']) return _keyStore['sevida_api_key'];
-    try { return sessionStorage.getItem('sevida_api_key') || ''; } catch(e) { return ''; }
+    try { var sk = sessionStorage.getItem('sevida_api_key'); if (sk) return sk; } catch(e) {}
+    if (typeof ANTHROPIC_API_KEY !== 'undefined' && ANTHROPIC_API_KEY) return ANTHROPIC_API_KEY;
+    return '';
   }
 
   // ── SKILL TEST (real Anthropic API call) ──
