@@ -31716,10 +31716,7 @@ function renderMenuChatList(searchQuery) {
         var d = new Date(date); d.setHours(0,0,0,0);
         var diff = Math.floor((now - d) / 86400000);
         if (diff === 0) return 'Today';
-        if (diff === 1) return 'Yesterday';
-        if (diff <= 7) return 'This Week';
-        if (diff <= 30) return 'This Month';
-        return 'Earlier';
+        return 'Recents';
     }
 
     function getTitle(s) {
@@ -31730,12 +31727,24 @@ function renderMenuChatList(searchQuery) {
             : s.date.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     }
 
+    function relativeTime(date) {
+        var now = new Date(); now.setHours(0,0,0,0);
+        var d = new Date(date); d.setHours(0,0,0,0);
+        var diff = Math.floor((now - d) / 86400000);
+        if (diff === 0) return 'Today';
+        if (diff === 1) return 'Yesterday';
+        if (diff < 7) return diff + 'd ago';
+        if (diff < 14) return '1w ago';
+        if (diff < 30) return Math.floor(diff/7) + 'w ago';
+        return date.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    }
+
     function renderItem(s, memberId, ctxLabel, isActive) {
         var isPinned = SESS.pinned.indexOf(s.id) > -1;
         var pinBorder = isPinned ? 'border-left:3px solid #f59e0b;' : '';
         var activeBg = isActive ? 'background:#f0f0ff;' : '';
         var title = getTitle(s);
-        var meta = dateGroup(s.date);
+        var meta = relativeTime(s.date);
         var loadFn = memberId
             ? 'closeAIMenu();loadSession(\'' + s.id + '\',\'' + memberId + '\')'
             : 'closeAIMenu();window.loadContextSession&&window.loadContextSession(\'' + s.id + '\',\'' + (ctxLabel||'members') + '\')';
@@ -31765,7 +31774,7 @@ function renderMenuChatList(searchQuery) {
     '</div>';
 
     function buildGroups(items, getS, getMemberId, getLabel) {
-        var groups = {}, order = ['Pinned','Today','Yesterday','This Week','This Month','Earlier'];
+        var groups = {}, order = ['Pinned','Today','Recents'];
         items.forEach(function(x) {
             var s = getS(x);
             var g = SESS.pinned.indexOf(s.id) > -1 ? 'Pinned' : dateGroup(s.date);
@@ -31816,7 +31825,7 @@ function renderMenuChatList(searchQuery) {
         listEl.innerHTML = searchBar + '<div style="font-size:12px;color:#9ca3af;padding:6px 14px;">' + (q ? 'No results.' : 'No past chats yet.') + '</div>';
         return;
     }
-    var groups2 = {}, order2 = ['Pinned','Today','Yesterday','This Week','This Month','Earlier'];
+    var groups2 = {}, order2 = ['Pinned','Today','Recents'];
     sessions.forEach(function(s) {
         var g = SESS.pinned.indexOf(s.id) > -1 ? 'Pinned' : dateGroup(s.date);
         if (!groups2[g]) groups2[g] = [];
@@ -32017,10 +32026,19 @@ function renderSessionList(searchQuery) {
         var d = new Date(date); d.setHours(0,0,0,0);
         var diff = Math.floor((now - d) / 86400000);
         if (diff === 0) return 'Today';
+        return 'Recents';
+    }
+
+    function relativeTime(date) {
+        var now = new Date(); now.setHours(0,0,0,0);
+        var d = new Date(date); d.setHours(0,0,0,0);
+        var diff = Math.floor((now - d) / 86400000);
+        if (diff === 0) return 'Today';
         if (diff === 1) return 'Yesterday';
-        if (diff <= 7) return 'This Week';
-        if (diff <= 30) return 'This Month';
-        return 'Earlier';
+        if (diff < 7) return diff + 'd ago';
+        if (diff < 14) return '1w ago';
+        if (diff < 30) return Math.floor(diff/7) + 'w ago';
+        return date.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     }
 
     function renderItem(s, memberId, displayTitle, meta, isActive, ctxLabel) {
@@ -32045,7 +32063,7 @@ function renderSessionList(searchQuery) {
     }
 
     function buildGroupedHTML(items) {
-        var groups = {}, order = ['Pinned','Today','Yesterday','This Week','This Month','Earlier'];
+        var groups = {}, order = ['Pinned','Today','Recents'];
         items.forEach(function(x) {
             var g = SESS.pinned.indexOf(x.s.id) > -1 ? 'Pinned' : dateGroup(x.s.date);
             if (!groups[g]) groups[g] = [];
@@ -32060,7 +32078,7 @@ function renderSessionList(searchQuery) {
                 var title = x.s.customTitle || (firstUserMsg
                     ? (firstUserMsg.content.length > 42 ? firstUserMsg.content.slice(0,42)+'…' : firstUserMsg.content)
                     : x.s.date.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
-                var meta = x.s.date.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+                var meta = relativeTime(x.s.date);
                 html += renderItem(x.s, x.memberId, title, meta, x.isActive||false, x.label||null);
             });
         });
@@ -32820,7 +32838,7 @@ window.loadContextSession = function(sessionId, ctx) {
     var container = document.getElementById('aiMessages');
     if (!container) return;
     aiCopilotState.isInConversation = true;
-    aiCopilotState.conversationHistory = session.messages.map(function(m){ return { role: m.role, content: m.content }; });
+    aiCopilotState.conversationHistory = session.messages.map(function(m){ return { role: m.role, content: m.content || m.text || '' }; }).filter(function(m){ return m.content && m.content.trim(); });
     container.innerHTML =
         '<div style="padding:8px 14px 6px;">' +
             '<div style="font-size:11px;color:#94a3b8;">' + escapeHtml(session.title) + '</div>' +
@@ -32842,7 +32860,7 @@ window.handleContextPrompt = function(id, text) {
     var inp = document.getElementById('aiInputField');
     if (inp) {
         inp.value = text;
-        inp.focus();
+        if (typeof sendAIMessage === 'function') sendAIMessage();
     }
 };
 
@@ -44242,9 +44260,9 @@ async function sendLLMMessage(userText) {
             });
         } else {
             // Proxy fallback (production / Netlify)
-            response = await fetch('https://api.anthropic.com/v1/messages', {
+            response = await fetch('/.netlify/functions/claude', {
                 method:'POST',
-                headers:{ 'Content-Type':'application/json', 'x-api-key': (typeof window.getApiKey==='function' ? window.getApiKey() : ''), 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+                headers:{ 'Content-Type':'application/json' },
                 signal: window._aiAbortController ? window._aiAbortController.signal : undefined,
                 body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:800, system:buildChatSystemPrompt(), messages:[...history,{role:'user',content:userText}] })
             });
@@ -55472,7 +55490,7 @@ window.runAgentFromChat = function(agentId, agentName, query) {
 
         // Log to Studio
         var runId = window.logRunToStudio(agentId, agentName, agent&&agent.skill, 'success', durationMs, tokens, member);
-        aiCopilotState.conversationHistory.push({ role:'assistant', agentId:agentId, text:respText });
+        aiCopilotState.conversationHistory.push({ role:'assistant', agentId:agentId, content:respText, text:respText });
 
         // ── Save to session store ──
         if (member && typeof sessSaveHTML === 'function') {
@@ -55540,7 +55558,7 @@ window.runAgentFromChat = function(agentId, agentName, query) {
         container.scrollTop = container.scrollHeight;
 
         var runId = window.logRunToStudio(agentId, agentName, agent&&agent.skill, 'success', durationMs, 1200, member);
-        aiCopilotState.conversationHistory.push({ role:'assistant', agentId:agentId, text:mockText });
+        aiCopilotState.conversationHistory.push({ role:'assistant', agentId:agentId, content:mockText, text:mockText });
 
         // ── Save to session store ──
         if (member && typeof sessSaveHTML === 'function') {
@@ -55621,7 +55639,7 @@ window.sendAIMessage = function() {
         if(h.role==='assistant') history.push({role:'assistant',content:h.text});
     });
     history.push({role:'user',content:text});
-    aiCopilotState.conversationHistory.push({role:'user',text:text});
+    aiCopilotState.conversationHistory.push({role:'user',content:text,text:text});
 
     container.innerHTML += '<div class="ai-conv-user"><div class="ai-conv-user-bubble">'+esc(text)+'</div></div>'
         + '<div class="ai-thinking-container" id="aiThinking">'
@@ -55647,7 +55665,7 @@ window.sendAIMessage = function() {
         if(data.error){ container.innerHTML+='<div class="ai-conv-assistant"><div class="ai-response-block ai-error-response"><div class="ai-response-summary">'+esc(data.error.message||'Error')+'</div></div></div>'; return; }
         var resp = (data.content&&data.content[0]&&data.content[0].text)||'No response.';
         var tokens = (data.usage&&(data.usage.input_tokens+data.usage.output_tokens))||800;
-        aiCopilotState.conversationHistory.push({role:'assistant',text:resp});
+        aiCopilotState.conversationHistory.push({role:'assistant',content:resp,text:resp});
         // Don't inject member card when CM is already on the member page
         var _respHtml = (typeof window.renderMarkdown === 'function')
             ? '<div class="ai-response-block"><div class="ai-llm-response">' + window.renderMarkdown(resp) + '</div></div>'
@@ -55816,7 +55834,7 @@ window.renderWelcomeScreen = function() {
                 '<div style="padding:0 14px 10px;">' +
                     '<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:7px;">Suggested</div>' +
                     ['Summarize this referral', 'What is the current status?', 'Which facilities have responded?', 'What are the next steps?'].map(function(t) {
-                        return '<button onclick="var i=document.getElementById(\'aiInputField\');if(i){i.value=\'' + t + '\';i.focus();}" style="display:block;width:100%;text-align:left;padding:8px 11px;margin-bottom:5px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;color:#1e293b;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background=\'#f0f0ff\';this.style.borderColor=\'#c8c6f0\'" onmouseout="this.style.background=\'#fff\';this.style.borderColor=\'#e2e8f0\'">' + t + '</button>';
+                        return '<button onclick="var i=document.getElementById(\'aiInputField\');if(i){i.value=\'' + t + '\';if(typeof sendAIMessage===\'function\')sendAIMessage();}" style="display:block;width:100%;text-align:left;padding:8px 11px;margin-bottom:5px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;color:#1e293b;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background=\'#f0f0ff\';this.style.borderColor=\'#c8c6f0\'" onmouseout="this.style.background=\'#fff\';this.style.borderColor=\'#e2e8f0\'">' + t + '</button>';
                     }).join('') +
                 '</div>';
         }
@@ -85772,7 +85790,7 @@ function addFollowUpChips(responseBlock) {
         chipsDiv.innerHTML = '<div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Follow up</div>' +
             questions.slice(0,3).map(function(q) {
                 var safe = q.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-                return '<button onclick="var i=document.getElementById(\'aiInputField\');if(i){i.value=\'' + safe + '\';i.focus();}" ' +
+                return '<button onclick="var i=document.getElementById(\'aiInputField\');if(i){i.value=\'' + safe + '\';if(typeof sendAIMessage===\'function\')sendAIMessage();}" ' +
                     'style="display:block;width:100%;text-align:left;padding:6px 10px;margin-bottom:4px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;font-size:11.5px;color:#374151;cursor:pointer;font-family:inherit;transition:all 0.15s;" ' +
                     'onmouseover="this.style.background=\'#f0f0ff\';this.style.borderColor=\'#c8c6f0\'" ' +
                     'onmouseout="this.style.background=\'#f8fafc\';this.style.borderColor=\'#e2e8f0\'">' +
