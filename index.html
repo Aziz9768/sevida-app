@@ -2,6 +2,22 @@
 <html lang="en">
 <head>
 <script>
+// ── Global API routing: proxy through Netlify when no local key ──
+(function() {
+    var _origFetch = window.fetch;
+    window.fetch = function(url, options) {
+        if (typeof url === 'string' && url === 'https://api.anthropic.com/v1/messages') {
+            var apiKey = (typeof window.getApiKey === 'function') ? window.getApiKey() : '';
+            if (!apiKey) {
+                var proxyOpts = { method: (options && options.method) || 'POST', headers: { 'Content-Type': 'application/json' }, body: options && options.body };
+                if (options && options.signal) proxyOpts.signal = options.signal;
+                return _origFetch.call(window, '/.netlify/functions/claude', proxyOpts);
+            }
+        }
+        return _origFetch.apply(window, arguments);
+    };
+})();
+
 function frOpenModal(){
   var m=document.getElementById('frModalOverlay');
   if(!m){ alert('frModalOverlay not found'); return; }
