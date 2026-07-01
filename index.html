@@ -44272,7 +44272,7 @@ async function sendLLMMessage(userText) {
                     'anthropic-dangerous-direct-browser-access': 'true'
                 },
                 signal: window._aiAbortController ? window._aiAbortController.signal : undefined,
-                body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:800, system:buildChatSystemPrompt(), messages:[...history,{role:'user',content:userText}] })
+                body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1500, system:buildChatSystemPrompt(), messages:[...history,{role:'user',content:userText}] })
             });
         } else {
             // Proxy fallback (production / Netlify)
@@ -44280,7 +44280,7 @@ async function sendLLMMessage(userText) {
                 method:'POST',
                 headers:{ 'Content-Type':'application/json' },
                 signal: window._aiAbortController ? window._aiAbortController.signal : undefined,
-                body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:800, system:buildChatSystemPrompt(), messages:[...history,{role:'user',content:userText}] })
+                body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1500, system:buildChatSystemPrompt(), messages:[...history,{role:'user',content:userText}] })
             });
         }
         data = await response.json();
@@ -44311,11 +44311,42 @@ function buildChatSystemPrompt() {
     const m = window.currentMember;
     const base = `You are Vida CoPilot, an AI assistant built into Sevida OS, a healthcare care management platform. You help Care Managers with any aspect of their work — clinical, administrative, referrals, behavioral health, and coordination tasks.\n\nRESPONSE RULES:\n- Be concise and clinically professional.\n- Use bullet points for lists, bold for key values. Keep under 250 words unless detail is needed.\n- Never make up clinical data. Only reference data provided in this prompt.\n- Answer ALL care management questions including behavioral health, social determinants, referrals, and care planning — these are all core CM responsibilities.\n- Never say a topic is outside your scope. If you lack specific data, say so and offer what help you can.\n- If asked to draft a note, remind the user to use the "Draft a service note" button for the full form.`;
     if (!m) {
-        const total = typeof membersDB!=='undefined'?membersDB.length:0;
-        const highRisk = typeof membersDB!=='undefined'?membersDB.filter(x=>x.riskCategory==='High').length:0;
-        const consentNeeded = typeof membersDB!=='undefined'?membersDB.filter(x=>['To Obtain Consent','Re-consent Required'].includes(x.consentStatus)).length:0;
-        const withADT = typeof membersDB!=='undefined'?membersDB.filter(x=>(x.dashboardData?.adts||[]).some(a=>a.acknowledged==='No')).length:0;
-        return `${base}\n\nCONTEXT: Care Manager Dashboard\nCASELOAD: ${total} total members · ${highRisk} high risk · ${consentNeeded} need consent · ${withADT} with unacknowledged ADT events`;
+        var members = typeof membersDB!=='undefined' ? membersDB : [];
+        var total = members.length;
+        var highRisk = members.filter(function(x){return x.riskCategory==='High';}).length;
+        var consentNeeded = members.filter(function(x){return ['To Obtain Consent','Re-consent Required'].includes(x.consentStatus);}).length;
+        var withADT = members.filter(function(x){return (x.dashboardData?.adts||[]).some(function(a){return a.acknowledged==='No';});}).length;
+
+        // Build compact member roster for AI context
+        var roster = members.map(function(mb) {
+            var dd = mb.dashboardData || {};
+            var allT = (dd.tasks||[]).concat(mb.tasks||[]);
+            var openT = allT.filter(function(t){return (t.status||'').toLowerCase()!=='closed';});
+            var now = new Date(); now.setHours(0,0,0,0);
+            var overdueT = openT.filter(function(t){var d=parseAnyDate(t.dueDate);return d&&d<now;});
+            var unackADT = (dd.adts||[]).filter(function(a){return a.acknowledged==='No';});
+            var adtText = unackADT.length ? unackADT.map(function(a){return (a.type||'Event')+' at '+(a.facility||'—')+' on '+(a.date||'—');}).join('; ') : 'None';
+            var dx = mb.diagnoses||{};
+            var dxList = [dx.primary,dx.secondary,dx.tertiary].filter(Boolean).map(function(d){return d.split(' - ')[1]||d;}).join(', ')||'None';
+            var gaps = dd.careGaps||{};
+            var gapCount = Object.keys(gaps).length;
+            var notes = (mb.serviceNotes||[]);
+            var lastNote = notes.length ? notes[notes.length-1] : null;
+            var lastContactStr = lastNote ? (lastNote.date||'—') : 'No contact';
+            var program = mb.program || mb.journeyStageName || '—';
+
+            return mb.name + ' (' + mb.id + ', MRN:' + (mb.mrn||'—') + ') | Risk:' + (mb.riskCategory||'—') +
+                ' | Consent:' + (mb.consentStatus||'—') + ' | Status:' + (mb.memberStatus||'—') +
+                ' | Stage:' + program +
+                ' | MCO:' + (mb.mco||'—') + ' | Age:' + (mb.age||'—') + ' | Gender:' + (mb.gender||'—') +
+                ' | Dx:' + dxList +
+                ' | Tasks:' + openT.length + ' open' + (overdueT.length ? ', ' + overdueT.length + ' OVERDUE' : '') +
+                ' | ADT:' + adtText +
+                ' | Care Gaps:' + gapCount +
+                ' | Last Contact:' + lastContactStr;
+        }).join('\n');
+
+        return `${base}\n\nCONTEXT: Care Manager Caseload Dashboard\nSUMMARY: ${total} total members · ${highRisk} high risk · ${consentNeeded} need consent · ${withADT} with unacknowledged ADT events\n\nFULL MEMBER ROSTER:\n${roster}\n\nINSTRUCTIONS: When answering questions about the caseload, always use the real member data above. List specific member names, IDs, and details. Never say data is unavailable — it is all provided above. Format responses as clean tables or lists with member names and relevant details.`;
     }
     const hh=m.healthHistory||{}; const cpd=m.carePlanData||{}; const dd=m.dashboardData||{}; const dx=m.diagnoses||{}; const safety=m.safetyConcern||{};
     const dxList=[dx.primary,dx.secondary,dx.tertiary,dx.additional].filter(Boolean).map(d=>d.replace(' - ',': ')).join(', ')||'None documented';
@@ -44333,7 +44364,18 @@ function buildChatSystemPrompt() {
     const needs=cpd.needs||[];
     const cpText=needs.length>0?needs.slice(0,4).map(n=>`${n.category}: ${(n.goals||[]).slice(0,2).map(g=>g.text?.substring(0,50)+'('+g.status+')').join(', ')}`).join(' | '):'No care plan needs';
     const recentNotes=(m.serviceNotes||[]).slice(-3).reverse().map(n=>`${n.date||'—'}: ${n.activity||n.type||'Contact'} (${n.outcome||'—'})`).join(' | ')||'No notes';
-    return `${base}\n\nCONTEXT: Member Profile — ${m.name}\nID: ${m.id} | Age: ${m.age||'—'} | Risk: ${m.riskCategory||'—'} | Consent: ${m.consentStatus||'—'} | Program: ${m.program||'—'}\n${safety.hasConcern?`⚠ SAFETY CONCERN: ${safety.details||safety.type||'Active flag'}\n`:''}\nDIAGNOSES: ${dxList}\nMEDICATIONS: ${meds}\nOPEN TASKS (${openTasks.length}, ${overdueTasks.length} overdue): ${tasksText}\nADT EVENTS: ${adtsText}\nASSESSMENTS — In Progress: ${inProg} | Completed: ${done}\nCARE PLAN (${needs.length} needs): ${cpText}\nRECENT NOTES: ${recentNotes}`;
+    // Referrals
+    const refs=(m.referrals||[]);
+    const refsText=refs.length>0?refs.slice(0,5).map(r=>`${r.serviceLine||r.type||'Referral'} → ${r.facility||r.provider||'—'} (${r.status||'—'})`).join(' | '):'No referrals';
+    // Care Gaps
+    const gaps=dd.careGaps||{};
+    const gapKeys=Object.keys(gaps);
+    const gapsText=gapKeys.length>0?gapKeys.slice(0,5).map(k=>`${k}: ${gaps[k].status||gaps[k]||'Open'}`).join(' | '):'No care gaps';
+    // Insurance & Demographics
+    const ins=m.insurance||{};
+    const comm=m.communication||{};
+    const demoLine=`Gender: ${m.gender||'—'} | DOB: ${m.dob||'—'} | City: ${m.city||'—'}, ${m.state||'NC'} | MCO: ${m.mco||ins.mco||'—'} | PCP: ${ins.pcpName||'—'} | Preferred Contact: ${comm.method||'—'} | Language: ${comm.preferredLanguage||'English'}`;
+    return `${base}\n\nCONTEXT: Member Profile — ${m.name}\nID: ${m.id} | MRN: ${m.mrn||'—'} | Medicaid ID: ${m.medicaidId||'—'} | Age: ${m.age||'—'} | Risk: ${m.riskCategory||'—'} | Consent: ${m.consentStatus||'—'} | Status: ${m.memberStatus||'—'} | Stage: ${m.journeyStageName||m.program||'—'}\nDEMOGRAPHICS: ${demoLine}\n${safety.hasConcern?`⚠ SAFETY CONCERN: ${safety.details||safety.type||'Active flag'}\n`:''}\nDIAGNOSES: ${dxList}\nMEDICATIONS: ${meds}\nOPEN TASKS (${openTasks.length}, ${overdueTasks.length} overdue): ${tasksText}\nADT EVENTS: ${adtsText}\nREFERRALS: ${refsText}\nCARE GAPS: ${gapsText}\nASSESSMENTS — In Progress: ${inProg} | Completed: ${done}\nCARE PLAN (${needs.length} needs): ${cpText}\nRECENT NOTES: ${recentNotes}\n\nINSTRUCTIONS: Use ONLY the data above to answer questions about this member. Be specific with names, dates, statuses. Never say data is unavailable if it is provided above.`;
 }
 
 function renderMarkdown(text) {
