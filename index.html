@@ -7187,8 +7187,44 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
     background: #2d2d52; color: white; padding: 10px 16px;
     border-radius: 14px 14px 4px 14px; max-width: 85%; font-size: 13px; line-height: 1.4;
 }
+
+/* INLINE MESSAGE EDIT — replaces the bubble in place (no jump to the welcome
+   screen, no round-trip through the bottom input field). Cancel/Save sit
+   right below the box, right-aligned, matching claude.ai's own edit-message
+   pattern. */
+.ai-edit-box { width: 380px; max-width: 100%; }
+.ai-edit-textarea {
+    width: 100%; min-height: 60px; padding: 10px 14px; box-sizing: border-box;
+    border: 1.5px solid #443fa7; border-radius: 14px 14px 4px 14px;
+    font-size: 13px; font-family: inherit; line-height: 1.4; color: #1e293b;
+    resize: vertical; outline: none;
+}
+.ai-edit-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.ai-edit-cancel-btn {
+    background: none; border: none; color: #64748b; font-size: 12.5px; font-weight: 500;
+    cursor: pointer; padding: 7px 10px; font-family: inherit; transition: color 0.15s;
+}
+.ai-edit-cancel-btn:hover { color: #1e293b; }
+.ai-edit-save-btn {
+    background: #2d2d52; color: #fff; border: none; border-radius: 7px;
+    padding: 7px 16px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: background 0.15s;
+}
+.ai-edit-save-btn:hover { background: #222245; }
+
 .ai-conv-assistant { padding: 0px 20px 8px; }
 .vida-response-actions { margin-bottom: 24px; }
+
+/* RESPONSE TIMESTAMP — hidden by default, only revealed while hovering
+   anywhere over that response block (matches the app's existing
+   hour:minute AM/PM time format used elsewhere). Hooked off
+   .ai-response-block itself, not .ai-chat-turn, since not every response
+   path wraps its block in a chat-turn div (e.g. the quick-chip flow doesn't). */
+.ai-response-timestamp {
+    font-size: 10.5px; color: #94a3b8; margin-left: auto; padding-left: 8px;
+    white-space: nowrap; opacity: 0; transition: opacity 0.15s; flex-shrink: 0;
+}
+.ai-response-block:hover .ai-response-timestamp { opacity: 1; }
 
 /* THINKING ANIMATION - Enhanced */
 .ai-thinking-container {
@@ -7341,6 +7377,33 @@ body.ai-panel-open .ai-copilot-trigger { opacity: 0; pointer-events: none; }
     color: #64748b; padding: 6px 0; transition: color 0.15s; font-family: inherit;
 }
 .ai-back-btn:hover { color: #2d2d52; }
+
+/* INTERRUPTION / RECOVERY STATES — Stop, network/server error, length limit,
+   rate limit. One card groups the message and its action button together
+   instead of leaving them as two loose, disconnected elements; the button
+   itself matches this panel's own established primary treatment (same fill
+   as the Send button and the CM's own message bubbles, same radius/padding
+   family as every other real button in the app) instead of an ad-hoc color
+   borrowed from elsewhere. */
+.ai-interrupt-card {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: 8px 8px;
+}
+/* Message and button share one row: fixed-width message on the left (wraps
+   to a new line once it runs out of room instead of stretching the row),
+   button pinned to the right edge. Any extra content (e.g. the agent-task
+   checklist) renders as its own full-width block below this row. */
+.ai-interrupt-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ai-interrupt-card .ai-response-summary {
+    margin-bottom: 0; width: 260px; display: inline-block;
+}
+.ai-interrupt-card .ai-back-row { padding: 0px 0 0; margin: 0; display: inline-block; flex-shrink: 0; }
+.ai-continue-btn {
+    background: #2d2d52; color: #fff; border: none; border-radius: 7px;
+    padding: 7px 16px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: background 0.15s; display: inline-block;
+}
+.ai-continue-btn:hover { background: #222245; }
 
 /* LOAD MORE */
 .ai-load-more-btn {
@@ -34337,43 +34400,268 @@ window.aiSetStreaming = function(on) {
 // didn't complete normally (stopped, failed, hit a limit, or an agent task
 // got interrupted mid-step). One consistent set of buttons and plain,
 // non-technical messages, rather than a different look per failure type.
-window._aiLastUserPrompt = ''; // set whenever a message is actually sent — Edit prompt / Try again both read from this
+window._aiLastUserPrompt = ''; // set whenever a message is actually sent — read by Try again / Continue
 
+// "ai-interrupt-block" (alongside the normal "ai-response-block") marks this
+// as a status/recovery banner — used for the visual card treatment
+// (.ai-interrupt-card). It still gets the normal Copy/Regenerate/Thumbs row
+// like any other assistant turn, by explicit choice: uniform treatment
+// everywhere rather than conditional on scenario/content.
 function _aiInterruptBlock(message, buttonsHTML, extraHTML) {
-    return '<div class="ai-chat-turn"><div class="ai-conv-assistant"><div class="ai-response-block">'
+    return '<div class="ai-chat-turn"><div class="ai-conv-assistant"><div class="ai-response-block ai-interrupt-block">'
+        + '<div class="ai-interrupt-card">'
+        + '<div class="ai-interrupt-row">'
         + '<div class="ai-response-summary" style="color:#64748b;font-style:italic;">' + message + '</div>'
+        + '<div class="ai-back-row">' + buttonsHTML + '</div>'
+        + '</div>'
         + (extraHTML || '')
-        + '<div class="ai-back-row" style="display:flex;gap:8px;margin-top:10px;">' + buttonsHTML + '</div>'
+        + '</div>'
         + '</div></div></div>';
 }
 
-function _aiEditTryAgainButtons() {
-    return '<button class="ai-back-btn" onclick="window._aiEditPrompt()">Edit prompt</button>'
-        + '<button class="ai-back-btn" style="background:#443fa7;color:#fff;border-color:#443fa7;" onclick="window._aiTryAgain()">Try again</button>';
+// Single source of truth for every recovery-button's markup, across all six
+// interruption scenarios (Stop, network/server error, length limit, agent-task
+// interrupted, Sparkle-turn error, rate limit) and every surface that can hit
+// them (typed chat, quick-chip templates, Agent Studio runs, Sparkle turns).
+// One function = one guaranteed-identical style everywhere; never hand-roll
+// this button's markup at a call site. Uses this panel's own established
+// primary treatment (ai-continue-btn: same fill as the Send button and the
+// CM's own message bubbles) rather than a color borrowed from elsewhere.
+function _aiActionButton(label, onclickExpr) {
+    return '<button class="ai-continue-btn" onclick="' + onclickExpr + '">' + label + '</button>';
 }
 
-// Puts the original prompt back in the input box for editing — does not resend.
-window._aiEditPrompt = function() {
-    var input = document.getElementById('aiInputField');
-    if (input) { input.value = window._aiLastUserPrompt; input.focus(); }
-};
-
-// Resends the exact same prompt, unchanged.
+// Retries the exact same turn after a Stop/error/rate-limit — resends
+// _aiLastUserPrompt through _sendLLMFetch directly, never through
+// sendLLMMessage, which would create a second copy of the user's own message
+// (bubble included) as its very first action. This is the same shape of fix
+// as _aiTryAgainQuickChip: retry only ever touches the response side.
+// _aiLastUserPrompt is already sitting at the end of conversationHistory from
+// the original (failed) attempt, so history for the resend excludes it —
+// otherwise it'd appear twice in the messages array sent to the API.
 window._aiTryAgain = function() {
-    if (window._aiLastUserPrompt) sendLLMMessage(window._aiLastUserPrompt);
+    if (!window._aiLastUserPrompt) return;
+    var container = document.getElementById('aiMessages');
+    if (container) {
+        var lastTurn = container.querySelector('.ai-chat-turn:last-child');
+        if (lastTurn) lastTurn.remove(); // removes the interrupt card only — the original bubble is untouched, further up
+    }
+    var full = aiCopilotState.conversationHistory || [];
+    var withoutCurrentTurn = full.length && full[full.length - 1].role === 'user' ? full.slice(0, -1) : full;
+    var history = withoutCurrentTurn.slice(-10)
+        .map(function(m) { return { role: m.role, content: m.content || m.text || '' }; })
+        .filter(function(m) { return m.content && m.content.trim(); });
+    _sendLLMFetch(window._aiLastUserPrompt, history);
 };
 
-// Edit on the latest user message — same behavior as ChatGPT/Gemini. Since
-// this button only ever appears on the latest message, there's nothing after
-// it in the conversation to worry about reordering; just clear it and its
-// response, and let the CM resend from the input.
-window._aiEditUserMessage = function(userBubbleId) {
+// Retries the exact original quick-chip request (Outreach Script, Gap Analysis,
+// etc.) after a Stop or a genuine error — resending the same systemPrompt/prompt
+// captured when it first ran (_aiQuickChipOriginalCtx), not re-invoking
+// handleAIQuestion. That distinction matters: handleAIQuestion's job is to
+// create a fresh question turn (bubble + thinking indicator) every time it's
+// called, which is exactly right for a first ask and exactly wrong for a
+// retry — calling it again would re-show "the CM asked this" a second time.
+// This function only ever touches the response side, same as every other
+// retry path (typed chat, Agent Studio, Sparkle).
+window._aiTryAgainQuickChip = function() {
+    var ctx = window._aiQuickChipOriginalCtx;
     var container = document.getElementById('aiMessages');
+    if (!ctx || !container) return;
+    var lastTurn = container.querySelector('.ai-chat-turn:last-child');
+    if (lastTurn) lastTurn.remove();
+    var thinkId = 'chat_think_retry_' + Date.now();
+    container.innerHTML += '<div id="' + thinkId + '" class="ai-thinking-container"><div class="ai-thinking-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div><div class="ai-thinking-text">Thinking...</div></div>';
+    container.scrollTop = container.scrollHeight;
+
+    window._aiQuickChipInFlight = true;
+    window._aiQuickChipRetryFn = window._aiTryAgainQuickChip;
+    window._aiAbortController = new AbortController();
+    window.aiSetStreaming && window.aiSetStreaming(true);
+    fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': (typeof window.getApiKey==='function' ? window.getApiKey() : ''), 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+        signal: window._aiAbortController.signal,
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, system: ctx.systemPrompt, messages: [{ role: 'user', content: ctx.prompt }] })
+    })
+    .then(function(r) {
+        if (r.status === 429) return { __rateLimited: true };
+        return r.json();
+    })
+    .then(function(data) {
+        document.getElementById(thinkId)?.remove();
+        window.aiSetStreaming && window.aiSetStreaming(false);
+        window._aiAbortController = null;
+        window._aiQuickChipInFlight = false;
+
+        if (data.__rateLimited) {
+            container.innerHTML += _aiInterruptBlock('Too many requests right now. Please try again in a moment.',
+                _aiActionButton('Continue', 'window._aiTryAgainQuickChip()'));
+            return;
+        }
+        if (data.error) {
+            container.innerHTML += _aiInterruptBlock("Something went wrong and the response couldn't finish. Please try again.",
+                _aiActionButton('Continue', 'window._aiTryAgainQuickChip()'));
+            return;
+        }
+
+        var text = (data.content||[]).map(function(c){ return c.text||''; }).join('\n');
+        var formatted = (typeof renderMarkdown === 'function') ? renderMarkdown(text) : text;
+        container.innerHTML += '<div class="ai-conv-assistant"><div class="ai-response-block">'
+            + (ctx.prefixHTML || '')
+            + '<div class="ai-response-text" style="font-size:12px;line-height:1.7;color:#334155;">' + formatted + '</div>'
+            + '<div class="ai-feedback-row" style="margin-top:12px;"><button class="ai-back-btn" onclick="resetAICopilot()">← Back</button></div>'
+            + '</div></div>';
+
+        if (data.stop_reason === 'max_tokens') {
+            window._aiQuickChipContinueCtx = { systemPrompt: ctx.systemPrompt, prompt: ctx.prompt };
+            container.innerHTML += _aiInterruptBlock('This response is longer than usual. Continue to see the rest.',
+                _aiActionButton('Continue', 'window._aiContinueQuickChipResponse()'));
+        }
+        container.scrollTop = container.scrollHeight;
+    })
+    .catch(function(err) {
+        document.getElementById(thinkId)?.remove();
+        window.aiSetStreaming && window.aiSetStreaming(false);
+        window._aiAbortController = null;
+        window._aiQuickChipInFlight = false;
+        if (err && err.name === 'AbortError') return;
+        container.innerHTML += _aiInterruptBlock("Something went wrong and the response couldn't finish. Please try again.",
+            _aiActionButton('Continue', 'window._aiTryAgainQuickChip()'));
+        container.scrollTop = container.scrollHeight;
+    });
+};
+
+// Genuinely continues a quick-chip response cut off by the length limit —
+// same real approach as the other two paths, not a relabeled restart.
+window._aiContinueQuickChipResponse = function() {
+    var ctx = window._aiQuickChipContinueCtx;
+    var container = document.getElementById('aiMessages');
+    if (!ctx || !container) return;
+    var lastTurn = container.lastElementChild;
+    if (lastTurn) lastTurn.remove();
+    var thinkId = 'chat_think_continue_' + Date.now();
+    container.innerHTML += '<div id="' + thinkId + '" class="ai-thinking-container"><div class="ai-thinking-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div><div class="ai-thinking-text">Continuing…</div></div>';
+    container.scrollTop = container.scrollHeight;
+
+    window._aiAbortController = new AbortController();
+    window._aiQuickChipInFlight = true;
+    window._aiQuickChipRetryFn = window._aiContinueQuickChipResponse;
+    window.aiSetStreaming && window.aiSetStreaming(true);
+    fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'x-api-key': (typeof window.getApiKey==='function' ? window.getApiKey() : ''), 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+        signal: window._aiAbortController.signal,
+        body: JSON.stringify({
+            model: 'claude-sonnet-4-6', max_tokens: 1000, system: ctx.systemPrompt,
+            messages: [
+                { role:'user', content: ctx.prompt },
+                { role:'user', content: 'Please continue exactly where you left off. Do not repeat or summarize anything you already said.' }
+            ]
+        })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+        document.getElementById(thinkId)?.remove();
+        window.aiSetStreaming && window.aiSetStreaming(false);
+        window._aiAbortController = null;
+        window._aiQuickChipInFlight = false;
+        var text = (data.content||[]).map(function(c){ return c.text||''; }).join('\n');
+        if (!text) throw new Error('Empty response');
+        var formatted = (typeof renderMarkdown === 'function') ? renderMarkdown(text) : text;
+        container.innerHTML += '<div class="ai-conv-assistant"><div class="ai-response-block"><div class="ai-response-text" style="font-size:12px;line-height:1.7;color:#334155;">' + formatted + '</div></div></div>';
+        if (data.stop_reason === 'max_tokens') {
+            container.innerHTML += _aiInterruptBlock('This response is longer than usual. Continue to see the rest.',
+                _aiActionButton('Continue', 'window._aiContinueQuickChipResponse()'));
+        }
+        container.scrollTop = container.scrollHeight;
+    })
+    .catch(function(err){
+        document.getElementById(thinkId)?.remove();
+        window.aiSetStreaming && window.aiSetStreaming(false);
+        window._aiAbortController = null;
+        window._aiQuickChipInFlight = false;
+        if (err && err.name === 'AbortError') return;
+        // Retries this same continuation, not the whole quick-chip query from
+        // scratch — the already-shown (truncated) text stays, this just
+        // re-attempts fetching the rest of it.
+        container.innerHTML += _aiInterruptBlock("Something went wrong and the response couldn't finish. Please try again.",
+            _aiActionButton('Continue', 'window._aiContinueQuickChipResponse()'));
+        container.scrollTop = container.scrollHeight;
+    });
+};
+
+// Edit on the latest user message — turns the bubble itself into an inline
+// editable box in place, matching claude.ai's own edit-message pattern
+// (Cancel / Save right below it), rather than clearing the whole thread and
+// dropping the text into the bottom input field. Only ever shown on the
+// latest message (see the visibility toggle in sendLLMMessage) — there's
+// nothing after it in the conversation to worry about reordering.
+window._aiEditUserMessage = function(userBubbleId) {
     var turn = document.getElementById(userBubbleId);
-    if (!container || !turn) return;
+    if (!turn) return;
     var bubble = turn.querySelector('.ai-conv-user-bubble');
-    var text = bubble ? bubble.textContent.trim() : '';
-    if (!text) return;
+    var editBtn = turn.querySelector('.ai-user-edit-btn');
+    if (!bubble) return;
+    if (turn.querySelector('.ai-edit-box')) return; // already editing
+
+    var originalText = bubble.textContent;
+    bubble.style.display = 'none';
+    if (editBtn) editBtn.style.display = 'none';
+
+    var editorId = 'ai-edit-box-' + Date.now();
+    var editorHTML =
+        '<div class="ai-edit-box" id="' + editorId + '">'
+        + '<textarea class="ai-edit-textarea">' + escapeHtml(originalText) + '</textarea>'
+        + '<div class="ai-edit-actions">'
+        + '<button class="ai-edit-cancel-btn" onclick="window._aiCancelEditUserMessage(\'' + userBubbleId + '\',\'' + editorId + '\')">Cancel</button>'
+        + '<button class="ai-edit-save-btn" onclick="window._aiSaveEditUserMessage(\'' + userBubbleId + '\',\'' + editorId + '\')">Save</button>'
+        + '</div>'
+        + '</div>';
+    bubble.insertAdjacentHTML('afterend', editorHTML);
+
+    var ta = document.getElementById(editorId).querySelector('textarea');
+    if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+};
+
+// Cancel — reverts to the plain bubble, nothing else on screen is touched.
+window._aiCancelEditUserMessage = function(userBubbleId, editorId) {
+    var turn = document.getElementById(userBubbleId);
+    if (!turn) return;
+    var bubble = turn.querySelector('.ai-conv-user-bubble');
+    var editBtn = turn.querySelector('.ai-user-edit-btn');
+    var editor = document.getElementById(editorId);
+    if (editor) editor.remove();
+    if (bubble) bubble.style.display = '';
+    if (editBtn) editBtn.style.display = '';
+};
+
+// Save — removes this turn and whatever followed it (the old response, an
+// interrupt card, whatever's there) and resends the edited text as a fresh
+// message, same net effect as the old "clear + retype in the bottom input"
+// flow, just without ever leaving this spot on screen.
+window._aiSaveEditUserMessage = function(userBubbleId, editorId) {
+    var turn = document.getElementById(userBubbleId);
+    var editor = document.getElementById(editorId);
+    if (!turn || !editor) return;
+    var ta = editor.querySelector('textarea');
+    var newText = ta ? ta.value.trim() : '';
+    if (!newText) return; // don't send empty — leave the editor open
+
+    var bubble = turn.querySelector('.ai-conv-user-bubble');
+    var originalText = bubble ? bubble.textContent : '';
+
+    // Trim conversationHistory back to just before this turn's original
+    // message — otherwise the edited resend leaves a stale duplicate entry
+    // in what gets sent to the API on every later turn.
+    if (typeof aiCopilotState !== 'undefined' && aiCopilotState.conversationHistory) {
+        var hist = aiCopilotState.conversationHistory;
+        for (var i = hist.length - 1; i >= 0; i--) {
+            if (hist[i].role === 'user' && (hist[i].content || '') === originalText) {
+                aiCopilotState.conversationHistory = hist.slice(0, i);
+                break;
+            }
+        }
+    }
 
     var el = turn;
     while (el) {
@@ -34381,8 +34669,7 @@ window._aiEditUserMessage = function(userBubbleId) {
         el.remove();
         el = next;
     }
-    var input = document.getElementById('aiInputField');
-    if (input) { input.value = text; input.focus(); }
+    sendLLMMessage(newText);
 };
 
 // Scenario 4 — a real multi-step agent task (tools/skills) got interrupted
@@ -34392,7 +34679,10 @@ window._aiScenario4Block = function(message) {
     var run = window._interruptNarrativeRun() || window._narrativeRun;
     var checklistHTML = '';
     if (run) {
-        checklistHTML = '<div style="margin:10px 0;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:12.5px;">'
+        // No background/border here — this now renders inside .ai-interrupt-card,
+        // which already provides that framing. Adding it again would nest one
+        // gray bordered box inside an identical one.
+        checklistHTML = '<div style="margin:8px 0 0;font-size:12.5px;">'
             + run.steps.map(function(s, i) {
                 var icon = i < run.currentStep ? '<span style="color:#22c55e;">\u2713</span>'
                     : i === run.currentStep ? '<span style="color:#dc2626;">\u2717</span>'
@@ -34402,7 +34692,7 @@ window._aiScenario4Block = function(message) {
             }).join('')
             + '</div>';
     }
-    var continueBtn = '<button class="ai-back-btn" style="background:#443fa7;color:#fff;border-color:#443fa7;" onclick="window._aiContinueAgentRun()">Continue</button>';
+    var continueBtn = _aiActionButton('Continue', 'window._aiContinueAgentRun()');
     return _aiInterruptBlock(message, continueBtn, checklistHTML);
 };
 
@@ -34479,7 +34769,7 @@ window._aiContinueAgentResponse = function() {
         container.innerHTML += '<div class="ai-conv-assistant">' + renderedHTML + '</div>';
         if (data.stop_reason === 'max_tokens') {
             container.innerHTML += _aiInterruptBlock('This response is longer than usual. Continue to see the rest.',
-                '<button class="ai-back-btn" style="background:#443fa7;color:#fff;border-color:#443fa7;" onclick="window._aiContinueAgentResponse()">Continue</button>');
+                _aiActionButton('Continue', 'window._aiContinueAgentResponse()'));
         }
         container.scrollTop = container.scrollHeight;
     })
@@ -34488,7 +34778,10 @@ window._aiContinueAgentResponse = function() {
         window.aiSetStreaming && window.aiSetStreaming(false);
         window._aiAbortController = null;
         if (err && err.name === 'AbortError') return;
-        container.innerHTML += _aiInterruptBlock("Something went wrong and the response couldn't finish. Please try again.", _aiEditTryAgainButtons());
+        // Retries this same continuation (not a generic chat resend) — the
+        // truncated agent response already on screen stays put.
+        container.innerHTML += _aiInterruptBlock("Something went wrong and the response couldn't finish. Please try again.",
+            _aiActionButton('Continue', 'window._aiContinueAgentResponse()'));
         container.scrollTop = container.scrollHeight;
     });
 };
@@ -34504,13 +34797,28 @@ window.aiSendOrStop = function() {
             if (t) t.remove();
             var run = window._narrativeRun;
             if (run && !run.aborted && !run.done) {
-                // A real multi-step agent task was in progress — show what
-                // actually completed before it was stopped, not a plain
-                // generic message.
+                // Scenario 1 (Agent Studio variant) — a real multi-step agent
+                // task was in progress — show what actually completed before
+                // it was stopped, not a plain generic message.
                 c.innerHTML += window._aiScenario4Block('Response stopped.');
+            } else if (window._spCopilotRun && window._spCopilotRun.active) {
+                // Scenario 1 (Sparkle variant) — an active Sparkle agent turn
+                // was in progress. Continue needs to retry that same turn
+                // (same messages/system prompt), not a generic chat resend —
+                // otherwise Stop would silently drop the CM back into plain
+                // chat mid-Sparkle-conversation.
+                c.innerHTML += _aiInterruptBlock('Response stopped.', _aiActionButton('Continue', 'window._spRetryAgentTurn()'));
+            } else if (window._aiQuickChipInFlight && window._aiQuickChipRetryFn) {
+                // Scenario 1 (quick-chip variant) — a suggested-question request
+                // (not something the CM typed) was in progress. _aiTryAgain reads
+                // _aiLastUserPrompt, which quick-chip questions never set, so
+                // falling through to the generic branch below would either do
+                // nothing or resend an unrelated stale typed message. Retry the
+                // actual quick-chip request/continuation instead.
+                c.innerHTML += _aiInterruptBlock('Response stopped.', _aiActionButton('Continue', 'window._aiQuickChipRetryFn()'));
             } else {
-                // Plain chat — nothing failed, the CM just chose to stop it.
-                c.innerHTML += _aiInterruptBlock('Response stopped.', _aiEditTryAgainButtons());
+                // Scenario 1 (plain chat) — nothing failed, the CM just chose to stop it.
+                c.innerHTML += _aiInterruptBlock('Response stopped.', _aiActionButton('Continue', 'window._aiTryAgain()'));
             }
             c.scrollTop = c.scrollHeight;
         }
@@ -34580,19 +34888,13 @@ window.populateSuggestionsDrawer = function() {
 // ── Send / Stop toggle ────────────────────────────────────────────────────────
 window._aiAbortController = null;
 window._aiIsStreaming = false;
-
-window.aiSetStreaming = function(isStreaming) {
-    window._aiIsStreaming = isStreaming;
-    var sendIcon = document.getElementById('aiSendIcon');
-    var stopIcon = document.getElementById('aiStopIcon');
-    var btn = document.getElementById('aiSendBtn');
-    if (sendIcon) sendIcon.style.display = isStreaming ? 'none' : 'block';
-    if (stopIcon) stopIcon.style.display = isStreaming ? 'block' : 'none';
-    if (btn) {
-        btn.style.background = isStreaming ? '#ef4444' : '';
-        btn.title = isStreaming ? 'Stop response' : 'Send';
-    }
-};
+// Mirrors _narrativeRun/_spCopilotRun.active — the only reliable way aiSendOrStop
+// can tell "a quick-chip request (not a typed chat message) is what's actually
+// in flight right now" and wire Continue to the retry function that matches it,
+// instead of falling through to the generic typed-chat path (which reads
+// _aiLastUserPrompt — a value quick-chip questions never set).
+window._aiQuickChipInFlight = false;
+window._aiQuickChipRetryFn = null;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QUESTION HANDLING
@@ -34658,6 +34960,12 @@ function handleAIQuestion(questionId) {
 
     // Show stop button while thinking
     window.aiSetStreaming && window.aiSetStreaming(true);
+    // Set from the very start of this invocation (not just once the real fetch
+    // begins below) — otherwise a Stop clicked during this initial "Thinking…"
+    // delay would retry whatever question was last asked, not this one.
+    window._aiLastQuestionId = questionId;
+    window._aiQuickChipInFlight = true;
+    window._aiQuickChipRetryFn = window._aiTryAgainQuickChip;
 
     // Process after delay for UX
     setTimeout(() => {
@@ -34668,6 +34976,11 @@ function handleAIQuestion(questionId) {
 
         // Reset stop button
         window.aiSetStreaming && window.aiSetStreaming(false);
+        // Mirrors aiSetStreaming here: true only while something's actually async
+        // and abortable. Re-set to true below if this question turns out to need
+        // a real API call; branches that resolve synchronously (_customHTML,
+        // renderResponse) never touch it again, so it must default back off here.
+        window._aiQuickChipInFlight = false;
 
         const handler = window[question.handler];
         if (typeof handler === 'function') {
@@ -47525,9 +47838,6 @@ async function sendLLMMessage(userText) {
     document.querySelectorAll('#aiMessages .ai-user-edit-btn').forEach(function(btn) {
         if (btn.closest('.ai-chat-turn').id !== userBubbleId) btn.style.display = 'none';
     });
-    const thinkId = 'chat_think_' + Date.now();
-    container.innerHTML += `<div id="${thinkId}" class="ai-thinking-container"><div class="ai-thinking-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div><div class="ai-thinking-text">Thinking...</div></div>`;
-    container.scrollTop = container.scrollHeight;
     const history = (aiCopilotState.conversationHistory||[]).slice(-10)
         .map(function(m) { return { role: m.role, content: m.content || m.text || '' }; })
         .filter(function(m) { return m.content && m.content.trim(); });
@@ -47535,6 +47845,23 @@ async function sendLLMMessage(userText) {
     aiCopilotState.conversationHistory.push({ role:'user', content:userText });
     if (window.currentMember && typeof sessSave==='function') sessSave(window.currentMember.id,'user',userText);
     else if (window.sessContextSave) { var _ctx = (window.aiCopilotState && window.aiCopilotState.currentContext) || 'members'; window.sessContextSave(_ctx,'user',userText); }
+
+    await _sendLLMFetch(userText, history);
+}
+
+// The actual request + response handling, split out from sendLLMMessage so a
+// Stop/error retry (_aiTryAgain) can redo exactly this — and only this —
+// without ever touching bubble creation. sendLLMMessage's job is "start a new
+// turn"; this function's job is "get an answer for a turn that already
+// exists". Conflating the two (the previous implementation of _aiTryAgain
+// called sendLLMMessage again) is what caused Continue to re-show the
+// question as if it had been asked a second time, including for suggested
+// prompts typed into the input and sent this same way.
+async function _sendLLMFetch(userText, history) {
+    const container = document.getElementById('aiMessages'); if (!container) return;
+    const thinkId = 'chat_think_' + Date.now();
+    container.innerHTML += `<div id="${thinkId}" class="ai-thinking-container"><div class="ai-thinking-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div><div class="ai-thinking-text">Thinking...</div></div>`;
+    container.scrollTop = container.scrollHeight;
 
     // Set up abort controller and show stop button
     window._aiAbortController = new AbortController();
@@ -47568,14 +47895,15 @@ async function sendLLMMessage(userText) {
         }
 
         // Scenario 6 — rate limit / system overload. Distinct cause from a
-        // plain network error, so it gets its own honest message — and no
-        // Edit prompt, since the prompt itself isn't the problem here.
+        // plain network error, so it gets its own honest message. Same
+        // Continue button/style as every other scenario — it resends this
+        // exact turn through this same function again.
         if (response.status === 429) {
             document.getElementById(thinkId)?.remove();
             window.aiSetStreaming && window.aiSetStreaming(false);
             window._aiAbortController = null;
             container.innerHTML += _aiInterruptBlock('Too many requests right now. Please try again in a moment.',
-                '<button class="ai-back-btn" style="background:#443fa7;color:#fff;border-color:#443fa7;" onclick="window._aiTryAgain()">Try again</button>');
+                _aiActionButton('Continue', 'window._aiTryAgain()'));
             container.scrollTop = container.scrollHeight;
             aiCopilotState.conversationHistory.pop();
             return;
@@ -47601,7 +47929,7 @@ async function sendLLMMessage(userText) {
         // finished turn.
         if (data.stop_reason === 'max_tokens') {
             container.innerHTML += _aiInterruptBlock('This response is longer than usual. Continue to see the rest.',
-                '<button class="ai-back-btn" style="background:#443fa7;color:#fff;border-color:#443fa7;" onclick="window._aiContinueChatResponse()">Continue</button>');
+                _aiActionButton('Continue', 'window._aiContinueChatResponse()'));
             container.scrollTop = container.scrollHeight;
         }
     } catch(err) {
@@ -47609,10 +47937,11 @@ async function sendLLMMessage(userText) {
         window.aiSetStreaming && window.aiSetStreaming(false);
         window._aiAbortController = null;
         if (err && err.name === 'AbortError') return; // Stopped by user — aiSendOrStop already shows the stopped state
-        // Scenario 2 — genuine network/server failure. Specific, plain
-        // language, with both a real Try again (resend unchanged) and Edit
-        // prompt (in case the request itself was part of the problem).
-        container.innerHTML += _aiInterruptBlock("Something went wrong and the response couldn't finish. Please try again.", _aiEditTryAgainButtons());
+        // Scenario 2 — genuine network/server failure. Same Continue button
+        // as every other scenario; it resends this exact turn through this
+        // same function again.
+        container.innerHTML += _aiInterruptBlock("Something went wrong and the response couldn't finish. Please try again.",
+            _aiActionButton('Continue', 'window._aiTryAgain()'));
         container.scrollTop = container.scrollHeight;
         aiCopilotState.conversationHistory.pop();
         console.warn('[AI Chat]', err);
@@ -47662,7 +47991,7 @@ window._aiContinueChatResponse = function() {
         container.innerHTML += '<div class="ai-chat-turn"><div class="ai-conv-assistant">' + replyHTML + '</div></div>';
         if (data.stop_reason === 'max_tokens') {
             container.innerHTML += _aiInterruptBlock('This response is longer than usual. Continue to see the rest.',
-                '<button class="ai-back-btn" style="background:#443fa7;color:#fff;border-color:#443fa7;" onclick="window._aiContinueChatResponse()">Continue</button>');
+                _aiActionButton('Continue', 'window._aiContinueChatResponse()'));
         }
         container.scrollTop = container.scrollHeight;
     })
@@ -47671,7 +48000,9 @@ window._aiContinueChatResponse = function() {
         window.aiSetStreaming && window.aiSetStreaming(false);
         window._aiAbortController = null;
         if (err && err.name === 'AbortError') return;
-        container.innerHTML += _aiInterruptBlock("Something went wrong and the response couldn't finish. Please try again.", _aiEditTryAgainButtons());
+        // Retries this same continuation, not the whole question from scratch.
+        container.innerHTML += _aiInterruptBlock("Something went wrong and the response couldn't finish. Please try again.",
+            _aiActionButton('Continue', 'window._aiContinueChatResponse()'));
         container.scrollTop = container.scrollHeight;
     });
 };
@@ -49758,14 +50089,48 @@ Be specific and insightful, not generic.`;
                     system: systemPrompt,
                     messages: [{ role: 'user', content: result.prompt.trim() }]
                 };
+                // This whole quick-chip system was missing streaming/stop/interrupt
+                // handling entirely — no abort signal, no Stop button ever shown,
+                // generic "check connectivity" error for everything. Bringing it up
+                // to the same standard as the other two AI paths.
+                window._aiLastQuestionId = questionId;
+                window._aiQuickChipInFlight = true;
+                window._aiQuickChipRetryFn = window._aiTryAgainQuickChip;
+                // Saved so a Stop/error retry can resend this exact request directly
+                // (see _aiTryAgainQuickChip) without going anywhere near this
+                // function's own bubble/thinking-indicator rendering — whatever
+                // that rendering actually does on a first ask, retry never touches
+                // it, so it can't duplicate anything.
+                window._aiQuickChipOriginalCtx = { systemPrompt: systemPrompt, prompt: result.prompt.trim(), prefixHTML: prefixHTML };
+                window._aiAbortController = new AbortController();
+                window.aiSetStreaming && window.aiSetStreaming(true);
                 fetch('https://api.anthropic.com/v1/messages', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'x-api-key': (typeof window.getApiKey==='function' ? window.getApiKey() : ''), 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+                    signal: window._aiAbortController.signal,
                     body: JSON.stringify(requestBody)
                 })
-                .then(r => r.json())
+                .then(r => {
+                    if (r.status === 429) return { __rateLimited: true };
+                    return r.json();
+                })
                 .then(data => {
-                    if (data.error) { console.error('Anthropic API error:', JSON.stringify(data.error)); }
+                    window.aiSetStreaming && window.aiSetStreaming(false);
+                    window._aiAbortController = null;
+                    window._aiQuickChipInFlight = false;
+
+                    if (data.__rateLimited) {
+                        if (container) container.innerHTML = `<div class="ai-conv-assistant">${prefixHTML}</div>` + _aiInterruptBlock('Too many requests right now. Please try again in a moment.',
+                            _aiActionButton('Continue', 'window._aiTryAgainQuickChip()'));
+                        return;
+                    }
+                    if (data.error) {
+                        console.error('Anthropic API error:', JSON.stringify(data.error));
+                        if (container) container.innerHTML = `<div class="ai-conv-assistant">${prefixHTML}</div>` + _aiInterruptBlock("Something went wrong and the response couldn't finish. Please try again.",
+                            _aiActionButton('Continue', 'window._aiTryAgainQuickChip()'));
+                        return;
+                    }
+
                     const text = (data.content||[]).map(c => c.text||'').join('\n');
                     const formatted = (typeof renderMarkdown === 'function') ? renderMarkdown(text) : text;
                     if (container) {
@@ -49777,13 +50142,21 @@ Be specific and insightful, not generic.`;
                             </div>
                         </div></div>`;
                     }
+
+                    // Scenario 3 — real length-limit signal, same as the other two paths.
+                    if (data.stop_reason === 'max_tokens' && container) {
+                        window._aiQuickChipContinueCtx = { systemPrompt: systemPrompt, prompt: result.prompt.trim() };
+                        container.innerHTML += _aiInterruptBlock('This response is longer than usual. Continue to see the rest.',
+                            _aiActionButton('Continue', 'window._aiContinueQuickChipResponse()'));
+                    }
                 })
                 .catch(err => {
-                    if (container) container.innerHTML = `<div class="ai-conv-assistant"><div class="ai-response-block">
-                        ${prefixHTML}
-                        <div style="font-size:12px;color:#64748b;padding:10px;background:#f8fafc;border-radius:6px;">AI response unavailable. Please check API connectivity.</div>
-                        <div class="ai-feedback-row" style="margin-top:12px;"><button class="ai-back-btn" onclick="resetAICopilot()">← Back</button></div>
-                    </div></div>`;
+                    window.aiSetStreaming && window.aiSetStreaming(false);
+                    window._aiAbortController = null;
+                    window._aiQuickChipInFlight = false;
+                    if (err && err.name === 'AbortError') return; // Stopped by user — aiSendOrStop already shows the stopped state
+                    if (container) container.innerHTML = `<div class="ai-conv-assistant">${prefixHTML}</div>` + _aiInterruptBlock("Something went wrong and the response couldn't finish. Please try again.",
+                        _aiActionButton('Continue', 'window._aiTryAgainQuickChip()'));
                 });
                 return;
             }
@@ -64760,7 +65133,7 @@ window.runAgentFromChat = function(agentId, agentName, query) {
         if (data.stop_reason === 'max_tokens') {
             window._aiAgentContinueCtx = { systemPrompt: systemPrompt, userMsg: userMsg, modelStr: modelStr, agent: agent, agentId: agentId, agentName: agentName, member: member };
             container.innerHTML += _aiInterruptBlock('This response is longer than usual. Continue to see the rest.',
-                '<button class="ai-back-btn" style="background:#443fa7;color:#fff;border-color:#443fa7;" onclick="window._aiContinueAgentResponse()">Continue</button>');
+                _aiActionButton('Continue', 'window._aiContinueAgentResponse()'));
         }
 
         container.scrollTop = container.scrollHeight;
@@ -64882,56 +65255,14 @@ window.sendAIMessage = function() {
         return;
     }
 
-    // General clinical query
-    var container = document.getElementById('aiMessages');
-    if(!container) return;
-    var member = window.currentMember;
-    aiCopilotState.isInConversation = true;
-
-    var history = [];
-    aiCopilotState.conversationHistory.forEach(function(h) {
-        if(h.role==='user') history.push({role:'user',content:h.text});
-        if(h.role==='assistant') history.push({role:'assistant',content:h.text});
-    });
-    history.push({role:'user',content:text});
-    aiCopilotState.conversationHistory.push({role:'user',content:text,text:text});
-
-    container.innerHTML += '<div class="ai-conv-user"><div class="ai-conv-user-bubble">'+esc(text)+'</div></div>'
-        + '<div class="ai-thinking-container" id="aiThinking">'
-        +   '<div class="ai-thinking-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>'
-        +   '<div class="ai-thinking-text">Thinking...</div>'
-        + '</div>';
-    container.scrollTop = container.scrollHeight;
-
-    var sysPrompt = 'You are Sevida AI, a clinical care management assistant. Be accurate and concise. Only answer clinical care management questions. If asked something outside clinical care, politely decline and offer to help with patient care instead. Format responses clearly with sections and bullet points where appropriate.';
-    if(member) sysPrompt += '\n\n'+window.buildPatientContext(member);
-
-    sysPrompt = sysPrompt.replace(/[^\x00-\xFF]/g, function(c){ return '?'; });
-    var startTime = Date.now();
-    fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', 'x-api-key': (typeof window.getApiKey==='function' ? window.getApiKey() : ''), 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,system:sysPrompt,messages:history})
-    })
-    .then(function(r){return r.json();})
-    .then(function(data) {
-        var durationMs = Date.now()-startTime;
-        var thinkEl = document.getElementById('aiThinking'); if(thinkEl) thinkEl.remove();
-        if(data.error){ container.innerHTML+='<div class="ai-conv-assistant"><div class="ai-response-block ai-error-response"><div class="ai-response-summary">'+esc(data.error.message||'Error')+'</div></div></div>'; return; }
-        var resp = (data.content&&data.content[0]&&data.content[0].text)||'No response.';
-        var tokens = (data.usage&&(data.usage.input_tokens+data.usage.output_tokens))||800;
-        aiCopilotState.conversationHistory.push({role:'assistant',content:resp,text:resp});
-        // Don't inject member card when CM is already on the member page
-        var _respHtml = (typeof window.renderMarkdown === 'function')
-            ? '<div class="ai-response-block"><div class="ai-llm-response">' + window.renderMarkdown(resp) + '</div></div>'
-            : window.renderAgentResponse(resp, null, null);
-        container.innerHTML += '<div class="ai-conv-assistant">' + _respHtml + '</div>';
-        container.scrollTop = container.scrollHeight;
-    })
-    .catch(function(err){
-        var thinkEl=document.getElementById('aiThinking'); if(thinkEl) thinkEl.remove();
-        container.innerHTML+='<div class="ai-conv-assistant"><div class="ai-response-block ai-error-response"><div class="ai-response-summary">Network error</div></div></div>';
-    });
+    // General clinical query — this used to be its own full duplicate of
+    // sendLLMMessage's logic (separate fetch, no abort signal, no Stop button
+    // support, none of the 5 interruption scenarios). That's exactly why
+    // predefined/suggested questions never showed a Stop button while typed
+    // ones did — whichever path a given query fell through to mattered, not
+    // whether it was typed or clicked. Calling the one real implementation
+    // directly instead, so every entry point gets the same correct behavior.
+    sendLLMMessage(text);
 };
 
 // -- INJECT AGENT BUTTONS into renderWelcomeScreen ----------------
@@ -93809,6 +94140,10 @@ function addResponseActions(responseBlock) {
     actions.className = 'vida-response-actions';
     actions.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;flex-wrap:wrap;';
 
+    // Captured now, when this response first renders — same hour:minute
+    // AM/PM format used elsewhere in the app (e.g. service note timestamps).
+    var _respTimeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
     actions.innerHTML =
         // Copy
         '<button class="vida-action-btn" title="Copy response" onclick="window.vidaCopyResponse(this)" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:none;border:1px solid #e2e8f0;border-radius:6px;font-size:11px;color:#64748b;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#2d2d52\';this.style.color=\'#2d2d52\'" onmouseout="this.style.borderColor=\'#e2e8f0\';this.style.color=\'#64748b\'">' +
@@ -93826,7 +94161,9 @@ function addResponseActions(responseBlock) {
         // Thumbs down
         '<button class="vida-action-btn vida-thumb" title="Not helpful" onclick="window.vidaThumb(this,false)" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:none;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#ef4444\'" onmouseout="if(!this.dataset.active)this.style.borderColor=\'#e2e8f0\'">' +
             '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/></svg>' +
-        '</button>';
+        '</button>' +
+        // Timestamp — hidden until the response block is hovered (CSS-driven)
+        '<span class="ai-response-timestamp">' + _respTimeStr + '</span>';
 
     responseBlock.appendChild(actions);
 
@@ -94663,15 +95000,24 @@ window.vidaOpenFeedbackPopup = function(thumbBtn) {
     reasonError.style.cssText = 'display:none;font-size:11px;color:#ef4444;margin-top:4px;';
     reasonError.textContent = 'Please select a reason to continue.';
 
-    var detailLabel = document.createElement('label');
-    detailLabel.style.cssText = 'display:block;font-size:12px;font-weight:600;color:#374151;margin-top:14px;margin-bottom:5px;';
-    detailLabel.innerHTML = 'Detail <span style="font-weight:400;color:#94a3b8;">(optional)</span>';
+    // Only shown when Reason is "Other" — hidden for every other selection,
+    // not a generic optional Detail field shown alongside every reason.
+    var otherLabel = document.createElement('label');
+    otherLabel.style.cssText = 'display:none;font-size:12px;font-weight:600;color:#374151;margin-top:14px;margin-bottom:5px;';
+    otherLabel.textContent = 'Please specify';
 
-    var textarea = document.createElement('textarea');
-    textarea.id = 'vidaFeedbackDetail';
-    textarea.rows = 3;
-    textarea.placeholder = 'Describe the issue in more detail…';
-    textarea.style.cssText = 'width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:12.5px;color:#1e293b;resize:none;outline:none;font-family:inherit;box-sizing:border-box;';
+    var otherInput = document.createElement('textarea');
+    otherInput.id = 'vidaFeedbackOtherReason';
+    otherInput.rows = 3;
+    otherInput.placeholder = 'What was the issue?';
+    otherInput.style.cssText = 'display:none;width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:12.5px;color:#1e293b;resize:none;outline:none;font-family:inherit;box-sizing:border-box;';
+
+    select.addEventListener('change', function() {
+        var isOther = select.value === 'Other';
+        otherLabel.style.display = isOther ? 'block' : 'none';
+        otherInput.style.display = isOther ? 'block' : 'none';
+        if (!isOther) otherInput.value = '';
+    });
 
     var btnRow = document.createElement('div');
     btnRow.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;margin-top:16px;';
@@ -94692,8 +95038,8 @@ window.vidaOpenFeedbackPopup = function(thumbBtn) {
     box.appendChild(reasonLabel);
     box.appendChild(select);
     box.appendChild(reasonError);
-    box.appendChild(detailLabel);
-    box.appendChild(textarea);
+    box.appendChild(otherLabel);
+    box.appendChild(otherInput);
     box.appendChild(btnRow);
     overlay.appendChild(box);
     document.body.appendChild(overlay);
@@ -94714,7 +95060,7 @@ window.vidaOpenFeedbackPopup = function(thumbBtn) {
             return;
         }
         reasonError.style.display = 'none';
-        var detail = textarea.value.trim();
+        var detail = reason === 'Other' ? otherInput.value.trim() : '';
         var conv = _extractConversation(thumbBtn);
         window._saveFeedback('down', reason, detail, conv.question, conv.fullResponse);
         closeModal();
@@ -96655,17 +97001,28 @@ body.sp-edit-mode-active .vida-sparkle-widget-btn[data-usp] { display: none !imp
         fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+            // Was previously not abortable at all — Stop would toggle the button's
+            // icon (callers already did that) but never actually cancel the
+            // in-flight request. Safe for every caller of this shared function:
+            // when no controller is active, this is just `signal: undefined`.
+            signal: window._aiAbortController ? window._aiAbortController.signal : undefined,
             body: JSON.stringify(body)
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            if (data.error) { onDone(null, 'API error: ' + (data.error.message || 'Unknown error')); return; }
+            if (data.error) { onDone(null, "Something went wrong and the response couldn't finish. Please try again."); return; }
             var content = data.content || [];
             var text = content.filter(function(b) { return b.type === 'text'; }).map(function(b) { return b.text; }).join('\n').trim();
             var toolCalls = content.filter(function(b) { return b.type === 'tool_use'; }).map(function(b) { return { id: b.id, name: b.name, input: b.input || {} }; });
             onDone({ text: text, toolCalls: toolCalls }, null);
         })
-        .catch(function(e) { onDone(null, 'Request failed: ' + (e.message || 'Network error')); });
+        .catch(function(e) {
+            // AbortError (Stop clicked) gets its own marker — aiSendOrStop already
+            // shows the stopped state, so the caller should show nothing further,
+            // same convention as every other fixed path.
+            if (e && e.name === 'AbortError') { onDone(null, '__ABORTED__'); return; }
+            onDone(null, "Something went wrong and the response couldn't finish. Please try again.");
+        });
     }
 
     // Pulls the Need's own name and description for the Outcome/User Notes sparkles on the Need
@@ -96775,6 +97132,7 @@ body.sp-edit-mode-active .vida-sparkle-widget-btn[data-usp] { display: none !imp
             if (append) container.innerHTML += turnHTML;
             else container.innerHTML = turnHTML;
 
+            window._aiAbortController = new AbortController();
             window.aiSetStreaming && window.aiSetStreaming(true);
             container.scrollTop = container.scrollHeight;
 
@@ -96873,6 +97231,7 @@ body.sp-edit-mode-active .vida-sparkle-widget-btn[data-usp] { display: none !imp
                     + '<div class="ai-thinking-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>'
                     + '<div class="ai-thinking-text">' + escapeHtml(_spStatusTextForSparkle(sp)) + '</div>'
                 + '</div>';
+            window._aiAbortController = new AbortController();
             window.aiSetStreaming && window.aiSetStreaming(true);
             container.scrollTop = container.scrollHeight;
 
@@ -97108,6 +97467,9 @@ body.sp-edit-mode-active .vida-sparkle-widget-btn[data-usp] { display: none !imp
             + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/></svg></button>';
         html += '<button class="vida-action-btn vida-thumb" title="Not helpful" onclick="window.vidaThumb(this,false)" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:none;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#ef4444\'" onmouseout="if(!this.dataset.active)this.style.borderColor=\'#e2e8f0\'">'
             + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/></svg></button>';
+        // Timestamp — same hidden-until-hover treatment as the general chat's
+        // response actions row; captured now, when this turn renders.
+        html += '<span class="ai-response-timestamp">' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) + '</span>';
         html += '</div>';
         return html;
     }
@@ -97118,6 +97480,7 @@ body.sp-edit-mode-active .vida-sparkle-widget-btn[data-usp] { display: none !imp
         var container = document.getElementById('aiMessages');
         var thinkEl = document.getElementById(run.thinkingElId || 'aiThinking'); if (thinkEl) thinkEl.remove();
         window.aiSetStreaming && window.aiSetStreaming(false);
+        window._aiAbortController = null;
         // Re-enable the other agent cards now that this turn is settled (whether it succeeded
         // or errored) — matches the disable applied in _spRunAgentFromCard when this turn began.
         // The agent that just finished gets a checkmark next to its name.
@@ -97134,10 +97497,8 @@ body.sp-edit-mode-active .vida-sparkle-widget-btn[data-usp] { display: none !imp
         if (!container) return;
 
         if (err) {
-            container.innerHTML += '<div class="ai-conv-assistant sp-agent-msg"><div class="ai-response-block">'
-                + '<div class="ai-response-summary" style="color:#a32d2d;">' + escapeHtml(err) + '</div>'
-                + '<div class="ai-back-row"><button class="ai-back-btn" onclick="resetAICopilot()">\u2190 Back to questions</button></div>'
-                + '</div></div>';
+            if (err === '__ABORTED__') return; // Stopped by user — aiSendOrStop already shows the stopped state
+            container.innerHTML += _aiInterruptBlock(err, _aiActionButton('Continue', 'window._spRetryAgentTurn()'));
             container.scrollTop = container.scrollHeight;
             return;
         }
@@ -97224,6 +97585,26 @@ body.sp-edit-mode-active .vida-sparkle-widget-btn[data-usp] { display: none !imp
             var regenBtn = row.querySelector('[title="Regenerate response"]');
             if (regenBtn) regenBtn.style.display = 'none';
         });
+    };
+
+    // Retries the last turn of an active Sparkle agent conversation — same
+    // messages/system prompt as the attempt that just failed, not a fresh
+    // conversation. run.messages doesn't include the failed attempt (it's
+    // only pushed on success in _spFinishAgentTurn), so this genuinely re-asks
+    // the same thing rather than duplicating anything.
+    window._spRetryAgentTurn = function() {
+        var run = window._spCopilotRun;
+        var container = document.getElementById('aiMessages');
+        if (!run || !container) return;
+        var lastTurn = container.querySelector('.ai-chat-turn:last-child');
+        if (lastTurn) lastTurn.remove();
+        var thinkId = 'sp_think_' + Date.now();
+        run.thinkingElId = thinkId;
+        container.innerHTML += '<div class="ai-thinking-container" id="' + thinkId + '"><div class="ai-thinking-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div><div class="ai-thinking-text">Thinking...</div></div>';
+        container.scrollTop = container.scrollHeight;
+        window._aiAbortController = new AbortController();
+        window.aiSetStreaming && window.aiSetStreaming(true);
+        _spCallAgentAPI(run.systemPrompt, run.messages, run.agent, window._spFinishAgentTurn);
     };
 
     // Renders one card per recipient note, each with its own Insert button, plus an Insert All
