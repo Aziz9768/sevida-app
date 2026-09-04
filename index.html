@@ -30681,22 +30681,28 @@ function generateConsentHistory(member, memberIndex) {
     const supName = SUPERVISOR_NAMES[n % SUPERVISOR_NAMES.length];
     const base = new Date(2023, n % 6, 1 + (n % 20));
 
+    // userName = the staff member the consent record is about; updatedBy = who
+    // actually recorded/performed the update. Usually the same person, but can
+    // differ (e.g. a supervisor recording an action on a care manager's behalf).
     var records = [{
+        userName: cmName,
+        userRole: 'Care Manager',
         outcome: 'Consented',
-        updatedOn: _fmtAssignDate(base),
         updatedBy: cmName,
-        userRole: 'Care Manager'
+        updatedOn: _fmtAssignDate(base)
     }];
 
     var pattern = n % 3;
     if (pattern === 1) {
         var optOutDate = _addMonths(base, 3 + (n % 4));
-        records.push({ outcome: 'Opted Out', updatedOn: _fmtAssignDate(optOutDate), updatedBy: supName, userRole: 'Supervisor' });
+        records.push({ userName: supName, userRole: 'Supervisor', outcome: 'Opted Out', updatedBy: supName, updatedOn: _fmtAssignDate(optOutDate) });
     } else if (pattern === 2) {
         var optOutDate2 = _addMonths(base, 2 + (n % 3));
         var reconsentDate = _addMonths(optOutDate2, 1 + (n % 2));
-        records.push({ outcome: 'Opted Out', updatedOn: _fmtAssignDate(optOutDate2), updatedBy: supName, userRole: 'Supervisor' });
-        records.push({ outcome: 'Reconsented', updatedOn: _fmtAssignDate(reconsentDate), updatedBy: cmName, userRole: 'Care Manager' });
+        records.push({ userName: supName, userRole: 'Supervisor', outcome: 'Opted Out', updatedBy: supName, updatedOn: _fmtAssignDate(optOutDate2) });
+        // Deliberately different here: the reconsent is on the care manager's
+        // record, but the supervisor is the one who recorded it in the system.
+        records.push({ userName: cmName, userRole: 'Care Manager', outcome: 'Reconsented', updatedBy: supName, updatedOn: _fmtAssignDate(reconsentDate) });
     }
     // pattern === 0: just the single initial Consented record — the majority/simple case.
 
@@ -41921,15 +41927,16 @@ const ActivityHistoryController = {
         const sorted = data.slice().reverse();
         const rows = sorted.map(r => `
             <tr>
-                <td>${outcomeBadge(r.outcome)}</td>
-                <td>${r.updatedOn}</td>
-                <td>${r.updatedBy}</td>
+                <td>${r.userName || r.updatedBy}</td>
                 <td>${r.userRole}</td>
+                <td>${outcomeBadge(r.outcome)}</td>
+                <td>${r.updatedBy}</td>
+                <td>${r.updatedOn}</td>
             </tr>
         `).join('');
 
         return this.wrapTable('Consent History', data.length,
-            ['Outcome', 'Updated On', 'Updated By', 'User Role'],
+            ['User Name', 'User Role', 'Outcome', 'Updated By', 'Updated On'],
             rows, false, false);
     },
 
